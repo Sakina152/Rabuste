@@ -1,68 +1,220 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+/* Rabuste Coffee Design System */
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
+@layer base {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    /* Coffee-inspired palette */
+    --background: 30 15% 6%;
+    --foreground: 35 30% 92%;
+
+    --card: 30 12% 10%;
+    --card-foreground: 35 30% 92%;
+
+    --popover: 30 12% 10%;
+    --popover-foreground: 35 30% 92%;
+
+    /* Deep espresso brown */
+    --primary: 25 35% 22%;
+    --primary-foreground: 35 30% 95%;
+
+    /* Warm cream */
+    --secondary: 35 25% 88%;
+    --secondary-foreground: 25 35% 15%;
+
+    /* Muted coffee */
+    --muted: 30 10% 18%;
+    --muted-foreground: 30 15% 55%;
+
+    /* Terracotta accent */
+    --accent: 18 65% 50%;
+    --accent-foreground: 35 30% 95%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 30 15% 20%;
+    --input: 30 15% 20%;
+    --ring: 18 65% 50%;
+
+    --radius: 0.5rem;
+
+    /* Custom tokens */
+    --coffee-dark: 25 30% 8%;
+    --coffee-medium: 25 25% 18%;
+    --coffee-light: 30 20% 28%;
+    --cream: 35 35% 92%;
+    --cream-dark: 35 25% 85%;
+    --terracotta: 18 65% 50%;
+    --terracotta-dark: 18 60% 40%;
+    --espresso: 25 40% 12%;
+
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(25 30% 8%) 0%, hsl(25 25% 18%) 50%, hsl(18 40% 20%) 100%);
+    --gradient-warm: linear-gradient(180deg, hsl(30 15% 6%) 0%, hsl(25 25% 12%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(18 65% 50%) 0%, hsl(25 50% 35%) 100%);
+    --gradient-cream: linear-gradient(180deg, hsl(35 35% 92%) 0%, hsl(35 25% 85%) 100%);
+
+    /* Shadows */
+    --shadow-soft: 0 4px 30px hsl(25 30% 5% / 0.4);
+    --shadow-glow: 0 0 60px hsl(18 65% 50% / 0.15);
+    --shadow-card: 0 8px 40px hsl(25 30% 5% / 0.5);
+
+    /* Sidebar defaults */
+    --sidebar-background: 30 15% 6%;
+    --sidebar-foreground: 35 30% 92%;
+    --sidebar-primary: 18 65% 50%;
+    --sidebar-primary-foreground: 35 30% 95%;
+    --sidebar-accent: 30 12% 15%;
+    --sidebar-accent-foreground: 35 30% 92%;
+    --sidebar-border: 30 15% 20%;
+    --sidebar-ring: 18 65% 50%;
   }
-  a:hover {
-    color: #747bff;
+
+  .dark {
+    --background: 30 15% 6%;
+    --foreground: 35 30% 92%;
+    --card: 30 12% 10%;
+    --card-foreground: 35 30% 92%;
+    --popover: 30 12% 10%;
+    --popover-foreground: 35 30% 92%;
+    --primary: 25 35% 22%;
+    --primary-foreground: 35 30% 95%;
+    --secondary: 35 25% 88%;
+    --secondary-foreground: 25 35% 15%;
+    --muted: 30 10% 18%;
+    --muted-foreground: 30 15% 55%;
+    --accent: 18 65% 50%;
+    --accent-foreground: 35 30% 95%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 30 15% 20%;
+    --input: 30 15% 20%;
+    --ring: 18 65% 50%;
   }
-  button {
-    background-color: #f9f9f9;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-accent);
+  }
+
+  .bg-hero-gradient {
+    background: var(--gradient-hero);
+  }
+
+  .bg-warm-gradient {
+    background: var(--gradient-warm);
+  }
+
+  .bg-cream-gradient {
+    background: var(--gradient-cream);
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Coffee cup steam animation */
+  .steam {
+    @apply absolute;
+    animation: steam 3s ease-in-out infinite;
+  }
+
+  @keyframes steam {
+    0%, 100% {
+      opacity: 0;
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      opacity: 0.6;
+      transform: translateY(-20px) scale(1.1);
+    }
+  }
+
+  /* Smooth reveal animation */
+  .reveal-up {
+    animation: revealUp 0.8s ease-out forwards;
+  }
+
+  @keyframes revealUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Floating animation */
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  /* Link underline effect */
+  .link-underline {
+    @apply relative;
+  }
+
+  .link-underline::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-[2px] bg-accent transition-all duration-300;
+  }
+
+  .link-underline:hover::after {
+    @apply w-full;
+  }
+
+  /* Section padding */
+  .section-padding {
+    @apply py-20 md:py-32 px-6 md:px-12;
+  }
+
+  /* Container max width */
+  .container-custom {
+    @apply max-w-7xl mx-auto;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
   }
 }
