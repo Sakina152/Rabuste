@@ -7,6 +7,11 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import IntroAnimation from "@/components/IntroAnimation";
 
+// Menu images
+import frappeImg from "@/assets/menu/robusta-frappe.jpg";
+import cappuccinoImg from "@/assets/menu/robusta-cappuccino.jpg";
+import icedAmericanoImg from "@/assets/menu/robusta-iced-americano.jpg";
+
 const Index = () => {
   const [showIntro, setShowIntro] = useState(true);
 
@@ -37,11 +42,32 @@ const Index = () => {
     },
   ];
 
+  const rabusteSpecials = [
+    { 
+      name: "Robusta Frappe", 
+      desc: "Our signature cold blend with creamy froth and bold Robusta kick",
+      price: "₹240",
+      image: frappeImg
+    },
+    { 
+      name: "Robusta Cappuccino", 
+      desc: "Velvety foam meets intense espresso perfection",
+      price: "₹180",
+      image: cappuccinoImg
+    },
+    { 
+      name: "Robusta Iced Americano", 
+      desc: "Smooth, refreshing, and powerfully bold",
+      price: "₹150",
+      image: icedAmericanoImg
+    },
+  ];
+
   const menuHighlights = [
-    { name: "Espresso Forte", desc: "Double shot, pure intensity", price: "$4" },
-    { name: "Robusta Latte", desc: "Smooth, creamy, bold", price: "$5" },
-    { name: "Cold Brew Dark", desc: "24-hour steeped perfection", price: "$5" },
-    { name: "Mocha Supreme", desc: "Chocolate meets power", price: "$6" },
+    { name: "Espresso Forte", desc: "Double shot, pure intensity", price: "₹110" },
+    { name: "Robusta Latte", desc: "Smooth, creamy, bold", price: "₹190" },
+    { name: "Classic Matcha", desc: "Premium green tea perfection", price: "₹250" },
+    { name: "Belgium Chocolate Cake", desc: "Rich, decadent indulgence", price: "₹280" },
   ];
 
   return (
@@ -286,6 +312,85 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Rabuste Specials Section */}
+        <section className="section-padding bg-gradient-to-b from-background to-coffee-dark/30">
+          <div className="container-custom">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <span className="text-accent text-sm tracking-[0.3em] uppercase font-body">
+                House Favourites
+              </span>
+              <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mt-4">
+                Rabuste Specials
+              </h2>
+              <p className="text-muted-foreground text-lg mt-4 max-w-2xl mx-auto">
+                Our most loved creations, crafted with premium Robusta for the ultimate café experience
+              </p>
+            </motion.div>
+
+            <div className="grid md:grid-cols-3 gap-8 mb-12">
+              {rabusteSpecials.map((item, index) => (
+                <motion.div
+                  key={item.name}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: index * 0.15 }}
+                  className="group relative rounded-2xl bg-card border border-border overflow-hidden hover:border-accent/50 transition-all duration-500 hover:shadow-glow cursor-pointer"
+                >
+                  {/* Image Container */}
+                  <div className="relative h-48 overflow-hidden">
+                    <img 
+                      src={item.image} 
+                      alt={item.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
+                    
+                    {/* Price Badge */}
+                    <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-accent text-background font-display font-bold text-sm">
+                      {item.price}
+                    </div>
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="p-6">
+                    <h3 className="font-display text-xl font-semibold text-foreground mb-2 group-hover:text-accent transition-colors duration-300">
+                      {item.name}
+                    </h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {item.desc}
+                    </p>
+                  </div>
+                  
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                </motion.div>
+              ))}
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="text-center"
+            >
+              <Button variant="hero" size="lg" asChild>
+                <Link to="/menu">
+                  View Full Menu
+                  <ArrowRight className="ml-2" />
+                </Link>
+              </Button>
+            </motion.div>
+          </div>
+        </section>
+
         {/* Menu Preview Section */}
         <section className="section-padding bg-coffee-dark">
           <div className="container-custom">
@@ -307,7 +412,7 @@ const Index = () => {
                   deliver maximum flavor and bold character. Perfect for grab-and-go.
                 </p>
                 <Button variant="hero" asChild>
-                  <Link to="/about">
+                  <Link to="/menu">
                     View Full Menu
                     <ArrowRight className="ml-2" />
                   </Link>
