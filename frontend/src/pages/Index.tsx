@@ -63,12 +63,12 @@ const Index = () => {
     },
   ];
 
-  const menuHighlights = [
-    { name: "Espresso Forte", desc: "Double shot, pure intensity", price: "₹110" },
-    { name: "Robusta Latte", desc: "Smooth, creamy, bold", price: "₹190" },
-    { name: "Classic Matcha", desc: "Premium green tea perfection", price: "₹250" },
-    { name: "Belgium Chocolate Cake", desc: "Rich, decadent indulgence", price: "₹280" },
-  ];
+  // const menuHighlights = [
+  //   { name: "Espresso Forte", desc: "Double shot, pure intensity", price: "₹110" },
+  //   { name: "Robusta Latte", desc: "Smooth, creamy, bold", price: "₹190" },
+  //   { name: "Classic Matcha", desc: "Premium green tea perfection", price: "₹250" },
+  //   { name: "Belgium Chocolate Cake", desc: "Rich, decadent indulgence", price: "₹280" },
+  // ];
 
   return (
     <>
@@ -392,7 +392,7 @@ const Index = () => {
         </section>
 
         {/* Menu Preview Section */}
-        <section className="section-padding bg-coffee-dark">
+        {/* <section className="section-padding bg-coffee-dark">
           <div className="container-custom">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <motion.div
@@ -449,7 +449,7 @@ const Index = () => {
               </motion.div>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* CTA Section */}
         <section className="section-padding bg-gradient-to-br from-accent/20 via-background to-coffee-medium">
