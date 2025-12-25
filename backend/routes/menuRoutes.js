@@ -2,7 +2,8 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
-import { protect, authorize } from '../middleware/authMiddleware.js';
+import { protect } from '../middleware/authMiddleware.js';
+import { authorize } from '../middleware/roleMiddleware.js';  // Fixed import
 import {
   getCategories,
   createCategory,

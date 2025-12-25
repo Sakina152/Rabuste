@@ -1,6 +1,7 @@
 // routes/authRoutes.js
 import express from 'express';
-import { protect, authorize } from '../middleware/authMiddleware.js';
+import { protect } from '../middleware/authMiddleware.js';
+import { authorize } from '../middleware/roleMiddleware.js';  // Fixed import
 import {
   registerUser,
   loginUser,

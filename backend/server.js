@@ -6,7 +6,7 @@ import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import connectDB from './config/db.js';
+import { connectDB } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import menuRoutes from './routes/menuRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
