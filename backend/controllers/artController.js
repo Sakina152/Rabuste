@@ -2,7 +2,7 @@ import Art from '../models/Art.js';
 import ArtInquiry from '../models/ArtInquiry.js';
 // import { sendEmail } from '../utils/emailSender.js';
 
-// 1. Get all Art (Customers see this)
+// 1. Get all Art (Customers see this) 
 export const getAllArt = async (req, res) => {
     try {
         const filter = req.query.status ? { status: req.query.status } : {};
@@ -25,6 +25,7 @@ export const addArt = async (req, res) => {
 };
 
 // 3. Toggle Art Status (The "Available -> Reserved -> Sold" logic)
+
 export const updateArtStatus = async (req, res) => {
     try {
         const { id } = req.params;
