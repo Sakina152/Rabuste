@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Coffee, Snowflake, UtensilsCrossed, Croissant, Cake, Clock, Sparkles } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -14,10 +14,17 @@ import croissantImg from "@/assets/menu/croissant.jpg";
 import cakeImg from "@/assets/menu/chocolate-cake.jpg";
 
 interface MenuItem {
+  _id: string;
   name: string;
   price: number;
-  tag?: string;
-  desc?: string;
+  description: string;
+  category: {
+    name: string;
+  };
+  isVegetarian?: boolean;
+  isBestSeller?: boolean;
+  isNew?: boolean;
+  isSeasonal?: boolean;
 }
 
 interface MenuSection {
@@ -28,120 +35,67 @@ interface MenuSection {
   highlight?: boolean;
 }
 
-const menuSections: MenuSection[] = [
-  {
-    title: "Rabuste Special – Hot",
+// Map category names to their respective icons and images
+const getCategoryConfig = (categoryName: string) => {
+  const config: {
+    icon: React.ReactNode;
+    image: string;
+  } = {
     icon: <Coffee className="w-5 h-5" />,
-    image: espressoImg,
-    items: [
-      { name: "Robusta Espresso", price: 110, desc: "Pure, intense, and bold" },
-      { name: "Robusta Americano", price: 140, desc: "Smooth and full-bodied" },
-      { name: "Robusta Cappuccino", price: 180, desc: "Velvety foam perfection" },
-      { name: "Robusta Latte", price: 190, desc: "Creamy, smooth, comforting" },
-    ],
-  },
-  {
-    title: "Rabuste Special – Cold",
-    icon: <Snowflake className="w-5 h-5" />,
-    image: frappeImg,
-    items: [
-      { name: "Robusta Iced Espresso", price: 120, desc: "Chilled intensity" },
-      { name: "Robusta Iced Americano", price: 150, desc: "Refreshingly bold" },
-      { name: "Robusta Iced Latte", price: 220, desc: "Cool, creamy delight" },
-      { name: "Robusta Classic Frappe", price: 240, tag: "House Favourite", desc: "Signature frozen blend" },
-      { name: "Cafe Suda", price: 240, tag: "House Special", desc: "Unique sparkling coffee" },
-      { name: "Robco", price: 290, tag: "House Special", desc: "Our secret recipe" },
-    ],
-  },
-  {
-    title: "Artisan Iced Brews & Tonics",
-    icon: <Sparkles className="w-5 h-5" />,
-    image: espressoTonicImg,
-    items: [
-      { name: "Espresso Tonic", price: 220, desc: "Sparkling coffee refresher" },
-      { name: "Iced Mocha", price: 240, desc: "Chocolate meets coffee" },
-      { name: "Classic Matcha", price: 250, desc: "Premium green tea" },
-      { name: "Iced Teas", price: 180, desc: "Refreshing fruit infusions" },
-      { name: "Mojitos (Non-Alcoholic)", price: 200, desc: "Minty fresh coolness" },
-    ],
-  },
-  {
-    title: "Savoury Bites – Bagels",
-    icon: <UtensilsCrossed className="w-5 h-5" />,
-    image: bagelImg,
-    items: [
-      { name: "Cream Cheese", price: 220, desc: "Classic creamy delight" },
-      { name: "Pesto", price: 240, desc: "Herby, aromatic goodness" },
-      { name: "Classic Veggie", price: 250, desc: "Fresh garden flavors" },
-    ],
-  },
-  {
-    title: "Savoury Bites – Sourdough Sandwiches",
-    icon: <UtensilsCrossed className="w-5 h-5" />,
-    image: sandwichImg,
-    items: [
-      { name: "Peri Peri Paneer", price: 280, desc: "Spicy cottage cheese" },
-      { name: "Pesto", price: 290, desc: "Fresh basil and pine nuts" },
-    ],
-  },
-  {
-    title: "Croissants",
-    icon: <Croissant className="w-5 h-5" />,
-    image: croissantImg,
-    items: [
-      { name: "Butter", price: 180, desc: "Flaky, golden layers" },
-      { name: "Nutella", price: 220, desc: "Chocolate hazelnut heaven" },
-      { name: "Cream Cheese", price: 240, desc: "Rich, tangy filling" },
-    ],
-  },
-  {
-    title: "Café Comfort Food",
-    icon: <UtensilsCrossed className="w-5 h-5" />,
-    image: sandwichImg,
-    items: [
-      { name: "Cheese Chilli Toast", price: 180, desc: "Spicy cheesy goodness" },
-      { name: "Cheese Garlic Bread", price: 160, desc: "Aromatic and savory" },
-      { name: "French Fries (Golden Fries)", price: 150, desc: "Crispy perfection" },
-      { name: "Classic Italiano Pizza", price: 320, desc: "Authentic Italian flavors" },
-    ],
-  },
-  {
-    title: "Desserts & Cakes",
-    icon: <Cake className="w-5 h-5" />,
-    image: cakeImg,
-    items: [
-      { name: "Belgium Chocolate Cake", price: 280, desc: "Rich, decadent layers" },
-      { name: "Orange Chocolate Cake (Almond Flour)", price: 300, desc: "Citrus meets chocolate" },
-    ],
-  },
-];
+    image: espressoImg
+  };
 
-const MenuItemCard = ({ item, index }: { item: MenuItem; index: number }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    transition={{ delay: index * 0.05, duration: 0.4 }}
-    viewport={{ once: true }}
-    className="group flex justify-between items-start p-4 rounded-xl bg-card/50 border border-border/30 hover:bg-card hover:border-accent/30 hover:shadow-lg transition-all duration-300 cursor-pointer"
-  >
-    <div className="flex-1">
-      <h4 className="font-body font-medium text-foreground group-hover:text-accent transition-colors duration-300">
-        {item.name}
-      </h4>
-      {item.desc && (
-        <p className="text-muted-foreground text-xs mt-1 opacity-70 group-hover:opacity-100 transition-opacity duration-300">
-          {item.desc}
-        </p>
-      )}
-      {item.tag && (
-        <span className="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-accent/20 text-accent rounded-full">
-          {item.tag}
-        </span>
-      )}
-    </div>
-    <span className="font-display text-lg text-accent ml-4 group-hover:scale-110 transition-transform duration-300">₹{item.price}</span>
-  </motion.div>
-);
+  const categoryConfig: Record<string, { icon: React.ReactNode; image: string }> = {
+    'Robusta Special (Hot)': { icon: <Coffee className="w-5 h-5" />, image: espressoImg },
+    'Robusta Special (Cold)': { icon: <Snowflake className="w-5 h-5" />, image: frappeImg },
+    'Blend Special (Cold)': { icon: <Sparkles className="w-5 h-5" />, image: espressoTonicImg },
+    'Blend Special (Hot)': { icon: <Coffee className="w-5 h-5" />, image: espressoImg },
+    'Manual Brews & Tea': { icon: <Sparkles className="w-5 h-5" />, image: espressoTonicImg },
+    'Food & Bakery': { icon: <UtensilsCrossed className="w-5 h-5" />, image: bagelImg }
+  };
+
+  return categoryConfig[categoryName] || config;
+};
+
+const MenuItemCard = ({ item, index }: { item: MenuItem; index: number }) => {
+  const tag = item.isBestSeller ? "House Favourite" : 
+              item.isNew ? "New" : 
+              item.isSeasonal ? "Seasonal" : undefined;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05, duration: 0.4 }}
+      viewport={{ once: true }}
+      className="group flex justify-between items-start p-4 rounded-xl bg-card/50 border border-border/30 hover:bg-card hover:border-accent/30 hover:shadow-lg transition-all duration-300 cursor-pointer"
+    >
+      <div className="flex-1">
+        <h4 className="font-body font-medium text-foreground group-hover:text-accent transition-colors duration-300">
+          {item.name}
+          {item.isVegetarian && (
+            <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+              Veg
+            </span>
+          )}
+        </h4>
+        {item.description && (
+          <p className="text-muted-foreground text-xs mt-1 opacity-70 group-hover:opacity-100 transition-opacity duration-300">
+            {item.description}
+          </p>
+        )}
+        {tag && (
+          <span className="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-accent/20 text-accent rounded-full">
+            {tag}
+          </span>
+        )}
+      </div>
+      <span className="font-display text-lg text-accent ml-4 group-hover:scale-110 transition-transform duration-300">
+        ₹{item.price}
+      </span>
+    </motion.div>
+  );
+};
 
 const MenuSectionBlock = ({ section, sectionIndex }: { section: MenuSection; sectionIndex: number }) => (
   <motion.div
@@ -151,7 +105,6 @@ const MenuSectionBlock = ({ section, sectionIndex }: { section: MenuSection; sec
     viewport={{ once: true }}
     className="mb-16"
   >
-    {/* Section Header with Image */}
     <div className="flex flex-col md:flex-row gap-6 mb-6">
       {section.image && (
         <div className="w-full md:w-32 h-24 md:h-24 rounded-xl overflow-hidden flex-shrink-0">
@@ -172,13 +125,83 @@ const MenuSectionBlock = ({ section, sectionIndex }: { section: MenuSection; sec
     
     <div className="grid gap-3 md:grid-cols-2">
       {section.items.map((item, index) => (
-        <MenuItemCard key={item.name} item={item} index={index} />
+        <MenuItemCard key={item._id} item={item} index={index} />
       ))}
     </div>
   </motion.div>
 );
 
 const Menu = () => {
+  const [menuSections, setMenuSections] = useState<MenuSection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/menu/items');
+        if (!response.ok) {
+          throw new Error('Failed to fetch menu items');
+        }
+        const data = await response.json();
+
+        // Group items by category
+        const groupedItems = data.reduce((acc: Record<string, MenuItem[]>, item: MenuItem) => {
+          const categoryName = item.category?.name || 'Other';
+          if (!acc[categoryName]) {
+            acc[categoryName] = [];
+          }
+          acc[categoryName].push(item);
+          return acc;
+        }, {});
+
+        // Transform to match the MenuSection interface
+        const sections = Object.entries(groupedItems).map(([categoryName, items]) => {
+          const { icon, image } = getCategoryConfig(categoryName);
+          return {
+            title: categoryName,
+            icon,
+            items: items as MenuItem[],
+            image
+          };
+        });
+
+        setMenuSections(sections);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+        console.error('Error fetching menu items:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMenuItems();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="flex items-center justify-center h-[60vh]">
+          <div className="animate-pulse">Loading menu...</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="flex items-center justify-center h-[60vh] text-red-500">
+          Error: {error}
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
