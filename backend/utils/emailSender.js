@@ -1,7 +1,6 @@
 const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
 
-// Load env vars just in case this file is run standalone
 dotenv.config(); 
 
 const sendEmail = async (options) => {
@@ -13,16 +12,14 @@ const sendEmail = async (options) => {
     },
   });
 
-  // 2. Define the Email Options
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: options.email,
     subject: options.subject,
     text: options.message,
-    // html: options.html // Optional: If you want to send fancy HTML emails later
+    // html: options.html // Optional: If we want to send fancy HTML emails later
   };
 
-  // 3. Send the Email
   try {
     await transporter.sendMail(mailOptions);
     console.log('✅ Email Sent Successfully to: ' + options.email);
