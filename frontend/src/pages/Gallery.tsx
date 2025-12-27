@@ -31,7 +31,7 @@ const Gallery = () => {
   useEffect(() => {
   const fetchArtworks = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/art`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/art`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

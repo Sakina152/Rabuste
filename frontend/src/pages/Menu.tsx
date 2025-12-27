@@ -13,6 +13,10 @@ import sandwichImg from "@/assets/menu/sandwich.jpg";
 import croissantImg from "@/assets/menu/croissant.jpg";
 import cakeImg from "@/assets/menu/chocolate-cake.jpg";
 
+console.log('ENV:', import.meta.env);
+console.log('BASE URL:', import.meta.env.VITE_API_BASE_URL);
+
+
 interface MenuItem {
   _id: string;
   name: string;
@@ -139,7 +143,7 @@ const Menu = () => {
   useEffect(() => {
     const fetchMenuItems = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/menu/items');
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/menu/items`);
         if (!response.ok) {
           throw new Error('Failed to fetch menu items');
         }
