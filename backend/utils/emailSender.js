@@ -1,25 +1,28 @@
-const nodemailer = require('nodemailer');
-const dotenv = require('dotenv');
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
 
-dotenv.config(); 
+// Load env vars
+dotenv.config();
 
 const sendEmail = async (options) => {
+  // 1. Create the Transporter
   const transporter = nodemailer.createTransport({
     service: 'gmail', 
     auth: {
-      user: process.env.EMAIL_USER, 
+      user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS, 
     },
   });
 
+  // 2. Define the Email Options
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: options.email,
     subject: options.subject,
     text: options.message,
-    // html: options.html // Optional: If we want to send fancy HTML emails later
   };
 
+  // 3. Send the Email
   try {
     await transporter.sendMail(mailOptions);
     console.log('✅ Email Sent Successfully to: ' + options.email);
@@ -29,4 +32,4 @@ const sendEmail = async (options) => {
   }
 };
 
-module.exports = sendEmail;
+export default sendEmail;

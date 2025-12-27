@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const franchiseSchema = new mongoose.Schema({
   name: {
@@ -25,7 +25,7 @@ const franchiseSchema = new mongoose.Schema({
   budget: {
     type: String,
     required: [true, 'Please select your budget range'],
-    enum: ['10k-50k', '50k-100k', '100k+'] // You can adjust these values
+    enum: ['10k-50k', '50k-100k', '100k+']
   },
   experience: {
     type: String,
@@ -42,4 +42,4 @@ const franchiseSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('Franchise', franchiseSchema);
+export default mongoose.model('Franchise', franchiseSchema);

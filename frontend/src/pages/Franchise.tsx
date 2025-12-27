@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useForm } from "react-hook-form"; // Added for form handling
+import axios from "axios"; // Added for API calls
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -9,6 +11,7 @@ import {
   Coffee,
   Palette,
   Zap,
+  Loader2, // Added for loading spinner
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,16 +21,26 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 
+// Define the shape of data sending to Backend
+interface FranchiseFormData {
+  name: string;
+  email: string;
+  phone: string;
+  location: string;
+  budget: string; // Changed from 'investment' to match Backend
+  experience: string; // Changed from 'message' to match Backend
+}
+
 const Franchise = () => {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    location: "",
-    investment: "",
-    message: "",
-  });
+  
+  // React Hook Form setup
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<FranchiseFormData>();
 
   const benefits = [
     {
@@ -96,21 +109,27 @@ const Franchise = () => {
     },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast({
-      title: "Inquiry Submitted!",
-      description:
-        "Thank you for your interest in Rabuste Coffee. Our team will contact you within 48 hours.",
-    });
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      location: "",
-      investment: "",
-      message: "",
-    });
+  // The Actual Submit Function
+  const onSubmit = async (data: FranchiseFormData) => {
+    try {
+      // Send data to your backend
+      await axios.post('http://localhost:5000/api/franchise', data);
+
+      toast({
+        title: "Inquiry Submitted!",
+        description: "Thank you! We have received your application and emailed you a confirmation.",
+        variant: "default", 
+      });
+
+      reset(); // Clear the form
+    } catch (error: any) {
+      console.error("Submission failed:", error);
+      toast({
+        title: "Submission Failed",
+        description: error.response?.data?.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -349,7 +368,7 @@ const Franchise = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              onSubmit={handleSubmit}
+              onSubmit={handleSubmit(onSubmit)} // Use Hook Form submit
               className="space-y-6 bg-card rounded-2xl p-8 border border-border"
             >
               <div className="grid md:grid-cols-2 gap-6">
@@ -357,26 +376,20 @@ const Franchise = () => {
                   <Label htmlFor="name">Full Name *</Label>
                   <Input
                     id="name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
+                    {...register("name", { required: "Name is required" })}
                     placeholder="Your name"
-                    required
                   />
+                  {errors.name && <span className="text-red-500 text-xs">{errors.name.message}</span>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address *</Label>
                   <Input
                     id="email"
                     type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                    {...register("email", { required: "Email is required" })}
                     placeholder="your@email.com"
-                    required
                   />
+                   {errors.email && <span className="text-red-500 text-xs">{errors.email.message}</span>}
                 </div>
               </div>
 
@@ -386,56 +399,67 @@ const Franchise = () => {
                   <Input
                     id="phone"
                     type="tel"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
+                    {...register("phone", { required: "Phone is required" })}
                     placeholder="+1 (555) 000-0000"
-                    required
                   />
+                   {errors.phone && <span className="text-red-500 text-xs">{errors.phone.message}</span>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="location">Preferred Location *</Label>
                   <Input
                     id="location"
-                    value={formData.location}
-                    onChange={(e) =>
-                      setFormData({ ...formData, location: e.target.value })
-                    }
+                    {...register("location", { required: "Location is required" })}
                     placeholder="City, State/Country"
-                    required
                   />
+                   {errors.location && <span className="text-red-500 text-xs">{errors.location.message}</span>}
                 </div>
               </div>
 
+              {/* UPDATED: Dropdown to match Backend Schema */}
               <div className="space-y-2">
-                <Label htmlFor="investment">Available Investment Range</Label>
-                <Input
-                  id="investment"
-                  value={formData.investment}
-                  onChange={(e) =>
-                    setFormData({ ...formData, investment: e.target.value })
-                  }
-                  placeholder="e.g., $150K - $200K"
-                />
+                <Label htmlFor="budget">Available Investment Range *</Label>
+                <select
+                  id="budget"
+                  {...register("budget", { required: "Please select a budget" })}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">Select a range...</option>
+                  <option value="10k-50k">$10,000 - $50,000</option>
+                  <option value="50k-100k">$50,000 - $100,000</option>
+                  <option value="100k+">$100,000+</option>
+                </select>
+                 {errors.budget && <span className="text-red-500 text-xs">{errors.budget.message}</span>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="message">Tell Us About Yourself</Label>
+                <Label htmlFor="experience">Tell Us About Yourself</Label>
                 <Textarea
-                  id="message"
-                  value={formData.message}
-                  onChange={(e) =>
-                    setFormData({ ...formData, message: e.target.value })
-                  }
+                  id="experience"
+                  {...register("experience", { required: "This field is required" })}
                   placeholder="Share your background, why you're interested in Rabuste Coffee, and any relevant experience..."
                   rows={4}
                 />
+                 {errors.experience && <span className="text-red-500 text-xs">{errors.experience.message}</span>}
               </div>
 
-              <Button type="submit" variant="hero" size="xl" className="w-full">
-                Submit Inquiry
-                <ArrowRight className="ml-2" />
+              <Button 
+                type="submit" 
+                variant="hero" 
+                size="xl" 
+                className="w-full"
+                disabled={isSubmitting} // Disable while sending
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending Inquiry...
+                  </>
+                ) : (
+                  <>
+                    Submit Inquiry
+                    <ArrowRight className="ml-2" />
+                  </>
+                )}
               </Button>
             </motion.form>
           </div>
