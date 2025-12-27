@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Eye, Heart, User, X } from "lucide-react";
@@ -7,80 +8,59 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 interface Artwork {
-  id: number;
+  _id: string;
   title: string;
   artist: string;
-  description: string;
-  price: string;
-  status: "available" | "sold";
-  category: string;
+  price: number;
+  status: "Available" | "Reserved" | "Sold";
+  imageUrl?: string;
+  dimensions?: string;
+  description?: string;
+  category?: "abstract" | "landscape" | "portrait";
 }
+
 
 const Gallery = () => {
   const [selectedArt, setSelectedArt] = useState<Artwork | null>(null);
 
-  const artworks: Artwork[] = [
-    {
-      id: 1,
-      title: "Morning Brew",
-      artist: "Elena Martinez",
-      description:
-        "An abstract representation of the first sip of coffee, capturing the warmth and awakening of morning rituals.",
-      price: "$1,200",
-      status: "available",
-      category: "abstract",
-    },
-    {
-      id: 2,
-      title: "Coffee Fields at Dusk",
-      artist: "Marcus Chen",
-      description:
-        "A stunning landscape depicting coffee plantations in Vietnam as the sun sets behind the mountains.",
-      price: "$2,400",
-      status: "available",
-      category: "landscape",
-    },
-    {
-      id: 3,
-      title: "The Barista's Dance",
-      artist: "Sofia Anderson",
-      description:
-        "A dynamic portrait capturing the artistry and precision of coffee making in fluid brush strokes.",
-      price: "$1,800",
-      status: "sold",
-      category: "portrait",
-    },
-    {
-      id: 4,
-      title: "Robusta Rising",
-      artist: "James Okonkwo",
-      description:
-        "A bold mixed-media piece celebrating the underrated Robusta bean in vibrant earth tones.",
-      price: "$3,200",
-      status: "available",
-      category: "abstract",
-    },
-    {
-      id: 5,
-      title: "Café Conversations",
-      artist: "Luna Park",
-      description:
-        "An intimate scene of strangers connecting over coffee, rendered in warm impressionistic style.",
-      price: "$1,600",
-      status: "available",
-      category: "portrait",
-    },
-    {
-      id: 6,
-      title: "Bean to Cup",
-      artist: "Alessandro Rossi",
-      description:
-        "A series of connected canvases showing the journey of coffee from harvest to your cup.",
-      price: "$4,500",
-      status: "available",
-      category: "landscape",
-    },
-  ];
+  const [artworks, setArtworks] = useState<Artwork[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+  const fetchArtworks = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/art`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch artworks");
+      }
+
+      const rawData = await res.json();
+
+      const adaptedData = rawData.map((art: any) => ({
+      ...art,
+        category: "abstract", // temp default
+        description: "Beautiful coffee-inspired artwork",
+      }));
+
+      setArtworks(adaptedData);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchArtworks();
+}, []);
+
+  
 
   return (
     <div className="min-h-screen bg-background">
@@ -89,6 +69,18 @@ const Gallery = () => {
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 overflow-hidden bg-hero-gradient">
         <div className="container-custom relative z-10 px-6">
+
+          {loading && (
+  <p className="text-center text-muted-foreground">
+    Loading artwork...
+  </p>
+)}
+
+  {error && (
+  <p className="text-center text-red-500">
+    {error}
+  </p>
+)}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -121,7 +113,7 @@ const Gallery = () => {
             <AnimatePresence mode="popLayout">
               {artworks.map((artwork, index) => (
                 <motion.div
-                  key={artwork.id}
+                  key={artwork._id}
                   layout
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -134,31 +126,33 @@ const Gallery = () => {
                     onClick={() => setSelectedArt(artwork)}
                   >
                     {/* Placeholder Art Pattern */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-full h-full p-8">
-                        <div
-                          className={`w-full h-full rounded-lg ${
-                            artwork.category === "abstract"
-                              ? "bg-gradient-to-br from-accent/30 via-coffee-light to-terracotta/20"
-                              : artwork.category === "landscape"
-                              ? "bg-gradient-to-b from-coffee-light/50 via-coffee-medium to-espresso"
-                              : "bg-gradient-to-tr from-cream/10 via-coffee-medium to-accent/20"
-                          }`}
-                        />
-                      </div>
-                    </div>
+                    <div className="aspect-[4/5] rounded-2xl overflow-hidden border border-border hover:border-accent/50 transition-all duration-500 cursor-pointer">
+  {artwork.imageUrl ? (
+    <img
+      src={artwork.imageUrl}
+      alt={artwork.title}
+      className="w-full h-full object-cover"
+    />
+  ) : (
+    <div className="w-full h-full bg-gradient-to-br from-coffee-medium to-espresso flex items-center justify-center">
+      <span className="text-muted-foreground text-sm">
+        No Image
+      </span>
+    </div>
+  )}
 
-                    {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-espresso/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                      <Eye className="w-12 h-12 text-accent" />
-                    </div>
+  {/* Hover overlay */}
+  <div className="absolute inset-0 bg-espresso/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+    <Eye className="w-12 h-12 text-accent" />
+  </div>
 
-                    {/* Status Badge */}
-                    {artwork.status === "sold" && (
-                      <div className="absolute top-4 right-4 bg-destructive text-destructive-foreground px-3 py-1 rounded-full text-xs font-medium">
-                        Sold
-                      </div>
-                    )}
+  {/* Status badge */}
+  {artwork.status === "Sold" && (
+    <div className="absolute top-4 right-4 bg-destructive text-destructive-foreground px-3 py-1 rounded-full text-xs font-medium">
+      Sold
+    </div>
+  )}
+</div>
                   </div>
 
                   {/* Info */}
@@ -174,7 +168,7 @@ const Gallery = () => {
                       <span className="font-display text-xl font-bold text-accent">
                         {artwork.price}
                       </span>
-                      {artwork.status === "available" && (
+                      {artwork.status === "Available" && (
                         <button className="flex items-center gap-1 text-muted-foreground hover:text-accent transition-colors text-sm">
                           <Heart size={14} />
                           <span>Save</span>
@@ -208,17 +202,21 @@ const Gallery = () => {
             >
               <div className="grid md:grid-cols-2">
                 {/* Art Preview */}
-                <div className="aspect-square bg-gradient-to-br from-coffee-medium to-espresso p-8">
-                  <div
-                    className={`w-full h-full rounded-lg ${
-                      selectedArt.category === "abstract"
-                        ? "bg-gradient-to-br from-accent/30 via-coffee-light to-terracotta/20"
-                        : selectedArt.category === "landscape"
-                        ? "bg-gradient-to-b from-coffee-light/50 via-coffee-medium to-espresso"
-                        : "bg-gradient-to-tr from-cream/10 via-coffee-medium to-accent/20"
-                    }`}
-                  />
+              <div className="aspect-square overflow-hidden">
+              {selectedArt.imageUrl ? (
+              <img
+                src={selectedArt.imageUrl}
+                alt={selectedArt.title}
+                className="w-full h-full object-cover"
+              />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-coffee-medium to-espresso flex items-center justify-center">
+                <span className="text-muted-foreground text-sm">
+                No Image
+                </span>
                 </div>
+              )}
+              </div>
 
                 {/* Details */}
                 <div className="p-8 space-y-6">
@@ -262,7 +260,7 @@ const Gallery = () => {
                       </span>
                     </div>
 
-                    {selectedArt.status === "available" ? (
+                    {selectedArt.status === "Available" ? (
                       <Button variant="hero" size="lg" className="w-full">
                         Inquire About This Piece
                         <ArrowRight className="ml-2" />

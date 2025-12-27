@@ -127,4 +127,4 @@ workshopSchema.pre('save', function(next) {
 
 const Workshop = mongoose.model('Workshop', workshopSchema);
 
-module.exports = Workshop;
+export default Workshop;
