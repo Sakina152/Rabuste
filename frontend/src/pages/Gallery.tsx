@@ -29,38 +29,48 @@ const Gallery = () => {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-  const fetchArtworks = async () => {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/art`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    const fetchArtworks = async () => {
+      setLoading(true);
+      setError(null);
 
-      if (!res.ok) {
-        throw new Error("Failed to fetch artworks");
+      try {
+        const response = await fetch('http://localhost:5000/api/art');
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error('Expected an array of artworks');
+        }
+
+        // Map the backend data to our frontend Artwork type
+        const formattedArtworks = data.map((art: any) => ({
+          _id: art._id,
+          title: art.title,
+          artist: art.artist,
+          price: art.price,
+          status: art.status,
+          imageUrl: art.image, // Map 'image' to 'imageUrl' to match our interface
+          dimensions: art.dimensions,
+          description: art.description,
+          // Default category if not provided
+          category: art.category || 'abstract'
+        }));
+
+        setArtworks(formattedArtworks);
+      } catch (err) {
+        console.error('Error fetching artworks:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load artworks');
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const rawData = await res.json();
-
-      const adaptedData = rawData.map((art: any) => ({
-      ...art,
-        category: "abstract", // temp default
-        description: "Beautiful coffee-inspired artwork",
-      }));
-
-      setArtworks(adaptedData);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchArtworks();
-}, []);
-
-  
+    fetchArtworks();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,16 +81,16 @@ const Gallery = () => {
         <div className="container-custom relative z-10 px-6">
 
           {loading && (
-  <p className="text-center text-muted-foreground">
-    Loading artwork...
-  </p>
-)}
+            <p className="text-center text-muted-foreground">
+              Loading artwork...
+            </p>
+          )}
 
-  {error && (
-  <p className="text-center text-red-500">
-    {error}
-  </p>
-)}
+          {error && (
+            <p className="text-center text-red-500">
+              {error}
+            </p>
+          )}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -127,32 +137,32 @@ const Gallery = () => {
                   >
                     {/* Placeholder Art Pattern */}
                     <div className="aspect-[4/5] rounded-2xl overflow-hidden border border-border hover:border-accent/50 transition-all duration-500 cursor-pointer">
-  {artwork.imageUrl ? (
-    <img
-      src={artwork.imageUrl}
-      alt={artwork.title}
-      className="w-full h-full object-cover"
-    />
-  ) : (
-    <div className="w-full h-full bg-gradient-to-br from-coffee-medium to-espresso flex items-center justify-center">
-      <span className="text-muted-foreground text-sm">
-        No Image
-      </span>
-    </div>
-  )}
+                      {artwork.imageUrl ? (
+                        <img
+                          src={artwork.imageUrl}
+                          alt={artwork.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-coffee-medium to-espresso flex items-center justify-center">
+                          <span className="text-muted-foreground text-sm">
+                            No Image
+                          </span>
+                        </div>
+                      )}
 
-  {/* Hover overlay */}
-  <div className="absolute inset-0 bg-espresso/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-    <Eye className="w-12 h-12 text-accent" />
-  </div>
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-espresso/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <Eye className="w-12 h-12 text-accent" />
+                      </div>
 
-  {/* Status badge */}
-  {artwork.status === "Sold" && (
-    <div className="absolute top-4 right-4 bg-destructive text-destructive-foreground px-3 py-1 rounded-full text-xs font-medium">
-      Sold
-    </div>
-  )}
-</div>
+                      {/* Status badge */}
+                      {artwork.status === "Sold" && (
+                        <div className="absolute top-4 right-4 bg-destructive text-destructive-foreground px-3 py-1 rounded-full text-xs font-medium">
+                          Sold
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Info */}
@@ -166,7 +176,7 @@ const Gallery = () => {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="font-display text-xl font-bold text-accent">
-                        {artwork.price}
+                        ₹{artwork.price.toLocaleString('en-IN')}
                       </span>
                       {artwork.status === "Available" && (
                         <button className="flex items-center gap-1 text-muted-foreground hover:text-accent transition-colors text-sm">
