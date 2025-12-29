@@ -8,7 +8,7 @@ const bookingSchema = new mongoose.Schema({
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User' // Optional for guest checkouts
+        ref: 'User' 
     },
     participantDetails: {
         name: { type: String, required: true },
@@ -28,7 +28,6 @@ const bookingSchema = new mongoose.Schema({
     },
     totalAmount: {
         type: Number,
-        required: true
     },
     paymentStatus: {
         type: String,
@@ -59,22 +58,20 @@ const bookingSchema = new mongoose.Schema({
 });
 
 // --- Indexes ---
-// Prevent duplicate registrations for the same workshop using the same email
 bookingSchema.index({ workshop: 1, 'participantDetails.email': 1 }, { unique: true });
 bookingSchema.index({ registrationNumber: 1 }, { unique: true });
 
-// --- Pre-save Hook ---
-bookingSchema.pre('save', async function(next) {
-    // 1. Generate Registration Number if it doesn't exist
+// --- FIXED Pre-save Hook ---
+// We remove 'next' and rely on the async/await promise resolution
+bookingSchema.pre('save', async function() {
+    // 1. Generate Registration Number
     if (!this.registrationNumber) {
         const date = new Date().getFullYear();
-        const randomStr = Math.floor(10000 + Math.random() * 90000); // 5 digit random
+        const randomStr = Math.floor(10000 + Math.random() * 90000); 
         this.registrationNumber = `WS-${date}-${randomStr}`;
     }
 
     // 2. Calculate Total Amount
-    // Note: This assumes the price is passed from the controller or 
-    // we fetch the workshop price here.
     if (this.isModified('numberOfSeats') || !this.totalAmount) {
         const Workshop = mongoose.model('Workshop');
         const workshopDoc = await Workshop.findById(this.workshop);
@@ -82,13 +79,10 @@ bookingSchema.pre('save', async function(next) {
             this.totalAmount = workshopDoc.price * this.numberOfSeats;
         }
     }
-
-    next();
 });
 
 // --- Post-save Hook ---
 bookingSchema.post('save', async function() {
-    // Increment currentParticipants in the Workshop model
     const Workshop = mongoose.model('Workshop');
     await Workshop.findByIdAndUpdate(this.workshop, {
         $inc: { currentParticipants: this.numberOfSeats }

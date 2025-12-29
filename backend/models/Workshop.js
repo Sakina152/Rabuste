@@ -1,5 +1,19 @@
 import mongoose from 'mongoose';
 
+/**
+ * Utility function to create a URL-friendly slug
+ * without using external libraries.
+ */
+const createSlug = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')     // Replace spaces with -
+    .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+    .replace(/\-\-+/g, '-');  // Replace multiple - with single -
+};
+
 const workshopSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -41,7 +55,7 @@ const workshopSchema = new mongoose.Schema({
         required: [true, 'End time is required']
     },
     duration: {
-        type: Number // Calculated in minutes
+        type: Number // In minutes
     },
     venue: {
         type: String,
@@ -113,16 +127,14 @@ workshopSchema.virtual('isPast').get(function() {
 });
 
 // --- Pre-save Hook ---
-workshopSchema.pre('save', function(next) {
-    // Generate slug if title is modified
+// Removed the 'next' parameter to prevent "next is not a function" errors.
+// Modern Mongoose handles hooks that return nothing or a promise automatically.
+workshopSchema.pre('save', function() {
     if (this.isModified('title')) {
-        this.slug = slugify(this.title, { lower: true, strict: true });
+        this.slug = createSlug(this.title);
     }
 
-    // Set isFree based on price
     this.isFree = this.price === 0;
-
-    next();
 });
 
 const Workshop = mongoose.model('Workshop', workshopSchema);
