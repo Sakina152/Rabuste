@@ -26,6 +26,17 @@ const Gallery = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [showInquiryForm, setShowInquiryForm] = useState(false);
+  const [inquiryData, setInquiryData] = useState({
+    customerName: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -53,10 +64,9 @@ const Gallery = () => {
           artist: art.artist,
           price: art.price,
           status: art.status,
-          imageUrl: art.image, // Map 'image' to 'imageUrl' to match our interface
+          imageUrl: art.imageUrl,
           dimensions: art.dimensions,
           description: art.description,
-          // Default category if not provided
           category: art.category || 'abstract'
         }));
 
@@ -71,6 +81,41 @@ const Gallery = () => {
 
     fetchArtworks();
   }, []);
+
+  const handleInquirySubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!selectedArt) return;
+
+  setSubmitting(true);
+  setSuccessMsg("");
+
+  try {
+    const res = await fetch("http://localhost:5000/api/art/inquiry", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        artId: selectedArt._id,
+        ...inquiryData,
+      }),
+    });
+
+    if (!res.ok) throw new Error("Failed to submit inquiry");
+
+    setSuccessMsg("Your inquiry has been sent. We'll get back to you soon!");
+    setInquiryData({ customerName: "", email: "", phone: "", message: "" });
+
+    setTimeout(() => {
+      setShowInquiryForm(false);
+    }, 1500);
+  } catch (err) {
+    alert("Something went wrong. Please try again.");
+  } finally {
+    setSubmitting(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -158,7 +203,9 @@ const Gallery = () => {
 
                       {/* Status badge */}
                       {artwork.status === "Sold" && (
-                        <div className="absolute top-4 right-4 bg-destructive text-destructive-foreground px-3 py-1 rounded-full text-xs font-medium">
+                        <div 
+                        key={`${artwork._id}-sold`}
+                        className="absolute top-4 right-4 bg-destructive text-destructive-foreground px-3 py-1 rounded-full text-xs font-medium">
                           Sold
                         </div>
                       )}
@@ -271,10 +318,16 @@ const Gallery = () => {
                     </div>
 
                     {selectedArt.status === "Available" ? (
-                      <Button variant="hero" size="lg" className="w-full">
+                      <Button
+                       variant="hero"
+                       size="lg"
+                       className="w-full"
+                       onClick={() => setShowInquiryForm(true)}
+                      >
                         Inquire About This Piece
                         <ArrowRight className="ml-2" />
                       </Button>
+
                     ) : (
                       <Button variant="subtle" size="lg" className="w-full" disabled>
                         This Piece Has Been Sold
@@ -287,6 +340,96 @@ const Gallery = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+  {showInquiryForm && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-md flex items-center justify-center p-6"
+      onClick={() => setShowInquiryForm(false)}
+    >
+      <motion.form
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={handleInquirySubmit}
+        className="w-full max-w-lg bg-card border border-border rounded-2xl p-8 space-y-5"
+      >
+        <h3 className="font-display text-2xl text-foreground">
+          Inquire about <span className="text-accent">{selectedArt?.title}</span>
+        </h3>
+
+        <input
+          required
+          placeholder="Your Name"
+          className="w-full bg-background border border-border rounded-lg px-4 py-2"
+          value={inquiryData.customerName}
+          onChange={(e) =>
+            setInquiryData({ ...inquiryData, customerName: e.target.value })
+          }
+        />
+
+        <input
+          required
+          type="email"
+          placeholder="Email Address"
+          className="w-full bg-background border border-border rounded-lg px-4 py-2"
+          value={inquiryData.email}
+          onChange={(e) =>
+            setInquiryData({ ...inquiryData, email: e.target.value })
+          }
+        />
+
+        <input
+          placeholder="Phone (optional)"
+          className="w-full bg-background border border-border rounded-lg px-4 py-2"
+          value={inquiryData.phone}
+          onChange={(e) =>
+            setInquiryData({ ...inquiryData, phone: e.target.value })
+          }
+        />
+
+        <textarea
+          required
+          rows={4}
+          placeholder="Your message"
+          className="w-full bg-background border border-border rounded-lg px-4 py-2"
+          value={inquiryData.message}
+          onChange={(e) =>
+            setInquiryData({ ...inquiryData, message: e.target.value })
+          }
+        />
+
+        {successMsg && (
+          <p className="text-green-500 text-sm">{successMsg}</p>
+        )}
+
+        <div className="flex gap-3 pt-2">
+          <Button
+            type="submit"
+            variant="hero"
+            className="flex-1"
+            disabled={submitting}
+          >
+            {submitting ? "Sending..." : "Send Inquiry"}
+          </Button>
+
+          <Button
+            type="button"
+            variant="subtle"
+            onClick={() => setShowInquiryForm(false)}
+          >
+            Cancel
+          </Button>
+        </div>
+      </motion.form>
+    </motion.div>
+  )}
+</AnimatePresence>
+
 
       {/* Artist Feature */}
       <section className="section-padding bg-coffee-dark">

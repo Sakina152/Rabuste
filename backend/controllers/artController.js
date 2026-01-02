@@ -1,6 +1,6 @@
 import Art from '../models/Art.js';
 import ArtInquiry from '../models/ArtInquiry.js';
-// import { sendEmail } from '../utils/emailSender.js';
+import sendEmail from '../utils/emailSender.js';
 
 // 1. Get all Art (Customers see this) 
 export const getAllArt = async (req, res) => {
@@ -49,38 +49,94 @@ export const updateArtStatus = async (req, res) => {
 // import { sendEmail } from '../utils/emailSender.js'; 
 
 export const submitInquiry = async (req, res) => {
-    try {
-        const { artId, customerName, email, phone, message } = req.body;
+  try {
+    const { artId, customerName, email, phone, message } = req.body;
 
-        const newInquiry = new ArtInquiry({
-            artId,
-            customerName,
-            email,
-            phone,
-            message
-        });
-
-        await newInquiry.save();
-
-        console.log(`📩 Inquiry saved for art ${artId}. (Email notification pending Dev 4)`);
-        
-        /* if (sendEmail) { *Requires Developer 4's email feature to be added*
-            await sendEmail({
-                to: 'admin@cafe.com',
-                subject: `New Art Inquiry: ${customerName}`,
-                text: message
-            });
-        } 
-        */
-
-        res.status(201).json({ 
-            success: true, 
-            message: "Inquiry saved successfully! (Note: Email notification will be active once Dev 4 completes utility)" 
-        });
-    } catch (error) {
-        res.status(400).json({ success: false, message: "Failed to send inquiry", error: error.message });
+    // 1. Validate Art exists
+    const art = await Art.findById(artId);
+    if (!art) {
+      return res.status(404).json({
+        success: false,
+        message: 'Art piece not found'
+      });
     }
+
+    // 2. Save inquiry to DB
+    const newInquiry = await ArtInquiry.create({
+      artId,
+      customerName,
+      email,
+      phone,
+      message
+    });
+
+    // 3. Email to ADMIN
+    await sendEmail({
+      email: process.env.EMAIL_USER, // admin email
+      subject: `📩 New Art Inquiry: ${art.title}`,
+      message: `
+New inquiry received:
+
+Art: ${art.title}
+Artist: ${art.artist}
+
+Customer: ${customerName}
+Email: ${email}
+Phone: ${phone || 'Not provided'}
+
+Message:
+${message}
+      `,
+      html: `
+        <h2>New Art Inquiry</h2>
+        <p><strong>Art:</strong> ${art.title}</p>
+        <p><strong>Artist:</strong> ${art.artist}</p>
+        <hr />
+        <p><strong>Customer:</strong> ${customerName}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message}</p>
+      `
+    });
+
+    // 4. Email CONFIRMATION to CUSTOMER
+    await sendEmail({
+      email,
+      subject: `We received your inquiry – Rabuste Gallery`,
+      message: `
+Hi ${customerName},
+
+Thank you for your interest in "${art.title}".
+Our team will contact you shortly.
+
+– Rabuste Gallery
+      `,
+      html: `
+        <p>Hi <strong>${customerName}</strong>,</p>
+        <p>Thank you for your interest in <strong>"${art.title}"</strong>.</p>
+        <p>Our team will contact you shortly.</p>
+        <br/>
+        <p>– Rabuste Gallery ☕</p>
+      `
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Inquiry submitted successfully'
+    });
+
+  } catch (error) {
+    console.error('Inquiry Error:', error);
+
+    res.status(500).json({
+      success: false,
+      message: 'Inquiry saved but email failed',
+      error: error.message
+    });
+  }
 };
+
 
 /* *Will be uncommented when Developer 4 completes the email handling*
 // Function to handle a confirmed purchase
