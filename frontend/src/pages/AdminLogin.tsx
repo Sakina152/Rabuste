@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 
 import logo from "@/assets/rabuste-logo.png";
+import axios from 'axios';
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -41,24 +42,28 @@ const AdminLogin = () => {
     setIsLoading(true);
     
     try {
-      // TODO: Integrate with MERN backend JWT auth
-      // const response = await fetch('/api/auth/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ ...data, rememberMe }),
-      // });
+      // 1. The Real API Call to your Backend
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
+        email: data.email,
+        password: data.password,
+      });
       
-      // Simulated delay for demo
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (response.data.role !== 'admin') {
+        throw new Error("Access Denied: You are not an Admin");
+      }
+
+      localStorage.setItem('userInfo', JSON.stringify(response.data));
+
       
       toast({
         title: "Login Successful",
-        description: "Welcome to Rabuste Admin Portal",
-      });
+        description: "Welcome back, Admin!",
+        className: "bg-terracotta text-white border-none"      });
       
       // Navigate to admin dashboard after successful login
-      // navigate('/admin/dashboard');
-    } catch (error) {
+      navigate('/admin/dashboard');
+
+    } catch (error : any) {
       toast({
         title: "Login Failed",
         description: "Invalid credentials. Please try again.",

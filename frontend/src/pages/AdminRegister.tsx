@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 
 import logo from "@/assets/rabuste-logo.png";
+import axios from 'axios';
 
 // 1. Zod Schema with "Confirm Password" check
 const registerSchema = z.object({
@@ -45,22 +46,28 @@ const AdminRegister = () => {
     setIsLoading(true);
     
     try {
-      // TODO: Connect to MERN Backend (Register API)
-      console.log("Register Data:", data);
-      
-      // Simulated delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // 2. The Real API Call
+      await axios.post('http://localhost:5000/api/auth/register', {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        role: 'admin' // <--- CRITICAL: Force this user to be an Admin
+      });
       
       toast({
         title: "Account Created!",
         description: "Welcome to the team. Please sign in.",
+        className: "bg-green-600 text-white border-none"
       });
       
       navigate('/admin'); // Redirect to login after success
-    } catch (error) {
+    } catch (error:any) {
+
+        const errorMessage = error.response?.data?.message || "Registration failed";
+
       toast({
         title: "Registration Failed",
-        description: "Something went wrong. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
