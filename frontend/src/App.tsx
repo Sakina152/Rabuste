@@ -10,6 +10,8 @@ import Gallery from "./pages/Gallery";
 import Workshops from "./pages/Workshops";
 import Franchise from "./pages/Franchise";
 import Menu from "./pages/Menu";
+import AdminRegister from "./pages/AdminRegister";
+import AdminLogin from "./pages/AdminLogin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => (
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/workshops" element={<Workshops />} />
           <Route path="/franchise" element={<Franchise />} />
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/register" element={<AdminRegister />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
