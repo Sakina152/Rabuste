@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Added useEffect
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -18,151 +18,117 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 
+// Updated Interface to match your Mongoose Model
 interface Workshop {
-  id: number;
+  _id: string; // Changed from id: number to match MongoDB _id
   title: string;
   description: string;
-  category: "coffee" | "art" | "community";
+  type: "coffee" | "art" | "community" | "special"; // Matches model 'type'
   date: string;
-  time: string;
-  duration: string;
-  seats: number;
-  seatsLeft: number;
-  price: string;
-  icon: typeof Coffee;
+  startTime: string; // Matches model
+  endTime: string;   // Matches model
+  duration: number;  // Matches model (minutes)
+  maxParticipants: number; // Matches model
+  currentParticipants: number; // Matches model
+  availableSeats: number; // Virtual field from backend
+  price: number; // Number in backend
+  isFree: boolean;
 }
 
 const Workshops = () => {
   const { toast } = useToast();
+  const [workshops, setWorkshops] = useState<Workshop[]>([]); // Dynamic state
+  const [loading, setLoading] = useState(true);
   const [selectedWorkshop, setSelectedWorkshop] = useState<Workshop | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
+    numberOfSeats: 1, // Added this as your backend requires it
   });
 
-  const workshops: Workshop[] = [
-    {
-      id: 1,
-      title: "Robusta Brewing Masterclass",
-      description:
-        "Learn the art of brewing the perfect Robusta coffee with our expert baristas. Discover extraction techniques, grind sizes, and brewing methods.",
-      category: "coffee",
-      date: "Dec 28, 2024",
-      time: "10:00 AM",
-      duration: "2 hours",
-      seats: 12,
-      seatsLeft: 5,
-      price: "$45",
-      icon: Coffee,
-    },
-    {
-      id: 2,
-      title: "Coffee & Canvas: Painting Workshop",
-      description:
-        "Express your creativity with a brush in one hand and coffee in the other. No experience needed—just bring your imagination!",
-      category: "art",
-      date: "Jan 4, 2025",
-      time: "2:00 PM",
-      duration: "3 hours",
-      seats: 15,
-      seatsLeft: 8,
-      price: "$65",
-      icon: Palette,
-    },
-    {
-      id: 3,
-      title: "Latte Art Fundamentals",
-      description:
-        "Master the basics of latte art from heart patterns to rosettas. Perfect for home baristas and coffee enthusiasts.",
-      category: "coffee",
-      date: "Jan 11, 2025",
-      time: "11:00 AM",
-      duration: "2.5 hours",
-      seats: 10,
-      seatsLeft: 3,
-      price: "$55",
-      icon: Coffee,
-    },
-    {
-      id: 4,
-      title: "Coffee Tasting Journey",
-      description:
-        "Explore the world of specialty Robusta through a guided cupping session. Learn to identify flavor notes and origins.",
-      category: "coffee",
-      date: "Jan 18, 2025",
-      time: "3:00 PM",
-      duration: "1.5 hours",
-      seats: 20,
-      seatsLeft: 12,
-      price: "$35",
-      icon: Coffee,
-    },
-    {
-      id: 5,
-      title: "Community Coffee Morning",
-      description:
-        "A relaxed gathering for coffee lovers to connect, share stories, and enjoy complimentary brews. Free to attend!",
-      category: "community",
-      date: "Every Saturday",
-      time: "9:00 AM",
-      duration: "2 hours",
-      seats: 30,
-      seatsLeft: 20,
-      price: "Free",
-      icon: Sparkles,
-    },
-    {
-      id: 6,
-      title: "Abstract Art with Coffee Stains",
-      description:
-        "Create unique artwork using coffee as your medium. An innovative workshop blending art and our favorite beverage.",
-      category: "art",
-      date: "Jan 25, 2025",
-      time: "1:00 PM",
-      duration: "2.5 hours",
-      seats: 12,
-      seatsLeft: 7,
-      price: "$50",
-      icon: Palette,
-    },
-  ];
+  // 1. Fetch Workshops from Backend
+  useEffect(() => {
+    const fetchWorkshops = async () => {
+      try {
+        const response = await fetch("/api/workshops");
+        const json = await response.json();
+        if (json.success) {
+          setWorkshops(json.data);
+        }
+      } catch (error) {
+        console.error("Error fetching workshops:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchWorkshops();
+  }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 2. Handle Registration Submission
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedWorkshop) {
-      toast({
-        title: "Registration Successful!",
-        description: `You've been registered for ${selectedWorkshop.title}. Check your email for confirmation.`,
+    if (!selectedWorkshop) return;
+
+    try {
+      const response = await fetch(`/api/workshops/${selectedWorkshop._id}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          participantDetails: {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+          },
+          numberOfSeats: formData.numberOfSeats,
+        }),
       });
-      setSelectedWorkshop(null);
-      setFormData({ name: "", email: "", phone: "" });
+
+      const json = await response.json();
+
+      if (json.success) {
+        toast({
+          title: "Registration Successful!",
+          description: `Booking ID: ${json.registrationNumber}. Check your email for confirmation.`,
+        });
+        setSelectedWorkshop(null);
+        setFormData({ name: "", email: "", phone: "", numberOfSeats: 1 });
+        
+        // Optionally refresh workshops to update seat count
+        const refreshRes = await fetch("/api/workshops");
+        const refreshJson = await refreshRes.json();
+        setWorkshops(refreshJson.data);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Registration Failed",
+          description: json.message || "Something went wrong.",
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not connect to server.",
+      });
     }
   };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case "coffee":
-        return Coffee;
-      case "art":
-        return Palette;
-      case "community":
-        return Sparkles;
-      default:
-        return Coffee;
+      case "coffee": return Coffee;
+      case "art": return Palette;
+      case "community": return Sparkles;
+      default: return Coffee;
     }
   };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case "coffee":
-        return "bg-accent/20 text-accent";
-      case "art":
-        return "bg-terracotta/20 text-terracotta";
-      case "community":
-        return "bg-cream/20 text-cream";
-      default:
-        return "bg-accent/20 text-accent";
+      case "coffee": return "bg-accent/20 text-accent";
+      case "art": return "bg-terracotta/20 text-terracotta";
+      case "community": return "bg-cream/20 text-cream";
+      default: return "bg-accent/20 text-accent";
     }
   };
 
@@ -170,7 +136,7 @@ const Workshops = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Hero Section */}
+      {/* Hero Section - Preserved Design */}
       <section className="relative pt-32 pb-20 overflow-hidden bg-hero-gradient">
         <div className="container-custom relative z-10 px-6">
           <motion.div
@@ -195,99 +161,92 @@ const Workshops = () => {
         </div>
       </section>
 
-      {/* Workshops Grid */}
+      {/* Workshops Grid - Now Dynamic */}
       <section className="section-padding bg-background">
         <div className="container-custom">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {workshops.map((workshop, index) => {
-              const CategoryIcon = getCategoryIcon(workshop.category);
-              return (
-                <motion.div
-                  key={workshop.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="group rounded-2xl bg-card border border-border hover:border-accent/50 transition-all duration-500 overflow-hidden"
-                >
-                  {/* Header */}
-                  <div className="p-6 pb-4">
-                    <div className="flex items-start justify-between mb-4">
-                      <div
-                        className={`p-3 rounded-xl ${getCategoryColor(
-                          workshop.category
-                        )}`}
+          {loading ? (
+             <div className="text-center text-muted-foreground">Loading experiences...</div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {workshops.map((workshop, index) => {
+                const CategoryIcon = getCategoryIcon(workshop.type);
+                return (
+                  <motion.div
+                    key={workshop._id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    className="group rounded-2xl bg-card border border-border hover:border-accent/50 transition-all duration-500 overflow-hidden"
+                  >
+                    <div className="p-6 pb-4">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className={`p-3 rounded-xl ${getCategoryColor(workshop.type)}`}>
+                          <CategoryIcon className="w-6 h-6" />
+                        </div>
+                        <span className="font-display text-2xl font-bold text-accent">
+                          {workshop.price === 0 ? "Free" : `$${workshop.price}`}
+                        </span>
+                      </div>
+
+                      <h3 className="font-display text-xl font-semibold text-foreground mb-2 group-hover:text-accent transition-colors">
+                        {workshop.title}
+                      </h3>
+                      <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
+                        {workshop.description}
+                      </p>
+                    </div>
+
+                    <div className="px-6 py-4 border-t border-border bg-coffee-dark/50">
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                          <Calendar size={14} className="text-accent" />
+                          <span>{new Date(workshop.date).toLocaleDateString()}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                          <Clock size={14} className="text-accent" />
+                          <span>{workshop.startTime}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                          <Sparkles size={14} className="text-accent" />
+                          <span>{workshop.duration} mins</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                          <Users size={14} className="text-accent" />
+                          <span>{workshop.availableSeats} seats left</span>
+                        </div>
+                      </div>
+
+                      <div className="mb-4">
+                        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-accent rounded-full transition-all"
+                            style={{
+                              width: `${(workshop.currentParticipants / workshop.maxParticipants) * 100}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <Button
+                        variant="hero"
+                        size="default"
+                        className="w-full"
+                        onClick={() => setSelectedWorkshop(workshop)}
+                        disabled={workshop.availableSeats === 0}
                       >
-                        <CategoryIcon className="w-6 h-6" />
-                      </div>
-                      <span className="font-display text-2xl font-bold text-accent">
-                        {workshop.price}
-                      </span>
+                        {workshop.availableSeats === 0 ? "Sold Out" : "Register Now"}
+                      </Button>
                     </div>
-
-                    <h3 className="font-display text-xl font-semibold text-foreground mb-2 group-hover:text-accent transition-colors">
-                      {workshop.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      {workshop.description}
-                    </p>
-                  </div>
-
-                  {/* Details */}
-                  <div className="px-6 py-4 border-t border-border bg-coffee-dark/50">
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                        <Calendar size={14} className="text-accent" />
-                        <span>{workshop.date}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                        <Clock size={14} className="text-accent" />
-                        <span>{workshop.time}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                        <Sparkles size={14} className="text-accent" />
-                        <span>{workshop.duration}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                        <Users size={14} className="text-accent" />
-                        <span>{workshop.seatsLeft} seats left</span>
-                      </div>
-                    </div>
-
-                    {/* Seats indicator */}
-                    <div className="mb-4">
-                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-accent rounded-full transition-all"
-                          style={{
-                            width: `${
-                              ((workshop.seats - workshop.seatsLeft) /
-                                workshop.seats) *
-                              100
-                            }%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    <Button
-                      variant="hero"
-                      size="default"
-                      className="w-full"
-                      onClick={() => setSelectedWorkshop(workshop)}
-                      disabled={workshop.seatsLeft === 0}
-                    >
-                      {workshop.seatsLeft === 0 ? "Sold Out" : "Register Now"}
-                    </Button>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Registration Modal */}
+      {/* Registration Modal - Preserved Design with updated Fields */}
       {selectedWorkshop && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -317,38 +276,48 @@ const Workshops = () => {
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Enter your name"
                     required
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    placeholder="your@email.com"
-                    required
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="your@email.com"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="+1 (555) 000-0000"
+                      required
+                    />
+                  </div>
                 </div>
 
+                {/* Added Seats input as per model requirement */}
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="seats">Number of Seats (Max 5)</Label>
                   <Input
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    placeholder="+1 (555) 000-0000"
+                    id="seats"
+                    type="number"
+                    min="1"
+                    max="5"
+                    value={formData.numberOfSeats}
+                    onChange={(e) => setFormData({ ...formData, numberOfSeats: parseInt(e.target.value) })}
+                    required
                   />
                 </div>
 
@@ -356,7 +325,7 @@ const Workshops = () => {
                   <div className="flex justify-between items-center mb-6">
                     <span className="text-muted-foreground">Total</span>
                     <span className="font-display text-2xl font-bold text-accent">
-                      {selectedWorkshop.price}
+                      {selectedWorkshop.price === 0 ? "Free" : `$${selectedWorkshop.price * formData.numberOfSeats}`}
                     </span>
                   </div>
 
@@ -381,7 +350,7 @@ const Workshops = () => {
         </motion.div>
       )}
 
-      {/* Private Events */}
+      {/* Private Events Section - Preserved Design */}
       <section className="section-padding bg-coffee-dark">
         <div className="container-custom">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
