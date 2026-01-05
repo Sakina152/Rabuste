@@ -30,6 +30,7 @@ const app = express();
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Make uploads folder static
 const uploadsDir = path.join(__dirname, 'uploads');

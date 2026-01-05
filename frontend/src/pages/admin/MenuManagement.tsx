@@ -1,152 +1,174 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 interface MenuItem {
-  _id: string;
-  name: string;
-  price: number;
-  isAvailable: boolean;
-  category: {
     _id: string;
     name: string;
-  };
+    price: number;
+    image: string;
+    isAvailable: boolean;
+    category: {
+        _id: string;
+        name: string;
+    };
 }
 
 export default function MenuManagement() {
-  const [groupedItems, setGroupedItems] = useState<
-    Record<string, { categoryName: string; items: MenuItem[] }>
-  >({});
+    const [groupedItems, setGroupedItems] = useState<
+        Record<string, { categoryName: string; items: MenuItem[] }>
+    >({});
 
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const API = import.meta.env.VITE_API_BASE_URL;
+    const navigate = useNavigate();
+    const { toast } = useToast();
+    const API = import.meta.env.VITE_API_BASE_URL;
 
-  const fetchMenuItems = async () => {
-    const res = await fetch(`${API}/api/menu/items`);
-    const data: MenuItem[] = await res.json();
+    const fetchMenuItems = async () => {
+        const res = await fetch(`${API}/api/menu/items`);
+        const data: MenuItem[] = await res.json();
 
-    const grouped: Record<
-      string,
-      { categoryName: string; items: MenuItem[] }
-    > = {};
+        const grouped: Record<
+            string,
+            { categoryName: string; items: MenuItem[] }
+        > = {};
 
-    data.forEach((item) => {
-      const catId = item.category._id;
-      if (!grouped[catId]) {
-        grouped[catId] = {
-          categoryName: item.category.name,
-          items: [],
-        };
-      }
-      grouped[catId].items.push(item);
-    });
+        data.forEach((item) => {
+            const catId = item.category._id;
+            if (!grouped[catId]) {
+                grouped[catId] = {
+                    categoryName: item.category.name,
+                    items: [],
+                };
+            }
+            grouped[catId].items.push(item);
+        });
 
-    setGroupedItems(grouped);
-  };
+        setGroupedItems(grouped);
+    };
 
-  const deleteItem = async (id: string) => {
-    if (!confirm("Delete this menu item?")) return;
+    const deleteItem = async (id: string) => {
+        if (!confirm("Delete this menu item?")) return;
 
-    await fetch(`${API}/api/menu/items/${id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
+        await fetch(`${API}/api/menu/items/${id}`, {
+            method: "DELETE",
+            credentials: "include",
+        });
 
-    toast({
-      title: "Deleted",
-      description: "Menu item removed",
-    });
+        toast({
+            title: "Deleted",
+            description: "Menu item removed",
+        });
 
-    fetchMenuItems();
-  };
+        fetchMenuItems();
+    };
 
-  useEffect(() => {
-    fetchMenuItems();
-  }, []);
+    useEffect(() => {
+        fetchMenuItems();
+    }, []);
 
-  return (
-    <div className="p-8 space-y-8">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-display">Menu Management</h1>
-        <Button
-          onClick={() =>
-            navigate("/admin/dashboard/menu-management/new")
-          }
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Item
-        </Button>
-      </div>
+    return (
+        <div className="p-8 space-y-10">
+            {/* Header */}
+            <div className="flex justify-between items-center">
+                <h1 className="text-3xl font-display">Menu Management</h1>
+                <Button
+                    onClick={() =>
+                        navigate("/admin/dashboard/menu-management/new")
+                    }
+                >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Item
+                </Button>
+            </div>
 
-      {/* Category-wise sections */}
-      {Object.values(groupedItems).map((group) => (
-        <Card key={group.categoryName}>
-          <CardHeader>
-            <CardTitle className="text-xl">
-              {group.categoryName}
-            </CardTitle>
-          </CardHeader>
+            {/* Category Sections */}
+            {Object.values(groupedItems).map((group) => (
+                <div key={group.categoryName} className="space-y-4">
+                    {/* Category Heading */}
+                    <h2 className="text-xl font-display text-foreground">
+                        {group.categoryName}
+                    </h2>
 
-          <CardContent>
-            <table className="w-full text-sm">
-              <thead className="border-b">
-                <tr className="text-muted-foreground">
-                  <th className="text-left py-2">Item</th>
-                  <th>Price</th>
-                  <th>Status</th>
-                  <th className="text-right">Actions</th>
-                </tr>
-              </thead>
+                    {/* Items Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {group.items.map((item) => (
+                            <Card
+                                key={item._id}
+                                className="hover:shadow-md transition"
+                            >
+                                <CardContent className="p-4 space-y-3">
+                                    {/* Thumbnail */}
+                                    <div className="w-full h-40 rounded-lg overflow-hidden bg-muted">
+                                        {item.image && item.image !== "null" ? (
+                                            <img
+                                                src={`${API}/${item.image}`}
+                                                alt={item.name}
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    e.currentTarget.style.display = "none";
+                                                }}
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
+                                                No Image
+                                            </div>
+                                        )}
+                                    </div>
 
-              <tbody>
-                {group.items.map((item) => (
-                  <tr
-                    key={item._id}
-                    className="border-b hover:bg-muted/30"
-                  >
-                    <td className="py-3 font-medium">{item.name}</td>
-                    <td>₹{item.price}</td>
-                    <td>
-                      {item.isAvailable ? "Active" : "Hidden"}
-                    </td>
-                    <td className="text-right space-x-2">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() =>
-                          navigate(
-                            `/admin/dashboard/menu-management/edit/${item._id}`
-                          )
-                        }
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
+                                    {/* Info */}
+                                    <div>
+                                        <h3 className="font-medium text-lg">
+                                            {item.name}
+                                        </h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            ₹{item.price}
+                                        </p>
+                                        <p
+                                            className={`text-xs mt-1 ${item.isAvailable
+                                                    ? "text-green-500"
+                                                    : "text-red-400"
+                                                }`}
+                                        >
+                                            {item.isAvailable ? "Available" : "Hidden"}
+                                        </p>
+                                    </div>
 
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => deleteItem(item._id)}
-                      >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
+                                    {/* Actions */}
+                                    <div className="flex justify-end gap-2 pt-2">
+                                        <Button
+                                            size="icon"
+                                            variant="ghost"
+                                            onClick={() =>
+                                                navigate(
+                                                    `/admin/dashboard/menu-management/edit/${item._id}`
+                                                )
+                                            }
+                                        >
+                                            <Pencil className="w-4 h-4" />
+                                        </Button>
+
+                                        <Button
+                                            size="icon"
+                                            variant="ghost"
+                                            onClick={() => deleteItem(item._id)}
+                                        >
+                                            <Trash2 className="w-4 h-4 text-red-500" />
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
 }
