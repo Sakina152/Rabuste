@@ -73,7 +73,7 @@ const recentActivity = [
 ];
 
 const quickActions = [
-  { title: "View Menu", description: "Manage items", icon: Coffee },
+  { title: "View Menu", description: "Manage items", icon: Coffee, href: "/admin/dashboard/menu-management" },
   { title: "Workshops", description: "5 upcoming", icon: Calendar },
   { title: "Analytics", description: "View reports", icon: TrendingUp },
 ];
@@ -290,6 +290,7 @@ export default function AdminDashboard() {
                       {quickActions.map((action, index) => (
                         <motion.button
                           key={action.title}
+                          onClick={() => action.href && navigate(action.href)}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           className="w-full p-4 rounded-xl border border-border hover:border-accent/30 bg-muted/20 hover:bg-muted/40 transition-all flex items-center gap-4 group"

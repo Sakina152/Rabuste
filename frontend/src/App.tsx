@@ -10,6 +10,7 @@ import Gallery from "./pages/Gallery";
 import Workshops from "./pages/Workshops";
 import Franchise from "./pages/Franchise";
 import Menu from "./pages/Menu";
+import MenuManagement from "./pages/admin/MenuManagement";
 
 
 import AdminRegister from "./pages/admin/AdminRegister";
@@ -46,7 +47,7 @@ const App = () => (
              <Route path="/admin/dashboard" element={<AdminDashboard />} />
           </Route>
 
-          {/* Catch-all */}
+          <Route path="/admin/dashboard/menu-management" element={<MenuManagement />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
