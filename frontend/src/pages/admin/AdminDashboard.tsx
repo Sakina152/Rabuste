@@ -33,7 +33,7 @@ const navItems = [
 const statsData = [
   { 
     title: "Total Revenue", 
-    value: "$12,450", 
+    value: "₹12,450", 
     icon: DollarSign, 
     trend: "+12.5%", 
     trendUp: true,

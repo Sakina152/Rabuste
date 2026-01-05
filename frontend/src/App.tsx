@@ -10,7 +10,12 @@ import Gallery from "./pages/Gallery";
 import Workshops from "./pages/Workshops";
 import Franchise from "./pages/Franchise";
 import Menu from "./pages/Menu";
+import Checkout from "./pages/Checkout";
 
+import { CartProvider } from "@/context/CartContext";
+import FloatingCart from "./components/FloatingCart";
+
+import OrderSuccess from "./pages/OrderSuccess";
 
 import AdminRegister from "./pages/admin/AdminRegister";
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -23,8 +28,10 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
+      <CartProvider>
+        <Toaster />
+        <Sonner />
+      
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
@@ -36,10 +43,16 @@ const App = () => (
           <Route path="/workshops" element={<Workshops />} />
           <Route path="/franchise" element={<Franchise />} />
           
+          {/* Checkout */}
+          <Route path="/checkout" element={<Checkout />} />
+
+          {/*Order success*/}
+          <Route path="/order-success" element={<OrderSuccess />} />
           {/* Admin Auth Routes */}
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/register" element={<AdminRegister />} />
 
+          <Route path="/checkout" element={<Checkout />} />
           {/*. PROTECTED ADMIN ROUTES */}
           {/* Anything inside this wrapper requires Login + Admin Role */}
           <Route element={<ProtectedRoute />}>
@@ -49,7 +62,9 @@ const App = () => (
           {/* Catch-all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <FloatingCart />
       </BrowserRouter>
+      </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

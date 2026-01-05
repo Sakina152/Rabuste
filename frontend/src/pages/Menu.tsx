@@ -1,21 +1,19 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Coffee, Snowflake, UtensilsCrossed, Croissant, Cake, Clock, Sparkles } from "lucide-react";
+import { Coffee, Snowflake, UtensilsCrossed, Clock, Sparkles, ShoppingBag } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button"; // Import Button
+import { useCart } from "@/context/CartContext"; // Import Cart Hook
 
 // Section images
 import espressoImg from "@/assets/menu/robusta-espresso.jpg";
 import frappeImg from "@/assets/menu/robusta-frappe.jpg";
 import espressoTonicImg from "@/assets/menu/espresso-tonic.jpg";
 import bagelImg from "@/assets/menu/bagel.jpg";
-import sandwichImg from "@/assets/menu/sandwich.jpg";
-import croissantImg from "@/assets/menu/croissant.jpg";
-import cakeImg from "@/assets/menu/chocolate-cake.jpg";
 
 console.log('ENV:', import.meta.env);
 console.log('BASE URL:', import.meta.env.VITE_API_BASE_URL);
-
 
 interface MenuItem {
   _id: string;
@@ -61,10 +59,23 @@ const getCategoryConfig = (categoryName: string) => {
   return categoryConfig[categoryName] || config;
 };
 
-const MenuItemCard = ({ item, index }: { item: MenuItem; index: number }) => {
+// Updated MenuItemCard to accept fallbackImage and include Add to Cart logic
+const MenuItemCard = ({ item, index, fallbackImage }: { item: MenuItem; index: number; fallbackImage?: string }) => {
+  const { addToCart } = useCart(); // Use the hook
+
   const tag = item.isBestSeller ? "House Favourite" : 
               item.isNew ? "New" : 
               item.isSeasonal ? "Seasonal" : undefined;
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering any parent click events
+    addToCart({
+      id: item._id,
+      name: item.name,
+      price: item.price,
+      image: fallbackImage || "", // Use section image as fallback
+    });
+  };
 
   return (
     <motion.div
@@ -72,9 +83,9 @@ const MenuItemCard = ({ item, index }: { item: MenuItem; index: number }) => {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.4 }}
       viewport={{ once: true }}
-      className="group flex justify-between items-start p-4 rounded-xl bg-card/50 border border-border/30 hover:bg-card hover:border-accent/30 hover:shadow-lg transition-all duration-300 cursor-pointer"
+      className="group flex justify-between items-start p-4 rounded-xl bg-card/50 border border-border/30 hover:bg-card hover:border-accent/30 hover:shadow-lg transition-all duration-300"
     >
-      <div className="flex-1">
+      <div className="flex-1 pr-4">
         <h4 className="font-body font-medium text-foreground group-hover:text-accent transition-colors duration-300">
           {item.name}
           {item.isVegetarian && (
@@ -94,9 +105,20 @@ const MenuItemCard = ({ item, index }: { item: MenuItem; index: number }) => {
           </span>
         )}
       </div>
-      <span className="font-display text-lg text-accent ml-4 group-hover:scale-110 transition-transform duration-300">
-        ₹{item.price}
-      </span>
+
+      {/* Right Side: Price & Add Button */}
+      <div className="flex flex-col items-end gap-3">
+        <span className="font-display text-lg text-accent group-hover:scale-110 transition-transform duration-300">
+          ₹{item.price}
+        </span>
+        <Button 
+          size="sm" 
+          onClick={handleAddToCart}
+          className="h-8 text-xs bg-accent hover:bg-accent/90 text-white"
+        >
+          Add
+        </Button>
+      </div>
     </motion.div>
   );
 };
@@ -129,7 +151,12 @@ const MenuSectionBlock = ({ section, sectionIndex }: { section: MenuSection; sec
     
     <div className="grid gap-3 md:grid-cols-2">
       {section.items.map((item, index) => (
-        <MenuItemCard key={item._id} item={item} index={index} />
+        <MenuItemCard 
+            key={item._id} 
+            item={item} 
+            index={index} 
+            fallbackImage={section.image} // Pass image down
+        />
       ))}
     </div>
   </motion.div>
