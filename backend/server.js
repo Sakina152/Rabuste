@@ -13,6 +13,7 @@ import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import workshopRoutes from './routes/workshopRoutes.js';
 import artRoutes from './routes/artRoutes.js';
 import franchiseRoutes from './routes/franchiseRoutes.js';
+import adminStatsRoutes from './routes/adminStatsRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -47,6 +48,7 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/workshops', workshopRoutes);
 app.use('/api/art', artRoutes);
 app.use('/api/franchise', franchiseRoutes);
+app.use('/api/admin/stats', adminStatsRoutes);
 // Basic route
 app.get('/', (req, res) => {
   res.send('Rabuste Coffee API is running...');

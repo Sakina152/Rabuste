@@ -31,9 +31,17 @@ export const updateArtStatus = async (req, res) => {
         const { id } = req.params;
         const { status } = req.body; // Expecting 'Available', 'Reserved', or 'Sold'
 
+        const update = {
+          status
+        };
+
+        if (status === 'Sold') {
+          update.soldAt = new Date();
+        }
+
         const updatedArt = await Art.findByIdAndUpdate(
             id, 
-            { status }, 
+            update, 
             { new: true, runValidators: true }
         );
 

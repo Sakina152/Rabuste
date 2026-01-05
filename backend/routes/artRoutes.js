@@ -7,6 +7,11 @@ import {
     updateArtStatus,
     submitInquiry
 } from '../controllers/artController.js';
+import {
+    getSalesOverview,
+    getWeeklySalesStats,
+    getInquiryStats
+} from '../controllers/artAnalyticsController.js';
 
 const router = express.Router();
 

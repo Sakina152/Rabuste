@@ -20,6 +20,10 @@ const artSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  soldAt: {
+    type: Date,
+    default: null
+  },
   imageUrl: {
     type: String,
     required: [true, 'Please provide an image URL']
