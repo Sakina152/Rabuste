@@ -73,8 +73,8 @@ const recentActivity = [
 ];
 
 const quickActions = [
-  { title: "View Menu", description: "Manage items", icon: Coffee },
-  { title: "Workshops", description: "5 upcoming", icon: Calendar },
+  { title: "View Menu", description: "Manage items", icon: Coffee, href: "/admin/dashboard/menu-management" },
+  { title: "Workshops", description: "5 upcoming", icon: Calendar , href: "/admin/dashboard/workshops"},
   { title: "Analytics", description: "View reports", icon: TrendingUp },
 ];
 
@@ -172,7 +172,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="font-display text-3xl font-semibold text-foreground">
-                  Welcome back, <span className="text-accent">Jake</span>
+                  Welcome back, <span className="text-accent">Jeet</span>
                 </h1>
                 <p className="text-muted-foreground mt-1 flex items-center gap-2">
                   <Clock className="w-4 h-4" />
@@ -290,6 +290,7 @@ export default function AdminDashboard() {
                       {quickActions.map((action, index) => (
                         <motion.button
                           key={action.title}
+                          onClick={() => action.href && navigate(action.href)}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           className="w-full p-4 rounded-xl border border-border hover:border-accent/30 bg-muted/20 hover:bg-muted/40 transition-all flex items-center gap-4 group"

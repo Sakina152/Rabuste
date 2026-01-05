@@ -25,7 +25,7 @@ const menuItemSchema = new mongoose.Schema(
     },
     image: {
       type: String,
-      default: 'default-item.jpg',
+      default: null,
     },
     tags: [{
       type: String,

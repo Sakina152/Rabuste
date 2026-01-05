@@ -17,6 +17,7 @@ import workshopRoutes from './routes/workshopRoutes.js';
 import artRoutes from './routes/artRoutes.js';
 import franchiseRoutes from './routes/franchiseRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js'; // <--- 1. NEW IMPORT
+import adminStatsRoutes from './routes/adminStatsRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -42,6 +43,7 @@ app.use(cors({
 
 app.use(helmet());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Make uploads folder static
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -59,8 +61,6 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/workshops', workshopRoutes);
 app.use('/api/art', artRoutes);
 app.use('/api/franchise', franchiseRoutes);
-app.use('/api/payment', paymentRoutes); // <--- 3. ADDED PAYMENT ROUTE
-
 // Basic route
 app.get('/', (req, res) => {
   res.send('Rabuste Coffee API is running...');

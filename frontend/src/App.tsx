@@ -8,8 +8,11 @@ import Index from "./pages/Index";
 import About from "./pages/About";
 import Gallery from "./pages/Gallery";
 import Workshops from "./pages/Workshops";
+import WorkshopManager from "@/pages/admin/WorkshopManager";
 import Franchise from "./pages/Franchise";
 import Menu from "./pages/Menu";
+import MenuManagement from "./pages/admin/MenuManagement";
+import MenuItemForm from "./pages/admin/MenuItemForm";
 import Checkout from "./pages/Checkout";
 
 import { CartProvider } from "@/context/CartContext";
@@ -59,7 +62,11 @@ const App = () => (
              <Route path="/admin/dashboard" element={<AdminDashboard />} />
           </Route>
 
-          {/* Catch-all */}
+          <Route path="/admin/dashboard/menu-management" element={<MenuManagement />} />
+          <Route path="/admin/dashboard/menu-management/new" element={<MenuItemForm />} />
+          <Route path="/admin/dashboard/menu-management/edit/:id" element={<MenuItemForm />} />
+          <Route path="/admin/dashboard/workshops" element={<WorkshopManager />} />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
         <FloatingCart />
