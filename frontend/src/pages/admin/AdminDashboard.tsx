@@ -74,7 +74,7 @@ const recentActivity = [
 
 const quickActions = [
   { title: "View Menu", description: "Manage items", icon: Coffee, href: "/admin/dashboard/menu-management" },
-  { title: "Workshops", description: "5 upcoming", icon: Calendar },
+  { title: "Workshops", description: "5 upcoming", icon: Calendar , href: "/admin/dashboard/workshops"},
   { title: "Analytics", description: "View reports", icon: TrendingUp },
 ];
 
@@ -172,7 +172,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="font-display text-3xl font-semibold text-foreground">
-                  Welcome back, <span className="text-accent">Jake</span>
+                  Welcome back, <span className="text-accent">Jeet</span>
                 </h1>
                 <p className="text-muted-foreground mt-1 flex items-center gap-2">
                   <Clock className="w-4 h-4" />
