@@ -10,12 +10,12 @@ import Gallery from "./pages/Gallery";
 import Workshops from "./pages/Workshops";
 import Franchise from "./pages/Franchise";
 import Menu from "./pages/Menu";
-import AdminRegister from "./pages/AdminRegister";
-import AdminLogin from "./pages/AdminLogin";
-// 👇 1. IMPORT THESE TWO
-import AdminDashboard from "./pages/AdminDashboard";
-import ProtectedRoute from "./components/ProtectedRoute"; 
 
+
+import AdminRegister from "./pages/admin/AdminRegister";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import ProtectedRoute from "./components/ProtectedRoute"; 
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
