@@ -9,6 +9,8 @@ import {
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { getToken } from "@/utils/getToken";
+
 
 interface MenuItem {
     _id: string;
@@ -55,20 +57,47 @@ export default function MenuManagement() {
     };
 
     const deleteItem = async (id: string) => {
-        if (!confirm("Delete this menu item?")) return;
-
-        await fetch(`${API}/api/menu/items/${id}`, {
+        console.log("🔥 DELETE MENU ITEM HIT:", id);
+        const confirmDelete = window.confirm(
+          "Are you sure you want to delete this item?"
+        );
+        if (!confirmDelete) return;
+      
+        const token = getToken();
+        if (!token) {
+          alert("Not logged in. Please login again.");
+          return;
+        }
+      
+        try {
+          const res = await fetch(`${API}/api/menu/items/${id}`, {
             method: "DELETE",
-            credentials: "include",
-        });
-
-        toast({
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+      
+          if (!res.ok) {
+            const errorText = await res.text();
+            console.error("DELETE ERROR:", errorText);
+            alert("Delete failed. Check console.");
+            return;
+          }
+      
+          toast({
             title: "Deleted",
-            description: "Menu item removed",
-        });
-
-        fetchMenuItems();
-    };
+            description: "Menu item removed successfully",
+          });
+      
+          // 🔥 THIS IS CRITICAL
+          fetchMenuItems();
+      
+        } catch (err) {
+          console.error("DELETE FAILED:", err);
+          alert("Something went wrong");
+        }
+      };
+      
 
     useEffect(() => {
         fetchMenuItems();
