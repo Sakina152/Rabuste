@@ -26,6 +26,6 @@ router.use(protect);
 router.use(authorize('admin', 'super_admin'));
 
 router.post('/', addArt);
-router.patch('/:id/status', updateArtStatus);
+router.patch('/:id', updateArtStatus);
 
 export default router;
