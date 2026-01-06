@@ -1,4 +1,3 @@
-// server.js
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -6,13 +5,18 @@ import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import fs from 'fs'; 
+
 import { connectDB } from './config/db.js';
+import { notFound, errorHandler } from './middleware/errorMiddleware.js';
+
+// Import Routes
 import authRoutes from './routes/authRoutes.js';
 import menuRoutes from './routes/menuRoutes.js';
-import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import workshopRoutes from './routes/workshopRoutes.js';
 import artRoutes from './routes/artRoutes.js';
 import franchiseRoutes from './routes/franchiseRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js'; // <--- 1. NEW IMPORT
 import adminStatsRoutes from './routes/adminStatsRoutes.js';
 
 // Load environment variables
@@ -26,17 +30,26 @@ const __dirname = dirname(__filename);
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// 2. UPDATED CORS CONFIGURATION
+app.use(cors({
+  origin: [
+    "http://localhost:5173", // Vite default port
+    "http://localhost:8080", // Your current frontend port
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:8080"
+  ],
+  credentials: true // Important for headers/cookies
+}));
+
 app.use(helmet());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Make uploads folder static
 const uploadsDir = path.join(__dirname, 'uploads');
 app.use('/uploads', express.static(uploadsDir));
 
 // Create uploads directory if it doesn't exist
-import fs from 'fs';
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
   fs.mkdirSync(path.join(uploadsDir, 'menu'), { recursive: true });
@@ -48,12 +61,10 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/workshops', workshopRoutes);
 app.use('/api/art', artRoutes);
 app.use('/api/franchise', franchiseRoutes);
-app.use('/api/admin/stats', adminStatsRoutes);
 // Basic route
 app.get('/', (req, res) => {
   res.send('Rabuste Coffee API is running...');
 });
-
 
 // Error handling middleware
 app.use(notFound);

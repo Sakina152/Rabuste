@@ -8,13 +8,19 @@ import Index from "./pages/Index";
 import About from "./pages/About";
 import Gallery from "./pages/Gallery";
 import Workshops from "./pages/Workshops";
+import WorkshopManager from "@/pages/admin/WorkshopManager";
 import Franchise from "./pages/Franchise";
 import Menu from "./pages/Menu";
 import MenuManagement from "./pages/admin/MenuManagement";
 import MenuItemForm from "./pages/admin/MenuItemForm";
+import Checkout from "./pages/Checkout";
+
+import { CartProvider } from "@/context/CartContext";
+import FloatingCart from "./components/FloatingCart";
 import GalleryManagement from "@/pages/admin/GalleryManagement";
 
 
+import OrderSuccess from "./pages/OrderSuccess";
 
 import AdminRegister from "./pages/admin/AdminRegister";
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -27,8 +33,10 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
+      <CartProvider>
+        <Toaster />
+        <Sonner />
+      
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
@@ -40,10 +48,16 @@ const App = () => (
           <Route path="/workshops" element={<Workshops />} />
           <Route path="/franchise" element={<Franchise />} />
           
+          {/* Checkout */}
+          <Route path="/checkout" element={<Checkout />} />
+
+          {/*Order success*/}
+          <Route path="/order-success" element={<OrderSuccess />} />
           {/* Admin Auth Routes */}
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/register" element={<AdminRegister />} />
 
+          <Route path="/checkout" element={<Checkout />} />
           {/*. PROTECTED ADMIN ROUTES */}
           {/* Anything inside this wrapper requires Login + Admin Role */}
           <Route element={<ProtectedRoute />}>
@@ -53,11 +67,15 @@ const App = () => (
           <Route path="/admin/dashboard/menu-management" element={<MenuManagement />} />
           <Route path="/admin/dashboard/menu-management/new" element={<MenuItemForm />} />
           <Route path="/admin/dashboard/menu-management/edit/:id" element={<MenuItemForm />} />
+          <Route path="/admin/dashboard/workshops" element={<WorkshopManager />} />
+
           <Route path="/admin/gallery" element={<GalleryManagement />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <FloatingCart />
       </BrowserRouter>
+      </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

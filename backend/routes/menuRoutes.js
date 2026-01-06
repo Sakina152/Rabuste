@@ -58,7 +58,7 @@ router.get('/items', getMenuItems);
 router.use(protect);
 
 // Menu Admin routes
-router.use(authorize('super_admin', 'menu_admin'));
+router.use(authorize('super_admin', 'menu_admin', 'admin'));
 
 // Category routes
 router.post(

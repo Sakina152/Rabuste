@@ -61,14 +61,18 @@ const getMenuItems = asyncHandler(async (req, res) => {
 // @route   POST /api/menu/items
 // @access  Private/MenuAdmin
 const createMenuItem = asyncHandler(async (req, res) => {
+  console.log("🔥 CREATE MENU ITEM HIT");
+console.log("BODY:", req.body);
+console.log("FILE:", req.file);
+
   const {
     category,
     name,
     description,
     price,
-    image,
     tags,
     isVegetarian,
+    isAvailable,
     displayOrder,
   } = req.body;
 
@@ -76,11 +80,14 @@ const createMenuItem = asyncHandler(async (req, res) => {
     category,
     name,
     description,
-    price,
-    image,
-    tags,
-    isVegetarian,
-    displayOrder,
+    price: Number(price),
+    image: req.file ? req.file.path : null,
+    tags: tags
+      ? tags.split(',').map(t => t.trim())
+      : [],
+    isVegetarian: isVegetarian === 'true',
+    isAvailable: isAvailable === 'true',
+    displayOrder: Number(displayOrder) || 0,
   });
 
   res.status(201).json(item);
@@ -90,16 +97,9 @@ const createMenuItem = asyncHandler(async (req, res) => {
 // @route   PUT /api/menu/items/:id
 // @access  Private/MenuAdmin
 const updateMenuItem = asyncHandler(async (req, res) => {
-  const {
-    name,
-    description,
-    price,
-    image,
-    tags,
-    isVegetarian,
-    isAvailable,
-    displayOrder,
-  } = req.body;
+  console.log("🔥 UPDATE MENU ITEM HIT");
+console.log("BODY:", req.body);
+console.log("FILE:", req.file);
 
   const item = await MenuItem.findById(req.params.id);
 
@@ -108,18 +108,40 @@ const updateMenuItem = asyncHandler(async (req, res) => {
     throw new Error('Menu item not found');
   }
 
-  item.name = name || item.name;
-  item.description = description !== undefined ? description : item.description;
-  item.price = price || item.price;
-  item.image = image || item.image;
-  item.tags = tags || item.tags;
-  if (isVegetarian !== undefined) item.isVegetarian = isVegetarian;
-  if (isAvailable !== undefined) item.isAvailable = isAvailable;
-  if (displayOrder !== undefined) item.displayOrder = displayOrder;
+  item.name = req.body.name ?? item.name;
+  item.description = req.body.description ?? item.description;
+  item.price = req.body.price
+    ? Number(req.body.price)
+    : item.price;
+
+  item.category = req.body.category ?? item.category;
+
+  if (req.body.tags !== undefined) {
+    item.tags = req.body.tags
+      .split(',')
+      .map(t => t.trim());
+  }
+
+  if (req.body.isVegetarian !== undefined) {
+    item.isVegetarian = req.body.isVegetarian === 'true';
+  }
+
+  if (req.body.isAvailable !== undefined) {
+    item.isAvailable = req.body.isAvailable === 'true';
+  }
+
+  if (req.body.displayOrder !== undefined) {
+    item.displayOrder = Number(req.body.displayOrder);
+  }
+
+  if (req.file) {
+    item.image = req.file.path;
+  }
 
   const updatedItem = await item.save();
   res.json(updatedItem);
 });
+
 
 // @desc    Delete a menu item
 // @route   DELETE /api/menu/items/:id

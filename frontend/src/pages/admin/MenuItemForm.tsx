@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+
+import { getToken } from "@/utils/getToken";
 
 interface Category {
   _id: string;
@@ -22,14 +29,21 @@ export default function MenuItemForm() {
   const API = import.meta.env.VITE_API_BASE_URL;
 
   const [categories, setCategories] = useState<Category[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [existingImage, setExistingImage] = useState<string | null>(null);
+
   const [form, setForm] = useState({
+    category: "",
     name: "",
     description: "",
     price: "",
-    category: "",
-    isVegetarian: false,
+    tags: "",
+    displayOrder: 0,
+    isVegetarian: true,
     isAvailable: true,
   });
+
+  /* ================= FETCH ================= */
 
   useEffect(() => {
     fetch(`${API}/api/menu/categories`)
@@ -44,34 +58,82 @@ export default function MenuItemForm() {
           if (!item) return;
 
           setForm({
+            category: item.category._id,
             name: item.name,
             description: item.description || "",
-            price: item.price,
-            category: item.category._id,
+            price: String(item.price),
+            tags: item.tags?.join(", ") || "",
+            displayOrder: item.displayOrder || 0,
             isVegetarian: item.isVegetarian,
             isAvailable: item.isAvailable,
           });
+
+          setExistingImage(item.image);
         });
     }
   }, [id]);
 
+  /* ================= SUBMIT ================= */
+
   const submit = async () => {
+    const token = getToken();
+
+    if (!token) {
+      toast({
+        title: "Not logged in",
+        description: "Please login again",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!form.name || !form.price || !form.category) {
+      toast({
+        title: "Missing fields",
+        description: "Name, price and category are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("category", form.category);
+    formData.append("name", form.name);
+    formData.append("description", form.description);
+    formData.append("price", form.price);
+    formData.append(
+      "tags",
+      form.tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean)
+        .join(",")
+    );
+    formData.append("displayOrder", String(form.displayOrder));
+    formData.append("isVegetarian", String(form.isVegetarian));
+    formData.append("isAvailable", String(form.isAvailable));
+
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
+
     const res = await fetch(
       isEdit
         ? `${API}/api/menu/items/${id}`
         : `${API}/api/menu/items`,
       {
         method: isEdit ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          ...form,
-          price: Number(form.price),
-        }),
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ THIS WAS MISSING
+        },
+        body: formData,
       }
     );
 
     if (!res.ok) {
+      const text = await res.text();
+      console.error(text);
+
       toast({
         title: "Error",
         description: "Failed to save menu item",
@@ -81,12 +143,14 @@ export default function MenuItemForm() {
     }
 
     toast({
-      title: isEdit ? "Updated" : "Added",
+      title: isEdit ? "Updated" : "Created",
       description: "Menu item saved successfully",
     });
 
     navigate("/admin/dashboard/menu-management");
   };
+
+  /* ================= UI ================= */
 
   return (
     <div className="p-8 max-w-3xl mx-auto">
@@ -98,6 +162,24 @@ export default function MenuItemForm() {
         </CardHeader>
 
         <CardContent className="space-y-4">
+          <div>
+            <Label>Category</Label>
+            <select
+              className="w-full border rounded p-2"
+              value={form.category}
+              onChange={(e) =>
+                setForm({ ...form, category: e.target.value })
+              }
+            >
+              <option value="">Select category</option>
+              {categories.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <Label>Name</Label>
             <Input
@@ -130,24 +212,33 @@ export default function MenuItemForm() {
           </div>
 
           <div>
-            <Label>Category</Label>
-            <select
-              className="w-full border rounded p-2"
-              value={form.category}
+            <Label>Tags</Label>
+            <Input
+              value={form.tags}
               onChange={(e) =>
-                setForm({ ...form, category: e.target.value })
+                setForm({ ...form, tags: e.target.value })
               }
-            >
-              <option value="">Select category</option>
-              {categories.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            />
           </div>
 
-          <div className="flex justify-between items-center">
+          <div>
+            <Label>Menu Item Image</Label>
+            {existingImage && !imageFile && (
+              <img
+                src={`${API}/${existingImage}`}
+                className="w-32 h-32 object-cover rounded mb-2"
+              />
+            )}
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) =>
+                setImageFile(e.target.files?.[0] || null)
+              }
+            />
+          </div>
+
+          <div className="flex justify-between">
             <Label>Vegetarian</Label>
             <Switch
               checked={form.isVegetarian}
@@ -157,7 +248,7 @@ export default function MenuItemForm() {
             />
           </div>
 
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between">
             <Label>Available</Label>
             <Switch
               checked={form.isAvailable}

@@ -39,15 +39,19 @@ const storage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+        cb(null, 'workshop-' + uniqueSuffix + path.extname(file.originalname).toLowerCase());
     }
 });
 
 const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-        cb(null, true);
+    const filetypes = /jpe?g|png|webp/;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
+
+    if (extname && mimetype) {
+        return cb(null, true);
     } else {
-        cb(new Error('Not an image! Please upload only images.'), false);
+        cb(new Error('Images only! (jpg, jpeg, png, webp)'), false);
     }
 };
 
@@ -64,13 +68,11 @@ const upload = multer({
 router.get('/', getWorkshops);
 router.get('/upcoming', getUpcomingWorkshops);
 router.get('/featured', getFeaturedWorkshops);
+router.get('/:identifier', getWorkshop);
 
 // Handle registration number/cancel before the general :identifier to avoid route conflicts
 router.get('/registrations/:registrationNumber', getRegistrationByNumber);
 router.put('/registrations/:registrationNumber/cancel', cancelRegistration);
-
-// Single workshop by ID or Slug
-router.get('/:identifier', getWorkshop);
 
 // Registration (Public)
 router.post(
@@ -89,7 +91,9 @@ router.use(protect);
 router.use(authorize('WorkshopAdmin', 'SuperAdmin'));
 
 // Workshop Management
-router.get('/admin/stats', getWorkshopStats); // Specific path for stats
+router.get('/admin/stats', getWorkshopStats);
+
+// Create new workshop
 router.post(
     '/', 
     upload.single('image'), 
@@ -98,6 +102,7 @@ router.post(
     createWorkshop
 );
 
+// Update workshop
 router.put(
     '/:id', 
     upload.single('image'), 
@@ -106,12 +111,19 @@ router.put(
     updateWorkshop
 );
 
+// Delete workshop
 router.delete('/:id', deleteWorkshop);
+
+// Cancel workshop
 router.put('/:id/cancel', cancelWorkshop);
 
-// Registration Management
+// Get registrations for a specific workshop
 router.get('/:id/registrations', getWorkshopRegistrations);
-router.get('/admin/registrations', getAllRegistrations); 
+
+// Get all registrations (admin)
+router.get('/admin/registrations', getAllRegistrations);
+
+// Update registration status
 router.put('/registrations/:id/status', updateRegistrationStatus);
 
 export default router;
