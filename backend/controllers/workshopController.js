@@ -148,44 +148,62 @@ export const getFeaturedWorkshops = async (req, res) => {
  * @access  Private/WorkshopAdmin
  */
 export const createWorkshop = async (req, res) => {
-    try {
-        req.body.createdBy = req.user.id;
+  try {
+    console.log("RAW BODY:", req.body);
 
-        if (req.file) {
-            req.body.image = `/uploads/workshops/${req.file.filename}`;
-        }
+    req.body.createdBy = req.user.id;
 
-        const workshop = await Workshop.create(req.body);
-
-        res.status(201).json({
-            success: true,
-            data: workshop
-        });
-    } catch (err) {
-        console.error('Error creating workshop:', err);
-        
-        if (err.name === 'ValidationError') {
-            const errors = Object.values(err.errors).map(e => e.message);
-            return res.status(400).json({
-                success: false,
-                message: 'Validation error',
-                errors
-            });
-        }
-
-        if (err.code === 11000) {
-            return res.status(400).json({
-                success: false,
-                message: 'Duplicate field value entered'
-            });
-        }
-
-        res.status(500).json({
-            success: false,
-            message: 'Server error'
-        });
+    // Normalize instructor
+    if (req.body.instructorName && !req.body.instructor) {
+      req.body.instructor = { name: req.body.instructorName };
+      delete req.body.instructorName;
     }
+
+    // Normalize status 🔥
+    req.body.status = "published";
+
+    // Normalize numbers
+    if (req.body.price) req.body.price = Number(req.body.price);
+    if (req.body.maxParticipants)
+      req.body.maxParticipants = Number(req.body.maxParticipants);
+
+    // Image
+    if (req.file) {
+      req.body.image = `/uploads/workshops/${req.file.filename}`;
+    }
+
+    const workshop = await Workshop.create(req.body);
+
+    return res.status(201).json({
+      success: true,
+      data: workshop,
+    });
+
+  } catch (err) {
+    console.error("CREATE WORKSHOP ERROR:", err);
+
+    if (err.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "Workshop with same title already exists",
+      });
+    }
+
+    if (err.name === "ValidationError") {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: Object.values(err.errors).map(e => e.message),
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
 };
+
 
 /**
  * @desc    Update workshop
@@ -586,4 +604,39 @@ export const getWorkshopStats = async (req, res) => {
             message: 'Server error' 
         });
     }
+};
+
+/**
+ * @desc    Force delete workshop (admin only)
+ * @route   DELETE /api/workshops/:id/force
+ * @access  Private/Admin
+ */
+export const forceDeleteWorkshop = async (req, res) => {
+  try {
+    const workshop = await Workshop.findById(req.params.id);
+
+    if (!workshop) {
+      return res.status(404).json({
+        success: false,
+        message: 'Workshop not found',
+      });
+    }
+
+    // 1. Delete all bookings related to this workshop
+    await Booking.deleteMany({ workshop: workshop._id });
+
+    // 2. Delete the workshop
+    await workshop.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: 'Workshop and all registrations deleted permanently',
+    });
+  } catch (err) {
+    console.error('Force delete workshop error:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+    });
+  }
 };

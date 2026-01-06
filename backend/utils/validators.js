@@ -100,36 +100,38 @@ const menuItemValidation = [
     }),
 ];
 
+  const workshopValidation = [
+  body("title")
+    .notEmpty()
+    .withMessage("Title is required"),
 
-const workshopValidation = [
-  body('title')
-    .trim()
-    .isLength({ min: 3, max: 100 })
-    .withMessage('Title must be between 3 and 100 characters'),
-  body('description')
-    .trim()
-    .isLength({ min: 50 })
-    .withMessage('Description must be at least 50 characters long'),
-  body('type')
-    .isIn(['coffee', 'art', 'community', 'special'])
-    .withMessage('Invalid workshop type'),
-  body('date')
-    .isISO8601()
-    .withMessage('Valid date is required')
-    .custom((value) => {
-      if (new Date(value) <= new Date()) {
-        throw new Error('Workshop date must be in the future');
-      }
-      return true;
-    }),
-  body('startTime').notEmpty().withMessage('Start time is required'),
-  body('endTime').notEmpty().withMessage('End time is required'),
-  body('maxParticipants')
-    .isInt({ min: 1 })
-    .withMessage('Maximum participants must be at least 1'),
-  body('price')
+  body("description")
+    .notEmpty()
+    .withMessage("Description is required"),
+
+  body("type")
+    .isIn(["coffee", "art", "community", "special"])
+    .withMessage("Invalid workshop type"),
+
+  body("date")
+    .notEmpty()
+    .withMessage("Date is required"),
+
+  body("startTime")
+    .notEmpty()
+    .withMessage("Start time is required"),
+
+  body("endTime")
+    .notEmpty()
+    .withMessage("End time is required"),
+
+  body("price")
     .isFloat({ min: 0 })
-    .withMessage('Price cannot be negative'),
+    .withMessage("Price must be >= 0"),
+
+  body("maxParticipants")
+    .isInt({ min: 1 })
+    .withMessage("At least 1 participant required"),
 ];
 
 const registrationValidation = [
