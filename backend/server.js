@@ -61,6 +61,7 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/workshops', workshopRoutes);
 app.use('/api/art', artRoutes);
 app.use('/api/franchise', franchiseRoutes);
+app.use('/api/admin/stats', adminStatsRoutes);
 // Basic route
 app.get('/', (req, res) => {
   res.send('Rabuste Coffee API is running...');

@@ -27,31 +27,32 @@ export const addArt = async (req, res) => {
 // 3. Toggle Art Status (The "Available -> Reserved -> Sold" logic)
 
 export const updateArtStatus = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { status } = req.body; // Expecting 'Available', 'Reserved', or 'Sold'
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
 
-        const update = {
-          status
-        };
+    const update = { status };
 
-        if (status === 'Sold') {
-          update.soldAt = new Date();
-        }
-
-        const updatedArt = await Art.findByIdAndUpdate(
-            id, 
-            update, 
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedArt) return res.status(404).json({ message: "Art piece not found" });
-
-        res.status(200).json({ message: `Status updated to ${status}`, updatedArt });
-    } catch (error) {
-        res.status(400).json({ message: "Update failed", error });
+    if (status === "Sold") {
+      update.soldAt = new Date();
     }
+
+    const updatedArt = await Art.findByIdAndUpdate(
+      id,
+      update,
+      { new: true }
+    );
+
+    if (!updatedArt) {
+      return res.status(404).json({ message: "Art not found" });
+    }
+
+    res.json(updatedArt);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
+
 
 // 4. Submit Art Inquiry (Customer interest)
 // import { sendEmail } from '../utils/emailSender.js'; 
@@ -174,3 +175,50 @@ export const purchaseArt = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };*/
+
+// 6. Editing Art Details (Admin-Side)
+
+export const updateArt = async (req, res) => {
+  try {
+    const art = await Art.findById(req.params.id);
+
+    if (!art) {
+      return res.status(404).json({ message: "Artwork not found" });
+    }
+
+    art.title = req.body.title ?? art.title;
+    art.artist = req.body.artist ?? art.artist;
+    art.price = req.body.price ?? art.price;
+    art.status = req.body.status ?? art.status;
+    art.imageUrl = req.body.imageUrl ?? art.imageUrl;
+
+    const updatedArt = await art.save();
+
+    res.json(updatedArt);
+  } catch (error) {
+    console.error("Update art error:", error);
+    res.status(400).json({
+      message: "Failed to update art",
+      error: error.message,
+    });
+  }
+};
+
+// 7. Deleting Artwork (Admin-Side)
+
+export const deleteArt = async (req, res) => {
+  try {
+    const art = await Art.findById(req.params.id);
+
+    if (!art) {
+      return res.status(404).json({ message: "Artwork not found" });
+    }
+
+    await art.deleteOne();
+
+    res.json({ message: "Artwork deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to delete artwork" });
+  }
+};

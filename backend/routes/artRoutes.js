@@ -5,7 +5,9 @@ import {
     getAllArt,
     addArt,
     updateArtStatus,
-    submitInquiry
+    submitInquiry,
+    updateArt,
+    deleteArt
 } from '../controllers/artController.js';
 import {
     getSalesOverview,
@@ -26,6 +28,8 @@ router.use(protect);
 router.use(authorize('admin', 'super_admin'));
 
 router.post('/', addArt);
-router.patch('/:id', updateArtStatus);
+router.put('/:id', updateArt);
+router.patch('/:id/status', updateArtStatus);
+router.delete('/:id', deleteArt);
 
 export default router;
