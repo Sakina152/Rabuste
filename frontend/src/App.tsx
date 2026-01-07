@@ -22,14 +22,14 @@ import Profile from "@/pages/Profile";
 import { CartProvider } from "@/context/CartContext";
 import FloatingCart from "./components/FloatingCart";
 import GalleryManagement from "@/pages/admin/GalleryManagement";
-
+import AiBaristaBot from "./components/aiBaristaBot";
 
 import OrderSuccess from "./pages/OrderSuccess";
 
 import AdminRegister from "./pages/admin/AdminRegister";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import ProtectedRoute from "./components/ProtectedRoute"; 
+import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -57,32 +57,33 @@ const App = () => (
           {/* Checkout */}
           <Route path="/checkout" element={<Checkout />} />
 
-          {/*Order success*/}
-          <Route path="/order-success" element={<OrderSuccess />} />
-          {/* Admin Auth Routes */}
-          <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/admin/register" element={<AdminRegister />} />
+            {/*Order success*/}
+            <Route path="/order-success" element={<OrderSuccess />} />
+            {/* Admin Auth Routes */}
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin/register" element={<AdminRegister />} />
 
-          <Route path="/checkout" element={<Checkout />} />
-          {/*. PROTECTED ADMIN ROUTES */}
-          {/* Anything inside this wrapper requires Login + Admin Role */}
-          <Route element={<ProtectedRoute />}>
-             <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          </Route>
+            <Route path="/checkout" element={<Checkout />} />
+            {/*. PROTECTED ADMIN ROUTES */}
+            {/* Anything inside this wrapper requires Login + Admin Role */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            </Route>
 
-          <Route path="/admin/dashboard/menu-management" element={<MenuManagement />} />
-          <Route path="/admin/dashboard/menu-management/new" element={<MenuItemForm />} />
-          <Route path="/admin/dashboard/menu-management/edit/:id" element={<MenuItemForm />} />
-          <Route path="/admin/dashboard/workshops" element={<WorkshopManager />} />
+            <Route path="/admin/dashboard/menu-management" element={<MenuManagement />} />
+            <Route path="/admin/dashboard/menu-management/new" element={<MenuItemForm />} />
+            <Route path="/admin/dashboard/menu-management/edit/:id" element={<MenuItemForm />} />
+            <Route path="/admin/dashboard/workshops" element={<WorkshopManager />} />
 
-          <Route path="/admin/gallery" element={<GalleryManagement />} />
+            <Route path="/admin/gallery" element={<GalleryManagement />} />
 
-          <Route path="/profile" element={<Profile />} />
+            <Route path="/profile" element={<Profile />} />
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <FloatingCart />
-      </BrowserRouter>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <FloatingCart />
+          <AiBaristaBot />
+        </BrowserRouter>
       </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>
