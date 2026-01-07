@@ -39,8 +39,6 @@ const workshopSchema = new mongoose.Schema({
     },
     instructor: {
         name: { type: String, required: true },
-        bio: { type: String },
-        image: { type: String }
     },
     date: {
         type: Date,

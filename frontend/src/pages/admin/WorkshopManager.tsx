@@ -1,385 +1,322 @@
-import { useState, useEffect } from 'react';
-import { Plus, Trash2, Calendar, Clock, DollarSign, Users } from 'lucide-react';
-import { format } from 'date-fns';
+import { useEffect, useState } from "react";
+import {
+  Plus,
+  Trash2,
+  Pencil,
+  Ban,
+  Calendar,
+  Clock,
+  Users,
+  Coffee,
+  Palette,
+  Sparkles,
+  Search,
+  AlertCircle
+} from "lucide-react";
+import { format } from "date-fns";
+import { motion, AnimatePresence } from "framer-motion";
+import { getToken } from "@/utils/getToken";
+import { useToast } from "@/hooks/use-toast";
+import WorkshopForm from "./WorkshopForm";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardFooter
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface Workshop {
   _id: string;
   title: string;
+  description: string;
+  type: "coffee" | "art" | "community" | "special";
   date: string;
-  time: string;
+  startTime: string;
+  endTime: string;
   price: number;
   maxParticipants: number;
   currentParticipants: number;
-  image: string;
+  image?: string;
+  status: "draft" | "published" | "completed" | "cancelled";
+  isFeatured: boolean;
 }
 
 export default function WorkshopManager() {
+  const { toast } = useToast();
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [filteredWorkshops, setFilteredWorkshops] = useState<Workshop[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [editWorkshop, setEditWorkshop] = useState<Workshop | null>(null);
 
-  // Form state
-  const [formData, setFormData] = useState({
-    title: '',
-    date: '',
-    time: '',
-    price: '',
-    maxParticipants: '',
-    image: ''
-  });
+  /* ================= FETCH ================= */
 
-  // Fetch workshops
-  useEffect(() => {
-    const fetchWorkshops = async () => {
-      try {
-        const response = await fetch('/api/workshops');
-        if (!response.ok) throw new Error('Failed to fetch workshops');
-        const data = await response.json();
-        setWorkshops(data.data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setIsLoading(false);
+  const fetchWorkshops = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/workshops");
+      const data = await res.json();
+      if (data.success) {
+        setWorkshops(data.data || []);
+        setFilteredWorkshops(data.data || []);
       }
-    };
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load workshops",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchWorkshops();
   }, []);
 
-  // Handle form input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/workshops', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          price: Number(formData.price),
-          maxParticipants: Number(formData.maxParticipants),
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create workshop');
-      }
-
-      // Refresh the workshops list
-      const updatedResponse = await fetch('/api/workshops');
-      const updatedData = await updatedResponse.json();
-      setWorkshops(updatedData.data);
-      
-      // Reset form and close modal
-      setFormData({
-        title: '',
-        date: '',
-        time: '',
-        price: '',
-        maxParticipants: '',
-        image: ''
-      });
-      setIsModalOpen(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle workshop deletion
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this workshop?')) return;
-
-    try {
-      const response = await fetch(`/api/workshops/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('Failed to delete workshop');
-
-      // Update the workshops list
-      setWorkshops(workshops.filter(workshop => workshop._id !== id));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete workshop');
-    }
-  };
-
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), 'MMM d, yyyy');
-    } catch {
-      return 'Invalid date';
-    }
-  };
-
-  // Calculate progress percentage for the progress bar
-  const getProgressPercentage = (current: number, max: number) => {
-    return Math.min(100, Math.round((current / max) * 100));
-  };
-
-  if (isLoading && workshops.length === 0) {
-    return (
-      <div className="min-h-screen bg-stone-900 text-stone-100 p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse space-y-4">
-            <div className="h-10 bg-stone-800 rounded w-1/3"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="bg-stone-800 rounded-lg p-4 h-64"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+  useEffect(() => {
+    const lower = searchQuery.toLowerCase();
+    const filtered = workshops.filter(w =>
+      w.title.toLowerCase().includes(lower) ||
+      w.status.toLowerCase().includes(lower)
     );
-  }
+    setFilteredWorkshops(filtered);
+  }, [searchQuery, workshops]);
 
-  if (error) {
+  const auth = () => ({
+    Authorization: `Bearer ${getToken()}`,
+  });
+
+  /* ================= ACTIONS ================= */
+
+  const cancelWorkshop = async (id: string, title: string) => {
+    if (!confirm(`Are you sure you want to cancel "${title}"? This will cancel all bookings.`)) return;
+
+    try {
+      const res = await fetch(`/api/workshops/${id}/cancel`, {
+        method: "PUT",
+        headers: auth(),
+      });
+
+      if (res.ok) {
+        toast({ title: "Workshop Cancelled", description: `"${title}" has been cancelled.` });
+        fetchWorkshops();
+      } else {
+        throw new Error();
+      }
+    } catch {
+      toast({ variant: "destructive", title: "Error", description: "Failed to cancel workshop." });
+    }
+  };
+
+  const deleteWorkshop = async (id: string, title: string) => {
+    if (!confirm(`PERMANENTLY DELETE "${title}"? This cannot be undone and deletes all booking history.`)) return;
+
+    try {
+      const res = await fetch(`/api/workshops/${id}/force`, {
+        method: "DELETE",
+        headers: auth(),
+      });
+
+      if (res.ok) {
+        toast({ title: "Workshop Deleted", description: `"${title}" has been permanently removed.` });
+        fetchWorkshops();
+      } else {
+        throw new Error();
+      }
+    } catch {
+      toast({ variant: "destructive", title: "Error", description: "Failed to delete workshop." });
+    }
+  };
+
+  const getCategoryIcon = (type: string) => {
+    switch (type) {
+      case "coffee": return <Coffee className="w-4 h-4" />;
+      case "art": return <Palette className="w-4 h-4" />;
+      case "community": return <Sparkles className="w-4 h-4" />;
+      default: return <Coffee className="w-4 h-4" />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "published": return "bg-green-500/20 text-green-400 border-green-500/50";
+      case "draft": return "bg-stone-500/20 text-stone-400 border-stone-500/50";
+      case "cancelled": return "bg-red-500/20 text-red-400 border-red-500/50";
+      case "completed": return "bg-blue-500/20 text-blue-400 border-blue-500/50";
+      default: return "bg-stone-500/20 text-stone-400";
+    }
+  };
+
+  if (loading && workshops.length === 0) {
     return (
-      <div className="min-h-screen bg-stone-900 text-stone-100 p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-red-900/50 border border-red-700 text-red-200 p-4 rounded-lg">
-            <p className="font-semibold">Error:</p>
-            <p>{error}</p>
-          </div>
-        </div>
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-stone-900 text-stone-100 p-6 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <h1 className="text-3xl font-bold">Workshop Management</h1>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+    <div className="min-h-screen bg-stone-950 p-6 md:p-8 space-y-8 font-body">
+
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-stone-800 pb-6">
+        <div>
+          <h1 className="text-3xl font-display font-bold text-stone-100">Workshop Manager</h1>
+          <p className="text-stone-400 mt-1">Create and manage your coffee experiences</p>
+        </div>
+
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="relative flex-1 md:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-500 w-4 h-4" />
+            <Input
+              placeholder="Search workshops..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 bg-stone-900 border-stone-800 text-stone-100 focus:border-amber-600 focus:ring-amber-600/20"
+            />
+          </div>
+          <Button
+            onClick={() => { setEditWorkshop(null); setShowForm(true); }}
+            className="bg-amber-600 hover:bg-amber-700 text-white shadow-lg shadow-amber-900/20 transition-all font-medium"
           >
-            <Plus size={20} />
-            <span>Add Workshop</span>
-          </button>
+            <Plus className="w-4 h-4 mr-2" /> New Workshop
+          </Button>
         </div>
+      </div>
 
-        {/* Workshops Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {workshops.map((workshop) => (
-            <div
-              key={workshop._id}
-              className="bg-stone-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
+      {/* Grid Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <AnimatePresence>
+          {filteredWorkshops.map((w, index) => (
+            <motion.div
+              key={w._id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ delay: index * 0.05 }}
+              layout
             >
-              {/* Workshop Image */}
-              <div className="h-48 bg-stone-700 relative">
-                {workshop.image ? (
-                  <img
-                    src={workshop.image}
-                    alt={workshop.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-stone-700 to-stone-800">
-                    <span className="text-stone-500">No image</span>
-                  </div>
-                )}
-                <button
-                  onClick={() => handleDelete(workshop._id)}
-                  className="absolute top-2 right-2 p-2 bg-red-600/90 hover:bg-red-700 rounded-full text-white"
-                  aria-label="Delete workshop"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-
-              {/* Workshop Details */}
-              <div className="p-5">
-                <h3 className="text-xl font-semibold mb-2 line-clamp-1">{workshop.title}</h3>
-                
-                <div className="space-y-3 text-stone-300 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Calendar size={16} className="text-blue-400" />
-                    <span>{formatDate(workshop.date)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock size={16} className="text-blue-400" />
-                    <span>{workshop.time || 'Time not specified'}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <DollarSign size={16} className="text-green-400" />
-                    <span>₹{workshop.price.toLocaleString()}</span>
-                  </div>
-                  <div className="pt-2">
-                    <div className="flex justify-between text-xs mb-1">
-                      <span>Seats</span>
-                      <span>{workshop.currentParticipants}/{workshop.maxParticipants}</span>
+              <Card className="bg-stone-900 border-stone-800 overflow-hidden hover:border-amber-500/30 transition-all group h-full flex flex-col">
+                {/* Image Area */}
+                <div className="relative h-48 w-full bg-stone-800 overflow-hidden">
+                  {w.image ? (
+                    <img
+                      src={w.image}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      alt={w.title}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-stone-600">
+                      <Coffee className="w-12 h-12 opacity-20" />
                     </div>
-                    <div className="w-full bg-stone-700 rounded-full h-2">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full"
-                        style={{
-                          width: `${getProgressPercentage(
-                            workshop.currentParticipants,
-                            workshop.maxParticipants
-                          )}%`,
-                        }}
-                      ></div>
-                    </div>
+                  )}
+                  <div className="absolute top-3 left-3 flex gap-2">
+                    <Badge className={`backdrop-blur-md shadow-sm capitalize ${getStatusColor(w.status)}`}>
+                      {w.status}
+                    </Badge>
+                    {w.isFeatured && (
+                      <Badge className="bg-amber-500/90 text-white border-none shadow-sm flex items-center gap-1">
+                        <Sparkles className="w-3 h-3" /> Featured
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="absolute top-3 right-3 bg-stone-900/80 backdrop-blur text-xs px-2 py-1 rounded text-stone-300 border border-stone-700/50 flex items-center gap-1 capitalize">
+                    {getCategoryIcon(w.type)} {w.type}
                   </div>
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
 
-        {/* Add Workshop Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
-            <div 
-              className="bg-stone-800 rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold">Add New Workshop</h2>
-                  <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="text-stone-400 hover:text-white"
+                <CardContent className="p-5 flex-grow space-y-4">
+                  <div>
+                    <h3 className="text-xl font-display font-semibold text-stone-100 mb-1 leading-tight">{w.title}</h3>
+                    <p className="text-sm text-stone-400 line-clamp-2">{w.description}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-y-2 text-sm text-stone-400">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-amber-600" />
+                      {w.date ? format(new Date(w.date), "MMM d, yyyy") : "No Date"}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-amber-600" />
+                      {w.startTime} - {w.endTime}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-amber-600" />
+                      <span className={w.currentParticipants >= w.maxParticipants ? "text-red-400" : ""}>
+                        {w.currentParticipants} / {w.maxParticipants}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 font-medium text-stone-200">
+                      <span className="text-amber-600">$</span>
+                      {w.price}
+                    </div>
+                  </div>
+                </CardContent>
+
+                <CardFooter className="p-4 border-t border-stone-800 bg-stone-900/50 flex justify-between">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { setEditWorkshop(w); setShowForm(true); }}
+                    className="text-stone-300 hover:text-white hover:bg-stone-800"
                   >
-                    ✕
-                  </button>
-                </div>
+                    <Pencil className="w-4 h-4 mr-2" /> Edit
+                  </Button>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label htmlFor="title" className="block text-sm font-medium mb-1">
-                      Title *
-                    </label>
-                    <input
-                      type="text"
-                      id="title"
-                      name="title"
-                      value={formData.title}
-                      onChange={handleChange}
-                      required
-                      className="w-full bg-stone-700 border border-stone-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="date" className="block text-sm font-medium mb-1">
-                        Date *
-                      </label>
-                      <input
-                        type="date"
-                        id="date"
-                        name="date"
-                        value={formData.date}
-                        onChange={handleChange}
-                        required
-                        className="w-full bg-stone-700 border border-stone-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="time" className="block text-sm font-medium mb-1">
-                        Time *
-                      </label>
-                      <input
-                        type="time"
-                        id="time"
-                        name="time"
-                        value={formData.time}
-                        onChange={handleChange}
-                        required
-                        className="w-full bg-stone-700 border border-stone-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="price" className="block text-sm font-medium mb-1">
-                        Price (₹) *
-                      </label>
-                      <input
-                        type="number"
-                        id="price"
-                        name="price"
-                        min="0"
-                        value={formData.price}
-                        onChange={handleChange}
-                        required
-                        className="w-full bg-stone-700 border border-stone-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="maxParticipants" className="block text-sm font-medium mb-1">
-                        Max Participants *
-                      </label>
-                      <input
-                        type="number"
-                        id="maxParticipants"
-                        name="maxParticipants"
-                        min="1"
-                        value={formData.maxParticipants}
-                        onChange={handleChange}
-                        required
-                        className="w-full bg-stone-700 border border-stone-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="image" className="block text-sm font-medium mb-1">
-                      Image URL
-                    </label>
-                    <input
-                      type="url"
-                      id="image"
-                      name="image"
-                      value={formData.image}
-                      onChange={handleChange}
-                      placeholder="https://example.com/image.jpg"
-                      className="w-full bg-stone-700 border border-stone-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div className="pt-4 flex justify-end gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setIsModalOpen(false)}
-                      className="px-4 py-2 rounded-lg border border-stone-600 hover:bg-stone-700 transition-colors"
+                  <div className="flex gap-1">
+                    {w.status !== "cancelled" && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => cancelWorkshop(w._id, w.title)}
+                        className="text-yellow-600 hover:text-yellow-500 hover:bg-yellow-950/20"
+                        title="Cancel Workshop"
+                      >
+                        <Ban className="w-4 h-4" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteWorkshop(w._id, w.title)}
+                      className="text-red-500 hover:text-red-400 hover:bg-red-950/20"
+                      title="Force Delete"
                     >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 transition-colors"
-                    >
-                      {isLoading ? 'Creating...' : 'Create Workshop'}
-                    </button>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
-                </form>
-              </div>
-            </div>
+                </CardFooter>
+              </Card>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
+        {filteredWorkshops.length === 0 && (
+          <div className="col-span-full py-12 text-center text-stone-500 bg-stone-900/50 rounded-xl border border-stone-800 border-dashed">
+            <AlertCircle className="w-10 h-10 mx-auto mb-3 opacity-50" />
+            <p className="text-lg font-medium">No workshops found</p>
+            <p className="text-sm mt-1">Try adjusting your search or create a new one.</p>
           </div>
         )}
       </div>
+
+      {showForm && (
+        <div className="fixed inset-0 bg-stone-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <WorkshopForm
+            workshop={editWorkshop}
+            onCancel={() => setShowForm(false)}
+            onSuccess={() => {
+              setShowForm(false);
+              fetchWorkshops();
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

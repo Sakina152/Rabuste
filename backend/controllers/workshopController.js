@@ -45,8 +45,8 @@ export const getWorkshops = async (req, res) => {
         });
     } catch (err) {
         console.error('Error fetching workshops:', err);
-        res.status(500).json({ 
-            success: false, 
+        res.status(500).json({
+            success: false,
             message: 'Server error',
             error: process.env.NODE_ENV === 'development' ? err.message : undefined
         });
@@ -69,20 +69,20 @@ export const getWorkshop = async (req, res) => {
             .populate('createdBy', 'name');
 
         if (!workshop) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Workshop not found' 
+            return res.status(404).json({
+                success: false,
+                message: 'Workshop not found'
             });
         }
 
-        res.status(200).json({ 
-            success: true, 
-            data: workshop 
+        res.status(200).json({
+            success: true,
+            data: workshop
         });
     } catch (err) {
         console.error('Error fetching workshop:', err);
-        res.status(500).json({ 
-            success: false, 
+        res.status(500).json({
+            success: false,
             message: 'Server error',
             error: process.env.NODE_ENV === 'development' ? err.message : undefined
         });
@@ -100,18 +100,18 @@ export const getUpcomingWorkshops = async (req, res) => {
             date: { $gte: new Date() },
             status: 'published'
         })
-        .sort({ date: 1 })
-        .limit(6);
+            .sort({ date: 1 })
+            .limit(6);
 
-        res.status(200).json({ 
-            success: true, 
-            data: workshops 
+        res.status(200).json({
+            success: true,
+            data: workshops
         });
     } catch (err) {
         console.error('Error fetching upcoming workshops:', err);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error' 
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
         });
     }
 };
@@ -129,15 +129,15 @@ export const getFeaturedWorkshops = async (req, res) => {
             date: { $gte: new Date() }
         }).sort({ date: 1 });
 
-        res.status(200).json({ 
-            success: true, 
-            data: workshops 
+        res.status(200).json({
+            success: true,
+            data: workshops
         });
     } catch (err) {
         console.error('Error fetching featured workshops:', err);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error' 
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
         });
     }
 };
@@ -149,43 +149,64 @@ export const getFeaturedWorkshops = async (req, res) => {
  */
 export const createWorkshop = async (req, res) => {
     try {
+        console.log("RAW BODY:", req.body);
+
         req.body.createdBy = req.user.id;
 
+        // Normalize instructor
+        if (req.body.instructorName && !req.body.instructor) {
+            req.body.instructor = { name: req.body.instructorName };
+            delete req.body.instructorName;
+        }
+
+        // Normalize status 🔥
+        req.body.status = "published";
+
+        // Normalize numbers
+        if (req.body.price) req.body.price = Number(req.body.price);
+        if (req.body.maxParticipants)
+            req.body.maxParticipants = Number(req.body.maxParticipants);
+
+        // Image
         if (req.file) {
             req.body.image = `/uploads/workshops/${req.file.filename}`;
         }
 
         const workshop = await Workshop.create(req.body);
 
-        res.status(201).json({
+        return res.status(201).json({
             success: true,
-            data: workshop
+            data: workshop,
         });
+
     } catch (err) {
-        console.error('Error creating workshop:', err);
-        
-        if (err.name === 'ValidationError') {
-            const errors = Object.values(err.errors).map(e => e.message);
-            return res.status(400).json({
-                success: false,
-                message: 'Validation error',
-                errors
-            });
-        }
+        console.error("CREATE WORKSHOP ERROR:", err);
 
         if (err.code === 11000) {
             return res.status(400).json({
                 success: false,
-                message: 'Duplicate field value entered'
+                message: "Workshop with same title already exists",
             });
         }
 
-        res.status(500).json({
+        if (err.name === "ValidationError") {
+            const messages = Object.values(err.errors).map(val => val.message);
+            console.log("Validation Messages:", messages); // Added log
+            return res.status(400).json({
+                success: false,
+                message: "Validation failed",
+                errors: messages,
+            });
+        }
+
+        return res.status(500).json({
             success: false,
-            message: 'Server error'
+            message: "Server error",
+            error: process.env.NODE_ENV === 'development' ? err.message : undefined
         });
     }
 };
+
 
 /**
  * @desc    Update workshop
@@ -195,11 +216,11 @@ export const createWorkshop = async (req, res) => {
 export const updateWorkshop = async (req, res) => {
     try {
         let workshop = await Workshop.findById(req.params.id);
-        
+
         if (!workshop) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Workshop not found' 
+            return res.status(404).json({
+                success: false,
+                message: 'Workshop not found'
             });
         }
 
@@ -210,15 +231,15 @@ export const updateWorkshop = async (req, res) => {
         Object.assign(workshop, req.body);
         await workshop.save();
 
-        res.status(200).json({ 
-            success: true, 
-            data: workshop 
+        res.status(200).json({
+            success: true,
+            data: workshop
         });
     } catch (err) {
         console.error('Error updating workshop:', err);
-        res.status(400).json({ 
-            success: false, 
-            message: err.message 
+        res.status(400).json({
+            success: false,
+            message: err.message
         });
     }
 };
@@ -259,9 +280,9 @@ export const deleteWorkshop = async (req, res) => {
         });
     } catch (err) {
         console.error('Error deleting workshop:', err);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error' 
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
         });
     }
 };
@@ -297,9 +318,9 @@ export const cancelWorkshop = async (req, res) => {
     } catch (err) {
         await session.abortTransaction();
         console.error('Error cancelling workshop:', err);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error' 
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
         });
     } finally {
         session.endSession();
@@ -316,25 +337,25 @@ export const cancelWorkshop = async (req, res) => {
 export const registerForWorkshop = async (req, res) => {
     try {
         const workshop = await Workshop.findById(req.params.id);
-        
+
         if (!workshop || workshop.status !== 'published') {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 success: false,
-                message: 'Workshop is not available for registration' 
+                message: 'Workshop is not available for registration'
             });
         }
 
         if (new Date(workshop.date) < new Date()) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 success: false,
-                message: 'Workshop date has passed' 
+                message: 'Workshop date has passed'
             });
         }
 
         if (workshop.currentParticipants >= workshop.maxParticipants) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 success: false,
-                message: 'Workshop is fully booked' 
+                message: 'Workshop is fully booked'
             });
         }
 
@@ -349,8 +370,8 @@ export const registerForWorkshop = async (req, res) => {
         workshop.currentParticipants += 1;
         await workshop.save();
 
-        res.status(201).json({ 
-            success: true, 
+        res.status(201).json({
+            success: true,
             data: {
                 registrationNumber: registration.registrationNumber,
                 workshop: workshop.title,
@@ -359,17 +380,17 @@ export const registerForWorkshop = async (req, res) => {
         });
     } catch (err) {
         console.error('Error registering for workshop:', err);
-        
+
         if (err.code === 11000) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 success: false,
-                message: 'Email already registered for this workshop' 
+                message: 'Email already registered for this workshop'
             });
         }
 
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error' 
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
         });
     }
 };
@@ -381,20 +402,20 @@ export const registerForWorkshop = async (req, res) => {
  */
 export const getWorkshopRegistrations = async (req, res) => {
     try {
-        const registrations = await Booking.find({ 
-            workshop: req.params.id 
+        const registrations = await Booking.find({
+            workshop: req.params.id
         }).sort('-createdAt');
 
-        res.status(200).json({ 
-            success: true, 
+        res.status(200).json({
+            success: true,
             count: registrations.length,
-            data: registrations 
+            data: registrations
         });
     } catch (err) {
         console.error('Error fetching workshop registrations:', err);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error' 
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
         });
     }
 };
@@ -431,9 +452,9 @@ export const getAllRegistrations = async (req, res) => {
         });
     } catch (err) {
         console.error('Error fetching all registrations:', err);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error' 
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
         });
     }
 };
@@ -445,26 +466,26 @@ export const getAllRegistrations = async (req, res) => {
  */
 export const getRegistrationByNumber = async (req, res) => {
     try {
-        const registration = await Booking.findOne({ 
-            registrationNumber: req.params.registrationNumber 
+        const registration = await Booking.findOne({
+            registrationNumber: req.params.registrationNumber
         }).populate('workshop', 'title date');
 
         if (!registration) {
-            return res.status(404).json({ 
+            return res.status(404).json({
                 success: false,
-                message: 'Registration not found' 
+                message: 'Registration not found'
             });
         }
 
-        res.status(200).json({ 
-            success: true, 
-            data: registration 
+        res.status(200).json({
+            success: true,
+            data: registration
         });
     } catch (err) {
         console.error('Error fetching registration:', err);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error' 
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
         });
     }
 };
@@ -477,27 +498,27 @@ export const getRegistrationByNumber = async (req, res) => {
 export const updateRegistrationStatus = async (req, res) => {
     try {
         const { status } = req.body;
-        
+
         const registration = await Booking.findById(req.params.id);
         if (!registration) {
-            return res.status(404).json({ 
+            return res.status(404).json({
                 success: false,
-                message: 'Registration not found' 
+                message: 'Registration not found'
             });
         }
 
         registration.status = status;
         await registration.save();
 
-        res.status(200).json({ 
-            success: true, 
-            data: registration 
+        res.status(200).json({
+            success: true,
+            data: registration
         });
     } catch (err) {
         console.error('Error updating registration status:', err);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error' 
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
         });
     }
 };
@@ -510,23 +531,23 @@ export const updateRegistrationStatus = async (req, res) => {
 export const cancelRegistration = async (req, res) => {
     try {
         const { email } = req.body;
-        
+
         const registration = await Booking.findOne({
             registrationNumber: req.params.registrationNumber,
             'participantDetails.email': email
         }).populate('workshop');
 
         if (!registration) {
-            return res.status(404).json({ 
+            return res.status(404).json({
                 success: false,
-                message: 'Registration not found or email does not match' 
+                message: 'Registration not found or email does not match'
             });
         }
 
         if (registration.status === 'cancelled') {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 success: false,
-                message: 'Registration is already cancelled' 
+                message: 'Registration is already cancelled'
             });
         }
 
@@ -543,15 +564,15 @@ export const cancelRegistration = async (req, res) => {
             await registration.workshop.save();
         }
 
-        res.status(200).json({ 
-            success: true, 
-            message: 'Registration cancelled successfully' 
+        res.status(200).json({
+            success: true,
+            message: 'Registration cancelled successfully'
         });
     } catch (err) {
         console.error('Error cancelling registration:', err);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error' 
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
         });
     }
 };
@@ -565,25 +586,60 @@ export const getWorkshopStats = async (req, res) => {
     try {
         const stats = {
             totalWorkshops: await Workshop.countDocuments(),
-            upcomingWorkshops: await Workshop.countDocuments({ 
-                date: { $gte: new Date() } 
+            upcomingWorkshops: await Workshop.countDocuments({
+                date: { $gte: new Date() }
             }),
             totalRegistrations: await Booking.countDocuments(),
-            activeRegistrations: await Booking.countDocuments({ 
-                status: 'confirmed' 
+            activeRegistrations: await Booking.countDocuments({
+                status: 'confirmed'
             }),
             revenue: 0 // This would be calculated based on your payment processing
         };
 
-        res.status(200).json({ 
-            success: true, 
-            data: stats 
+        res.status(200).json({
+            success: true,
+            data: stats
         });
     } catch (err) {
         console.error('Error fetching workshop stats:', err);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error' 
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
+    }
+};
+
+/**
+ * @desc    Force delete workshop (admin only)
+ * @route   DELETE /api/workshops/:id/force
+ * @access  Private/Admin
+ */
+export const forceDeleteWorkshop = async (req, res) => {
+    try {
+        const workshop = await Workshop.findById(req.params.id);
+
+        if (!workshop) {
+            return res.status(404).json({
+                success: false,
+                message: 'Workshop not found',
+            });
+        }
+
+        // 1. Delete all bookings related to this workshop
+        await Booking.deleteMany({ workshop: workshop._id });
+
+        // 2. Delete the workshop
+        await workshop.deleteOne();
+
+        res.status(200).json({
+            success: true,
+            message: 'Workshop and all registrations deleted permanently',
+        });
+    } catch (err) {
+        console.error('Force delete workshop error:', err);
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
         });
     }
 };
