@@ -89,6 +89,39 @@ export default function GalleryManagement() {
   setArtworks((prev) => prev.filter((a) => a._id !== id));
 };
 
+  const handleStatusChange = async (
+  id: string,
+  status: "Available" | "Reserved" | "Sold"
+) => {
+  const token = getToken();
+  if (!token) return;
+
+  const res = await fetch(
+    `http://localhost:5000/api/art/${id}/status`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ status }),
+    }
+  );
+
+  if (!res.ok) {
+    alert("Failed to update status");
+    return;
+  }
+
+  const updatedArt = await res.json();
+
+  // 🔥 THIS LINE IS THE FIX
+  setArtworks((prev) =>
+    prev.map((art) =>
+      art._id === updatedArt._id ? updatedArt : art
+    )
+  );
+};
 
   const openAddModal = () => {
     setEditingArt(null);

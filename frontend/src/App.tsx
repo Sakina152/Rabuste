@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ScrollToTop from "@/components/ScrollToTop";
 import Index from "./pages/Index";
 import About from "./pages/About";
+import Login from "./pages/UserLogin";
+import Register from "./pages/UserRegister";
 import Gallery from "./pages/Gallery";
 import Workshops from "./pages/Workshops";
 import WorkshopManager from "@/pages/admin/WorkshopManager";
@@ -42,6 +44,8 @@ const App = () => (
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/menu" element={<Menu />} />
           <Route path="/about" element={<About />} />
           <Route path="/gallery" element={<Gallery />} />
