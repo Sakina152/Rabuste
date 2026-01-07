@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Coffee } from "lucide-react";
+import { Menu, X, Coffee, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import rabusteLogo from "@/assets/rabuste-logo.png";
 
@@ -36,18 +36,17 @@ const Navbar = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        isScrolled
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
           ? "bg-background/95 backdrop-blur-md shadow-soft"
           : "bg-transparent"
-      }`}
+        }`}
     >
       <nav className="container-custom flex items-center justify-between h-20 px-6">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 group">
-          <img 
-            src={rabusteLogo} 
-            alt="Rabuste Coffee" 
+          <img
+            src={rabusteLogo}
+            alt="Rabuste Coffee"
             className="h-12 w-auto transition-transform duration-300 group-hover:scale-105"
           />
         </Link>
@@ -58,11 +57,10 @@ const Navbar = () => {
             <Link
               key={link.path}
               to={link.path}
-              className={`relative font-body text-sm tracking-wide transition-colors duration-300 link-underline ${
-                location.pathname === link.path
+              className={`relative font-body text-sm tracking-wide transition-colors duration-300 link-underline ${location.pathname === link.path
                   ? "text-accent"
                   : "text-muted-foreground hover:text-foreground"
-              }`}
+                }`}
             >
               {link.name}
             </Link>
@@ -70,14 +68,33 @@ const Navbar = () => {
         </div>
 
         {/* CTA Button */}
-        <div className="hidden lg:block">
+        {/* CTA Buttons */}
+        <div className="hidden lg:flex items-center gap-3">
           <Button variant="hero" size="default" asChild>
             <Link to="/franchise" className="flex items-center gap-2">
               <Coffee className="w-4 h-4" />
               Partner With Us
             </Link>
           </Button>
+
+          <Button
+            size="icon"
+            asChild
+            className="
+              rounded-full
+            bg-[#5C3A21]
+            text-white
+            hover:bg-[#6F4A2D]
+              transition-colors
+              duration-300
+              "
+          >
+            <Link to="/profile" aria-label="Profile">
+              <User className="w-5 h-5" />
+            </Link>
+          </Button>
         </div>
+
 
         {/* Mobile Menu Button */}
         <button
@@ -109,11 +126,10 @@ const Navbar = () => {
                 >
                   <Link
                     to={link.path}
-                    className={`block py-3 font-body text-lg transition-colors ${
-                      location.pathname === link.path
+                    className={`block py-3 font-body text-lg transition-colors ${location.pathname === link.path
                         ? "text-accent"
                         : "text-muted-foreground"
-                    }`}
+                      }`}
                   >
                     {link.name}
                   </Link>
@@ -128,6 +144,23 @@ const Navbar = () => {
                   <Link to="/franchise" className="flex items-center justify-center gap-2">
                     <Coffee className="w-4 h-4" />
                     Partner With Us
+                  </Link>
+                </Button>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full"
+                  asChild
+                >
+                  <Link to="/profile" className="flex items-center justify-center gap-2">
+                    <User className="w-5 h-5" />
+                    Profile
                   </Link>
                 </Button>
               </motion.div>

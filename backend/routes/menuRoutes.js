@@ -12,6 +12,7 @@ import {
   createMenuItem,
   updateMenuItem,
   deleteMenuItem,
+  getAdminMenuItems,
 } from '../controllers/menuController.js';
 import { menuItemValidation, validate } from '../utils/validators.js';
 
@@ -76,6 +77,10 @@ router.post(
   validate,
   createMenuItem
 );
+
+// router.get('/items', getAdminMenuItems);
+
+
 router
   .route('/items/:id')
   .put(upload.single('image'), menuItemValidation, validate, updateMenuItem)
