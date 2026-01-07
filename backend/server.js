@@ -5,7 +5,7 @@ import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import fs from 'fs'; 
+import fs from 'fs';
 
 import { connectDB } from './config/db.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
@@ -18,6 +18,8 @@ import artRoutes from './routes/artRoutes.js';
 import franchiseRoutes from './routes/franchiseRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js'; // <--- 1. NEW IMPORT
 import adminStatsRoutes from './routes/adminStatsRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
+
 
 // Load environment variables
 dotenv.config();
@@ -44,6 +46,7 @@ app.use(cors({
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/api/ai', aiRoutes);
 
 // Make uploads folder static
 const uploadsDir = path.join(__dirname, 'uploads');
