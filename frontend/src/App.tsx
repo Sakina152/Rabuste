@@ -14,6 +14,8 @@ import Menu from "./pages/Menu";
 import MenuManagement from "./pages/admin/MenuManagement";
 import MenuItemForm from "./pages/admin/MenuItemForm";
 import Checkout from "./pages/Checkout";
+import Profile from "@/pages/Profile";
+
 
 import { CartProvider } from "@/context/CartContext";
 import FloatingCart from "./components/FloatingCart";
@@ -70,6 +72,8 @@ const App = () => (
           <Route path="/admin/dashboard/workshops" element={<WorkshopManager />} />
 
           <Route path="/admin/gallery" element={<GalleryManagement />} />
+
+          <Route path="/profile" element={<Profile />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
