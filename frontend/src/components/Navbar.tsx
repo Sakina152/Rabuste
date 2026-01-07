@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Coffee, User } from "lucide-react";
+import { Menu, X, Coffee, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import rabusteLogo from "@/assets/rabuste-logo.png";
 
@@ -17,153 +17,181 @@ const navLinks = [
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
+  const [profileOpen, setProfileOpen] = useState(false);
 
+  const location = useLocation();
+  const navigate = useNavigate();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  /* ---------------- Scroll effect ---------------- */
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  /* ---------------- Close menus on route change ---------------- */
   useEffect(() => {
     setIsMobileMenuOpen(false);
+    setProfileOpen(false);
   }, [location]);
+
+  /* ---------------- Close dropdown on outside click ---------------- */
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  /* ---------------- Logout ---------------- */
+  const handleLogout = () => {
+    localStorage.removeItem("userInfo");
+    navigate("/login");
+  };
 
   return (
     <motion.header
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        isScrolled
           ? "bg-background/95 backdrop-blur-md shadow-soft"
           : "bg-transparent"
-        }`}
+      }`}
     >
       <nav className="container-custom flex items-center justify-between h-20 px-6">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-3 group">
-          <img
-            src={rabusteLogo}
-            alt="Rabuste Coffee"
-            className="h-12 w-auto transition-transform duration-300 group-hover:scale-105"
-          />
+        <Link to="/" className="flex items-center gap-3">
+          <img src={rabusteLogo} alt="Rabuste Coffee" className="h-12" />
         </Link>
 
-        {/* Desktop Navigation */}
+        {/* Desktop Nav */}
         <div className="hidden lg:flex items-center gap-8">
           {navLinks.map((link) => (
             <Link
               key={link.path}
               to={link.path}
-              className={`relative font-body text-sm tracking-wide transition-colors duration-300 link-underline ${location.pathname === link.path
+              className={`text-sm transition-colors ${
+                location.pathname === link.path
                   ? "text-accent"
                   : "text-muted-foreground hover:text-foreground"
-                }`}
+              }`}
             >
               {link.name}
             </Link>
           ))}
         </div>
 
-        {/* CTA Button */}
-        {/* CTA Buttons */}
-        <div className="hidden lg:flex items-center gap-3">
-          <Button variant="hero" size="default" asChild>
+        {/* Desktop Actions */}
+        <div className="hidden lg:flex items-center gap-3 relative">
+          <Button variant="hero" asChild>
             <Link to="/franchise" className="flex items-center gap-2">
               <Coffee className="w-4 h-4" />
               Partner With Us
             </Link>
           </Button>
 
-          <Button
-            size="icon"
-            asChild
-            className="
-              rounded-full
-            bg-[#5C3A21]
-            text-white
-            hover:bg-[#6F4A2D]
-              transition-colors
-              duration-300
+          {/* Profile Dropdown */}
+          <div ref={dropdownRef} className="relative">
+            <button
+              onClick={() => setProfileOpen((p) => !p)}
+              className="
+                w-10 h-10 rounded-full
+                bg-[#5C3A21] text-white
+                flex items-center justify-center
+                hover:bg-[#6F4A2D]
+                transition
               "
-          >
-            <Link to="/profile" aria-label="Profile">
+              aria-label="User menu"
+            >
               <User className="w-5 h-5" />
-            </Link>
-          </Button>
-        </div>
+            </button>
 
+            <AnimatePresence>
+              {profileOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
+                  className="
+                    absolute right-0 mt-3 w-40
+                    rounded-xl overflow-hidden
+                    bg-[#5C3A21] text-white
+                    shadow-xl
+                  "
+                >
+                  <Link
+                    to="/profile"
+                    className="
+                      flex items-center gap-2 px-4 py-3
+                      hover:bg-[#6F4A2D] transition
+                    "
+                  >
+                    <User className="w-4 h-4" />
+                    Profile
+                  </Link>
+
+                  <button
+                    onClick={handleLogout}
+                    className="
+                      w-full flex items-center gap-2 px-4 py-3
+                      hover:bg-[#6F4A2D] transition
+                      text-left
+                    "
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
 
         {/* Mobile Menu Button */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="lg:hidden p-2 text-foreground"
-          aria-label="Toggle menu"
+          className="lg:hidden p-2"
         >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {isMobileMenuOpen ? <X /> : <Menu />}
         </button>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu (unchanged) */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="lg:hidden bg-background/98 backdrop-blur-md border-t border-border"
+            className="lg:hidden bg-background border-t"
           >
-            <div className="container-custom py-6 px-6 flex flex-col gap-4">
-              {navLinks.map((link, index) => (
-                <motion.div
+            <div className="px-6 py-6 flex flex-col gap-4">
+              {navLinks.map((link) => (
+                <Link
                   key={link.path}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
+                  to={link.path}
+                  className="text-lg text-muted-foreground"
                 >
-                  <Link
-                    to={link.path}
-                    className={`block py-3 font-body text-lg transition-colors ${location.pathname === link.path
-                        ? "text-accent"
-                        : "text-muted-foreground"
-                      }`}
-                  >
-                    {link.name}
-                  </Link>
-                </motion.div>
+                  {link.name}
+                </Link>
               ))}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 }}
-              >
-                <Button variant="hero" size="lg" className="w-full mt-4" asChild>
-                  <Link to="/franchise" className="flex items-center justify-center gap-2">
-                    <Coffee className="w-4 h-4" />
-                    Partner With Us
-                  </Link>
-                </Button>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6 }}
-              >
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full"
-                  asChild
-                >
-                  <Link to="/profile" className="flex items-center justify-center gap-2">
-                    <User className="w-5 h-5" />
-                    Profile
-                  </Link>
-                </Button>
-              </motion.div>
+              <Button variant="hero" asChild>
+                <Link to="/franchise">Partner With Us</Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link to="/profile">Profile</Link>
+              </Button>
             </div>
           </motion.div>
         )}

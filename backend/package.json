@@ -13,6 +13,7 @@
   "license": "ISC",
   "description": "Rabuste Coffee Backend API",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
