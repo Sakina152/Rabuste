@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Eye, Heart, User, X } from "lucide-react";
+import { ArrowRight, Eye, Heart, User, X, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useRazorpay } from "@/hooks/useRazorpay"; // <--- 1. Import Hook
 
 interface Artwork {
   _id: string;
@@ -19,10 +19,8 @@ interface Artwork {
   category?: "abstract" | "landscape" | "portrait";
 }
 
-
 const Gallery = () => {
   const [selectedArt, setSelectedArt] = useState<Artwork | null>(null);
-
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +36,9 @@ const Gallery = () => {
   const [successMsg, setSuccessMsg] = useState("");
 
   const token = localStorage.getItem("token");
+
+  // Razorpay Hook
+  const { handlePayment, isProcessing } = useRazorpay(); // <--- 2. Use Hook
 
   useEffect(() => {
     const fetchArtworks = async () => {
@@ -83,38 +84,38 @@ const Gallery = () => {
   }, []);
 
   const handleInquirySubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!selectedArt) return;
+    e.preventDefault();
+    if (!selectedArt) return;
 
-  setSubmitting(true);
-  setSuccessMsg("");
+    setSubmitting(true);
+    setSuccessMsg("");
 
-  try {
-    const res = await fetch("http://localhost:5000/api/art/inquiry", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        artId: selectedArt._id,
-        ...inquiryData,
-      }),
-    });
+    try {
+      const res = await fetch("http://localhost:5000/api/art/inquiry", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          artId: selectedArt._id,
+          ...inquiryData,
+        }),
+      });
 
-    if (!res.ok) throw new Error("Failed to submit inquiry");
+      if (!res.ok) throw new Error("Failed to submit inquiry");
 
-    setSuccessMsg("Your inquiry has been sent. We'll get back to you soon!");
-    setInquiryData({ customerName: "", email: "", phone: "", message: "" });
+      setSuccessMsg("Your inquiry has been sent. We'll get back to you soon!");
+      setInquiryData({ customerName: "", email: "", phone: "", message: "" });
 
-    setTimeout(() => {
-      setShowInquiryForm(false);
-    }, 1500);
-  } catch (err) {
-    alert("Something went wrong. Please try again.");
-  } finally {
-    setSubmitting(false);
-  }
-};
+      setTimeout(() => {
+        setShowInquiryForm(false);
+      }, 1500);
+    } catch (err) {
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
 
   return (
@@ -259,21 +260,21 @@ const Gallery = () => {
             >
               <div className="grid md:grid-cols-2">
                 {/* Art Preview */}
-              <div className="aspect-square overflow-hidden">
-              {selectedArt.imageUrl ? (
-              <img
-                src={selectedArt.imageUrl}
-                alt={selectedArt.title}
-                className="w-full h-full object-cover"
-              />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-coffee-medium to-espresso flex items-center justify-center">
-                <span className="text-muted-foreground text-sm">
-                No Image
-                </span>
+                <div className="aspect-square overflow-hidden">
+                  {selectedArt.imageUrl ? (
+                    <img
+                      src={selectedArt.imageUrl}
+                      alt={selectedArt.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-coffee-medium to-espresso flex items-center justify-center">
+                      <span className="text-muted-foreground text-sm">
+                        No Image
+                      </span>
+                    </div>
+                  )}
                 </div>
-              )}
-              </div>
 
                 {/* Details */}
                 <div className="p-8 space-y-6">
@@ -309,27 +310,40 @@ const Gallery = () => {
                     {selectedArt.description}
                   </p>
 
-                  <div className="pt-4 border-t border-border">
-                    <div className="flex items-center justify-between mb-6">
+                  <div className="pt-4 border-t border-border space-y-4">
+                    <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Price</span>
                       <span className="font-display text-3xl font-bold text-accent">
-                        {selectedArt.price}
+                        ₹{selectedArt.price.toLocaleString('en-IN')}
                       </span>
                     </div>
 
+                    {/* ACTION BUTTONS (Updated) */}
                     {selectedArt.status === "Available" ? (
-                      <Button
-                       variant="hero"
-                       size="lg"
-                       className="w-full"
-                       onClick={() => setShowInquiryForm(true)}
-                      >
-                        Inquire About This Piece
-                        <ArrowRight className="ml-2" />
-                      </Button>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <Button
+                          variant="hero"
+                          size="lg"
+                          className="flex-1 bg-green-600 hover:bg-green-700 text-white border-none"
+                          onClick={() => handlePayment('ART', selectedArt)} // <--- 3. Call Payment Hook
+                          disabled={isProcessing}
+                        >
+                          {isProcessing ? "Processing..." : "Buy Now"}
+                          {!isProcessing && <ShoppingBag className="ml-2 w-4 h-4" />}
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          className="flex-1"
+                          onClick={() => setShowInquiryForm(true)}
+                        >
+                          Inquire
+                        </Button>
+                      </div>
 
                     ) : (
-                      <Button variant="subtle" size="lg" className="w-full" disabled>
+                      <Button variant="subtle" size="lg" className="w-full bg-gray-600 text-gray-300 cursor-not-allowed" disabled>
                         This Piece Has Been Sold
                       </Button>
                     )}
@@ -342,93 +356,93 @@ const Gallery = () => {
       </AnimatePresence>
 
       <AnimatePresence>
-  {showInquiryForm && (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-md flex items-center justify-center p-6"
-      onClick={() => setShowInquiryForm(false)}
-    >
-      <motion.form
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={handleInquirySubmit}
-        className="w-full max-w-lg bg-card border border-border rounded-2xl p-8 space-y-5"
-      >
-        <h3 className="font-display text-2xl text-foreground">
-          Inquire about <span className="text-accent">{selectedArt?.title}</span>
-        </h3>
-
-        <input
-          required
-          placeholder="Your Name"
-          className="w-full bg-background border border-border rounded-lg px-4 py-2"
-          value={inquiryData.customerName}
-          onChange={(e) =>
-            setInquiryData({ ...inquiryData, customerName: e.target.value })
-          }
-        />
-
-        <input
-          required
-          type="email"
-          placeholder="Email Address"
-          className="w-full bg-background border border-border rounded-lg px-4 py-2"
-          value={inquiryData.email}
-          onChange={(e) =>
-            setInquiryData({ ...inquiryData, email: e.target.value })
-          }
-        />
-
-        <input
-          placeholder="Phone (optional)"
-          className="w-full bg-background border border-border rounded-lg px-4 py-2"
-          value={inquiryData.phone}
-          onChange={(e) =>
-            setInquiryData({ ...inquiryData, phone: e.target.value })
-          }
-        />
-
-        <textarea
-          required
-          rows={4}
-          placeholder="Your message"
-          className="w-full bg-background border border-border rounded-lg px-4 py-2"
-          value={inquiryData.message}
-          onChange={(e) =>
-            setInquiryData({ ...inquiryData, message: e.target.value })
-          }
-        />
-
-        {successMsg && (
-          <p className="text-green-500 text-sm">{successMsg}</p>
-        )}
-
-        <div className="flex gap-3 pt-2">
-          <Button
-            type="submit"
-            variant="hero"
-            className="flex-1"
-            disabled={submitting}
-          >
-            {submitting ? "Sending..." : "Send Inquiry"}
-          </Button>
-
-          <Button
-            type="button"
-            variant="subtle"
+        {showInquiryForm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-md flex items-center justify-center p-6"
             onClick={() => setShowInquiryForm(false)}
           >
-            Cancel
-          </Button>
-        </div>
-      </motion.form>
-    </motion.div>
-  )}
-</AnimatePresence>
+            <motion.form
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              onSubmit={handleInquirySubmit}
+              className="w-full max-w-lg bg-card border border-border rounded-2xl p-8 space-y-5"
+            >
+              <h3 className="font-display text-2xl text-foreground">
+                Inquire about <span className="text-accent">{selectedArt?.title}</span>
+              </h3>
+
+              <input
+                required
+                placeholder="Your Name"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2"
+                value={inquiryData.customerName}
+                onChange={(e) =>
+                  setInquiryData({ ...inquiryData, customerName: e.target.value })
+                }
+              />
+
+              <input
+                required
+                type="email"
+                placeholder="Email Address"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2"
+                value={inquiryData.email}
+                onChange={(e) =>
+                  setInquiryData({ ...inquiryData, email: e.target.value })
+                }
+              />
+
+              <input
+                placeholder="Phone (optional)"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2"
+                value={inquiryData.phone}
+                onChange={(e) =>
+                  setInquiryData({ ...inquiryData, phone: e.target.value })
+                }
+              />
+
+              <textarea
+                required
+                rows={4}
+                placeholder="Your message"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2"
+                value={inquiryData.message}
+                onChange={(e) =>
+                  setInquiryData({ ...inquiryData, message: e.target.value })
+                }
+              />
+
+              {successMsg && (
+                <p className="text-green-500 text-sm">{successMsg}</p>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <Button
+                  type="submit"
+                  variant="hero"
+                  className="flex-1"
+                  disabled={submitting}
+                >
+                  {submitting ? "Sending..." : "Send Inquiry"}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="subtle"
+                  onClick={() => setShowInquiryForm(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </motion.form>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
 
       {/* Artist Feature */}

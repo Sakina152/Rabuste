@@ -7,23 +7,23 @@ import {
     updateArtStatus,
     submitInquiry,
     updateArt,
-    deleteArt
+    deleteArt,
+    purchaseArt // <--- 1. Import this
 } from '../controllers/artController.js';
-import {
-    getSalesOverview,
-    getWeeklySalesStats,
-    getInquiryStats
-} from '../controllers/artAnalyticsController.js';
 
 const router = express.Router();
 
-// --- Public routes ---
+// --- Public Routes ---
 // Anyone can view the gallery and send an inquiry
 router.get('/', getAllArt);
 router.post('/inquiry', submitInquiry);
 
-// --- Protected routes ---
-// Only logged-in Admins can add or change the status of art
+// --- Protected Routes (Any Logged-in User) ---
+// Buying art requires login, but you don't need to be an admin
+router.post('/purchase/:id', protect, purchaseArt); // <--- 2. Add this route
+
+// --- Admin Only Routes ---
+// Everything below this line requires Admin privileges
 router.use(protect);
 router.use(authorize('admin', 'super_admin'));
 

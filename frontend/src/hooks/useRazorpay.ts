@@ -4,7 +4,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 
-// Define TypeScript interface for Razorpay options
+// Define generic interface for payment data
+interface PaymentRequest {
+  type: 'MENU' | 'ART' | 'WORKSHOP';
+  items?: any[]; // For Menu
+  itemId?: string; // For Art/Workshop
+  price?: number; // For Art/Workshop display
+}
+
 interface RazorpayOptions {
   key: string;
   amount: string;
@@ -30,116 +37,96 @@ export const useRazorpay = () => {
   const navigate = useNavigate();
   const { cartItems, clearCart, cartTotal } = useCart();
 
-  const handlePayment = async () => {
+  // Updated function accepts optional params
+  const handlePayment = async (requestType: 'MENU' | 'ART' = 'MENU', artItem?: any) => {
     setIsProcessing(true);
 
     try {
-      // 1. Check Login Status
       const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
       const token = userInfo.token;
 
       if (!token) {
-        toast({ 
-          title: "Please Login", 
-          description: "You need to be logged in to place an order.", 
-          variant: "destructive" 
-        });
-        navigate("/admin"); // Or your user login route
+        toast({ title: "Please Login", description: "You need to be logged in to purchase.", variant: "destructive" });
+        navigate("/admin");
         return;
       }
 
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      // 2. Get Razorpay Key ID from Backend
+      // 1. Get Key ID
       const { data: keyData } = await axios.get("http://localhost:5000/api/payment/config", config);
 
-      // 3. Create Order on Backend (Calculates price securely on server)
+      // 2. Prepare Payload for Backend
+      let payload = {};
+      if (requestType === 'MENU') {
+        payload = { type: 'MENU', cartItems };
+      } else if (requestType === 'ART') {
+        payload = { type: 'ART', itemId: artItem._id };
+      }
+
+      // 3. Create Order on Backend
       const { data: orderData } = await axios.post(
         "http://localhost:5000/api/payment/create-order",
-        { cartItems }, 
+        payload,
         config
       );
 
-      // 4. Configure the Popup Options
+      // 4. Configure Razorpay
       const options: RazorpayOptions = {
         key: keyData.keyId,
         amount: orderData.amount,
         currency: orderData.currency,
-        name: "Rabuste Coffee",
-        description: "Fresh Coffee Order",
-        image: "https://cdn-icons-png.flaticon.com/512/924/924514.png", // Generic coffee icon
-        order_id: orderData.id, // This is the Order ID from Razorpay
+        name: "Rabuste Art Gallery",
+        description: requestType === 'ART' ? `Purchase: ${artItem.title}` : "Food Order",
+        image: requestType === 'ART' ? artItem.image : "https://cdn-icons-png.flaticon.com/512/924/924514.png",
+        order_id: orderData.id,
         
-        // 5. Handle Success
         handler: async (response: any) => {
           try {
-            // Verify signature on backend
-            await axios.post(
-              "http://localhost:5000/api/payment/verify",
-              {
+            // Verify Signature
+            await axios.post("http://localhost:5000/api/payment/verify", {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
-              },
-              config
-            );
-
-            // Save Order to Database
-            await axios.post("http://localhost:5000/api/orders", {
-               orderItems: cartItems.map(item => ({
-                 product: item.id, // Ensure this ID matches backend Product ID
-                 name: item.name,
-                 image: item.image,
-                 price: item.price,
-                 qty: item.quantity
-               })),
-               shippingAddress: {
-                 address: "SVNIT Campus", // Placeholder for now
-                 city: "Surat",
-                 postalCode: "395007",
-                 country: "India"
-               },
-               paymentMethod: "Razorpay",
-               itemsPrice: cartTotal,
-               taxPrice: cartTotal * 0.05,
-               totalPrice: cartTotal * 1.05,
-               isPaid: true,
-               paidAt: new Date(),
-               paymentResult: {
-                 id: response.razorpay_payment_id,
-                 status: "success",
-                 email_address: userInfo.email
-               }
             }, config);
 
-            // Clear Cart and Redirect
-            clearCart();
-            navigate("/order-success");
-            toast({ 
-              title: "Payment Successful!", 
-              description: "Your coffee is being prepared.",
-              className: "bg-green-600 text-white border-none" 
-            });
+            // SAVE SUCCESSFUL ORDER
+            if (requestType === 'MENU') {
+               // (Existing Menu Logic)
+               await axios.post("http://localhost:5000/api/orders", {
+                   orderItems: cartItems.map(item => ({ product: item.id, name: item.name, price: item.price, qty: item.quantity, image: item.image })),
+                   paymentMethod: "Razorpay",
+                   totalPrice: cartTotal,
+                   isPaid: true,
+                   paidAt: new Date(),
+                   paymentResult: { id: response.razorpay_payment_id, status: "success", email_address: userInfo.email }
+               }, config);
+               clearCart();
+               navigate("/order-success");
+
+            } else if (requestType === 'ART') {
+               // NEW ART LOGIC: Mark as Sold
+               await axios.post(`http://localhost:5000/api/art/purchase/${artItem._id}`, {}, config);
+               
+               toast({ title: "Art Purchased!", description: "Congratulations on your new artwork.", className: "bg-green-600 text-white" });
+               // Reload page to show "Sold" status
+               window.location.reload(); 
+            }
 
           } catch (error) {
-            toast({ 
-              title: "Verification Failed", 
-              description: "Payment succeeded but verification failed.", 
-              variant: "destructive" 
-            });
+            toast({ title: "Verification Failed", description: "Payment succeeded but verification failed.", variant: "destructive" });
           }
         },
         prefill: {
           name: userInfo.name,
           email: userInfo.email,
-          contact: "9999999999", // You can update User model to store phone numbers later
+          contact: "",
         },
         theme: {
-          color: "#D35400", // Your Terracotta Brand Color
+          color: "#D35400",
         },
       };
 
-      // 6. Open the Window
       const rzp1 = new (window as any).Razorpay(options);
       rzp1.open();
 

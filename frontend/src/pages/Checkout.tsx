@@ -67,9 +67,9 @@ const Checkout = () => {
                 <span>₹{(cartTotal * 1.05).toFixed(2)}</span>
               </div>
 
+
               <Button 
-                onClick={handlePayment} 
-                disabled={isProcessing}
+                onClick={() => handlePayment('MENU')}                 disabled={isProcessing}
                 className="w-full bg-terracotta hover:bg-terracotta/90 h-12 text-lg mt-6"
               >
                 {/* 👇 CHANGED HERE */}
