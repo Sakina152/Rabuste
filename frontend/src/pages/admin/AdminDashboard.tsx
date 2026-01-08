@@ -75,7 +75,12 @@ const recentActivity = [
 const quickActions = [
   { title: "View Menu", description: "Manage items", icon: Coffee, href: "/admin/dashboard/menu-management" },
   { title: "Workshops", description: "5 upcoming", icon: Calendar , href: "/admin/dashboard/workshops"},
-  { title: "Analytics", description: "View reports", icon: TrendingUp },
+  { 
+    title: "Gallery", 
+    description: "0 sold", // will become dynamic later
+    icon: TrendingUp,
+    href: "/admin/gallery"
+  },
 ];
 
 export default function AdminDashboard() {
@@ -288,6 +293,7 @@ export default function AdminDashboard() {
                   <CardContent>
                     <div className="space-y-3">
                       {quickActions.map((action, index) => (
+                        <Link to={action.href || "#"} key={action.title}>
                         <motion.button
                           key={action.title}
                           onClick={() => action.href && navigate(action.href)}
@@ -304,6 +310,7 @@ export default function AdminDashboard() {
                           </div>
                           <ChevronRight className="w-5 h-5 text-muted-foreground ml-auto group-hover:text-accent transition-colors" />
                         </motion.button>
+                        </Link>
                       ))}
                     </div>
                   </CardContent>

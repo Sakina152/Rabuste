@@ -8,6 +8,16 @@ const userSchema = new mongoose.Schema(
       required: [true, 'Please add a name'],
       trim: true,
     },
+    phoneNumber: {
+      type: String,
+      required: [true, 'Please add a phone number'],
+      trim: true,
+    },
+    address: {
+      type: String,
+      required: false,
+      trim: true,
+    },
     email: {
       type: String,
       required: [true, 'Please add an email'],
@@ -25,7 +35,6 @@ const userSchema = new mongoose.Schema(
       minlength: [6, 'Password must be at least 6 characters'],
       select: false, 
     },
-    
     role: {
       type: String,
       enum: ['admin', 'user'], 

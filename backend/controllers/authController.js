@@ -6,7 +6,7 @@ import User from '../models/User.js';
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, phoneNumber, address, email, password, role } = req.body;
 
   const userExists = await User.findOne({ email });
 
@@ -17,6 +17,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const user = await User.create({
     name,
+    phoneNumber,
+    address,
     email,
     password,
     role: role || 'user',
@@ -27,6 +29,8 @@ const registerUser = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      phoneNumber: user.phoneNumber,
+      address: user.address,
       role: user.role,
       token: generateToken(user._id),
     });
@@ -65,21 +69,23 @@ const loginUser = asyncHandler(async (req, res) => {
 // @route   GET /api/auth/me
 // @access  Private
 const getMe = asyncHandler(async (req, res) => {
-  // req.user comes from the "protect" middleware (we will build this next)
   const user = await User.findById(req.user._id);
 
-  if (user) {
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    });
-  } else {
+  if (!user) {
     res.status(404);
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
+
+  res.json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    phoneNumber: user.phoneNumber,
+    address: user.address,
+    role: user.role,
+  });
 });
+
 
 // @desc    Get all users
 // @route   GET /api/auth/users

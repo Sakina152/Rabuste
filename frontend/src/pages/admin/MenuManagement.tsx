@@ -57,12 +57,11 @@ export default function MenuManagement() {
     };
 
     const deleteItem = async (id: string) => {
-        console.log("🔥 DELETE MENU ITEM HIT:", id);
+
         const confirmDelete = window.confirm(
           "Are you sure you want to delete this item?"
         );
         if (!confirmDelete) return;
-      
         const token = getToken();
         if (!token) {
           alert("Not logged in. Please login again.");
@@ -89,7 +88,6 @@ export default function MenuManagement() {
             description: "Menu item removed successfully",
           });
       
-          // 🔥 THIS IS CRITICAL
           fetchMenuItems();
       
         } catch (err) {

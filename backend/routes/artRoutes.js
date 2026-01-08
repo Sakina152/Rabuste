@@ -6,6 +6,8 @@ import {
     addArt,
     updateArtStatus,
     submitInquiry,
+    updateArt,
+    deleteArt,
     purchaseArt // <--- 1. Import this
 } from '../controllers/artController.js';
 
@@ -26,6 +28,8 @@ router.use(protect);
 router.use(authorize('admin', 'super_admin'));
 
 router.post('/', addArt);
+router.put('/:id', updateArt);
 router.patch('/:id/status', updateArtStatus);
+router.delete('/:id', deleteArt);
 
 export default router;

@@ -57,14 +57,17 @@ const getMenuItems = asyncHandler(async (req, res) => {
   res.json(items);
 });
 
+const getAdminMenuItems = asyncHandler(async (req, res) => {
+  const items = await MenuItem.find()
+    .populate('category', 'name')
+    .sort('displayOrder');
+  res.json(items);
+});
+
 // @desc    Create a new menu item
 // @route   POST /api/menu/items
 // @access  Private/MenuAdmin
 const createMenuItem = asyncHandler(async (req, res) => {
-  console.log("🔥 CREATE MENU ITEM HIT");
-console.log("BODY:", req.body);
-console.log("FILE:", req.file);
-
   const {
     category,
     name,
@@ -165,4 +168,5 @@ export {
   createMenuItem,
   updateMenuItem,
   deleteMenuItem,
+  getAdminMenuItems,
 };
