@@ -334,7 +334,7 @@ function ArtModal({
   onClose: () => void;
   onSuccess: (art: Art) => void;
 }) {
-  const token = localStorage.getItem("token");
+  const token = getToken();
 
   const [form, setForm] = useState({
     title: art?.title || "",

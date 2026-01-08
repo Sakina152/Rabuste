@@ -164,6 +164,40 @@ const Profile = () => {
           </CardContent>
         </Card>
 
+        {/* Activity Overview */}
+<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+  {/* Items Purchased */}
+  <Card>
+    <CardHeader>
+      <CardTitle>Items Purchased</CardTitle>
+    </CardHeader>
+    <CardContent className="text-sm text-muted-foreground">
+      No items purchased yet.
+    </CardContent>
+  </Card>
+
+  {/* Art Purchased */}
+  <Card>
+    <CardHeader>
+      <CardTitle>Art Purchased</CardTitle>
+    </CardHeader>
+    <CardContent className="text-sm text-muted-foreground">
+      No artworks purchased yet.
+    </CardContent>
+  </Card>
+
+  {/* Workshops Enrolled */}
+  <Card>
+    <CardHeader>
+      <CardTitle>Workshops Enrolled</CardTitle>
+    </CardHeader>
+    <CardContent className="text-sm text-muted-foreground">
+      No workshops enrolled yet.
+    </CardContent>
+  </Card>
+</div>
+
+
       </div>
     </div>
   );
