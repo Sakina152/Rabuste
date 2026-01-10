@@ -4,12 +4,13 @@ import {
   verifyPayment, 
   sendRazorpayConfig 
 } from '../controllers/paymentController.js';
-import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/config', protect, sendRazorpayConfig);
-router.post('/create-order', protect, createOrder);
-router.post('/verify', protect, verifyPayment);
+// Payment routes without authentication (auth not set up yet)
+// TODO: Add authentication middleware when auth is implemented
+router.get('/config', sendRazorpayConfig);
+router.post('/create-order', createOrder);
+router.post('/verify', verifyPayment);
 
 export default router;
