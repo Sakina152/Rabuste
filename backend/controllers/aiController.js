@@ -1,10 +1,16 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
+import MenuItem from "../models/MenuItem.js";
+
 dotenv.config();
 
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+const model = genAI.getGenerativeModel({
+    model: "gemini-3-flash-preview",
+    generationConfig: { responseMimeType: "application/json" }
+});
+// const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
 // --- THE KNOWLEDGE BASE ---
 // We hardcode the menu here so the AI "knows" it perfectly.
@@ -14,46 +20,62 @@ WE SPECIALIZE IN ROBUSTA BEANS (High Caffeine, Bold Taste).
 
 MENU DATA:
 [ROBUSTA SPECIALTY (Cold)]
-- Robusta Iced Americano: ₹160
-- Robusta Iced Espresso: ₹130
-- Robusta Iced Espresso (Tonic/Ginger/Orange): ₹250
-- Robusta Iced Espresso (Red Bull): ₹290
+- Iced Americano: ₹160
+- Iced Espresso: ₹130
+- Iced Espresso (Tonic/Ginger/Orange): ₹250
+- Iced Espresso (Red Bull): ₹290
 - Cranberry Tonic: ₹270
-- Robusta Iced Latte: ₹220
-- Robusta Affogato: ₹250
-- Robusta Classic Frappe: ₹250
-- Robusta Hazelnut/Caramel Frappe: ₹260
-- Robusta Mocha/Biscoff Frappe: ₹270
-- Robusta Vietnamese: ₹240
-- Robusta Café Suda: ₹250
-- Robusta Robco Signature: ₹290
+- Iced Latte: ₹220
+- Affogato: ₹250
+- Classic Frappe: ₹250
+- Hazelnut Frappe: ₹260
+- Caramel Frappe: ₹260
+- Mocha Frappe: ₹270
+- Biscoff Frappe: ₹270
+- Vietnamese: ₹240
+- Café Suda: ₹250
+- Robco Signature: ₹290
 
 [ROBUSTA SPECIALTY (Hot)]
-- Robusta Hot Americano: ₹150
-- Robusta Hot Espresso: ₹130
-- Robusta Hot Latte: ₹190
-- Robusta Flat White/Cappuccino: ₹180
-- Robusta Mocha: ₹230
+- Hot Americano: ₹150
+- Hot Espresso: ₹130
+- Hot Latte: ₹190
+- Flat White: ₹180
+- Cappuccino: ₹180
+- Hot Mocha: ₹230
 
 [BLENDS (For lighter taste)]
-- Cold: Iced Americano (₹150), Iced Latte (₹210), Frappe (₹240)
-- Hot: Hot Americano (₹140), Hot Latte (₹180), Cappuccino (₹170)
+- Cold: Iced Americano Blend (₹150), Iced Latte Blend (₹210), Classic Frappe Blend (₹240)
+- Hot: Hot Americano Blend (₹140), Hot Latte Blend (₹180), Cappuccino Blend (₹170), Flat White Blend (₹170), Hot Espresso Blend (₹130), Mocha Blend (₹220)
 
 [MANUAL BREWS]
 - Classic Cold Brew: ₹220
-- V60 Pour Over: ₹220 (Hot) / ₹230 (Cold)
+- V60 Pour Over Hot: ₹220
+- Cranberry Cold Brew Tonic: ₹230
 
 [FOOD]
 - Fries: ₹150
+- Potato Wedges: ₹150
+- Veg Nuggets: ₹200
 - Pizza: ₹300
-- Bagels: Plain (₹100), Cream Cheese (₹150), Pesto (₹230)
-- Croissants: Butter (₹150), Nutella (₹200)
+- Bagel: ₹100
+- Cream Cheese Bagel: ₹150
+- Pesto Bagel: ₹230
+- Butter Croissant: ₹150
+- Nutella Croissant: ₹200
+
+[OTHERS]
+- Lemon Ice Tea
+- Ginger Fizz
 
 RULES FOR YOU:
 1. Identify the user's mood (e.g., Tired -> Needs high caffeine/Robusta. Stressed -> Needs sweet/Comfort).
 2. Recommend 1 Drink + 1 Alternative from the menu above.
 3. Keep it short, friendly, and café-style.
 4. If they ask for something we don't have (like Matcha), politely say we strictly serve Coffee & Tea.
+5. You MUST return a STRICT JSON object (no markdown, no backticks) with exactly two fields:
+   - "reply": Your friendly response to the customer.
+   - "recommended_drink_name": The EXACT name of the main recommended drink as it appears in the menu data (e.g., "Iced Americano"). If no specific drink is recommended, return null.
 `;
 
 export const getMoodRecommendation = async (req, res) => {
@@ -79,10 +101,37 @@ export const getMoodRecommendation = async (req, res) => {
         const response = await result.response;
         const text = response.text();
 
-        res.json({ reply: text });
+        // 1. Parse JSON Response
+        let parsedData;
+        try {
+            parsedData = JSON.parse(text);
+        } catch (e) {
+            console.error("JSON Parse Error:", e);
+            // Fallback if AI fails to give JSON
+            return res.json({
+                reply: text, // sending raw text as reply if parsing fails
+                product: null
+            });
+        }
+
+        // 2. Fetch Product Details from DB if recommendation exists
+        let productData = null;
+        if (parsedData.recommended_drink_name) {
+            const drinkName = parsedData.recommended_drink_name.trim();
+            console.log("AI Recommending:", drinkName);
+            productData = await MenuItem.findOne({
+                name: { $regex: new RegExp(`^${drinkName}$`, 'i') }
+            }).select('name price image category');
+        }
+
+        // 3. Send Response
+        res.json({
+            reply: parsedData.reply,
+            product: productData
+        });
 
     } catch (error) {
         console.error("AI Error:", error);
-        res.status(500).json({ reply: "My coffee machine is acting up! Can you tell me that again?" });
+        res.status(500).json({ reply: "My coffee machine is acting up! Can you tell me that again?", product: null });
     }
 };

@@ -1,13 +1,22 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Coffee, Loader2 } from 'lucide-react';
+import { MessageCircle, X, Send, Coffee, Loader2, ShoppingBag } from 'lucide-react';
+import { useCart } from '../context/CartContext';
+import { toast } from 'sonner';
 
 interface Message {
     role: 'user' | 'bot';
     content: string;
+    product?: {
+        _id: string;
+        name: string;
+        price: number;
+        image: string;
+    } | null;
 }
 
 export default function AiBaristaBot() {
     const [isOpen, setIsOpen] = useState(false);
+    const { addToCart } = useCart();
     const [messages, setMessages] = useState<Message[]>([
         { role: 'bot', content: "Hey there! 👋 I'm your Rabuste Barista. How are you feeling today? (e.g., Sleepy, Stressed, Happy)" }
     ]);
@@ -46,7 +55,11 @@ export default function AiBaristaBot() {
             const data = await response.json();
 
             // Add Bot Response
-            setMessages(prev => [...prev, { role: 'bot', content: data.reply }]);
+            setMessages(prev => [...prev, {
+                role: 'bot',
+                content: data.reply,
+                product: data.product
+            }]);
         } catch (error) {
             setMessages(prev => [...prev, { role: 'bot', content: "Oops! I spilled the coffee. Try again?" }]);
         } finally {
@@ -85,11 +98,51 @@ export default function AiBaristaBot() {
                             <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 <div
                                     className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed ${msg.role === 'user'
-                                            ? 'bg-yellow-600 text-white rounded-br-none'
-                                            : 'bg-stone-800 text-stone-200 border border-stone-700 rounded-bl-none'
+                                        ? 'bg-yellow-600 text-white rounded-br-none'
+                                        : 'bg-stone-800 text-stone-200 border border-stone-700 rounded-bl-none'
                                         }`}
                                 >
                                     {msg.content}
+
+                                    {/* Product Recommendation Card */}
+                                    {msg.product && (
+                                        <div className="mt-4 bg-stone-900 border border-stone-700 rounded-xl p-3 overflow-hidden">
+                                            <div className="flex items-center gap-3">
+                                                {/* Product Image */}
+                                                <div className="w-12 h-12 bg-stone-800 rounded-lg overflow-hidden flex-shrink-0">
+                                                    {msg.product.image ? (
+                                                        <img src={msg.product.image} alt={msg.product.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <Coffee className="w-full h-full p-2 text-stone-600" />
+                                                    )}
+                                                </div>
+
+                                                {/* Details */}
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="text-stone-200 font-medium text-sm truncate">{msg.product.name}</h4>
+                                                    <p className="text-yellow-500 font-bold text-sm">₹{msg.product.price}</p>
+                                                </div>
+                                            </div>
+
+                                            {/* Add to Cart Button */}
+                                            <button
+                                                onClick={() => {
+                                                    if (msg.product) {
+                                                        addToCart({
+                                                            id: msg.product._id,
+                                                            name: msg.product.name,
+                                                            price: msg.product.price,
+                                                            image: msg.product.image
+                                                        });
+                                                        toast.success(`Added ${msg.product.name} to cart!`);
+                                                    }
+                                                }}
+                                                className="w-full mt-3 bg-yellow-600 hover:bg-yellow-500 text-white text-xs font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
+                                            >
+                                                <ShoppingBag size={14} /> Add to Cart
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}
