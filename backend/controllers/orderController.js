@@ -47,7 +47,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     paidAt: paidAt ? new Date(paidAt) : (isPaid ? new Date() : undefined),
     customerEmail,
     customerName,
-    status: isPaid ? 'completed' : 'pending'
+    status: isPaid ? 'in progress' : 'pending'
   });
 
   // If it's an art order and payment is successful, mark art as sold
@@ -123,7 +123,7 @@ export const getOrderById = asyncHandler(async (req, res) => {
 export const updateOrderStatus = asyncHandler(async (req, res) => {
   const { status } = req.body;
   
-  const validStatuses = ['pending', 'processing', 'completed', 'cancelled'];
+  const validStatuses = ['pending', 'in progress', 'delivered', 'cancelled'];
   if (!validStatuses.includes(status)) {
     res.status(400);
     throw new Error('Invalid status');
@@ -140,4 +140,24 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   await order.save();
   
   res.json(order);
+});
+
+// @desc    Get orders by user email
+// @route   GET /api/orders/user/:email
+// @access  Public (add auth later)
+export const getOrdersByUser = asyncHandler(async (req, res) => {
+  const { email } = req.params;
+  
+  if (!email) {
+    res.status(400);
+    throw new Error('Email is required');
+  }
+  
+  const orders = await Order.find({ customerEmail: email })
+    .populate('artItem', 'title artist price imageUrl')
+    .populate('orderItems.product', 'name price image')
+    .sort({ createdAt: -1 })
+    .limit(50);
+  
+  res.json(orders);
 });
