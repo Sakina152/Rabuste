@@ -11,6 +11,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import axios from "axios";
+import { getToken } from "@/utils/getToken";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProfileUser {
   name: string;
@@ -20,37 +22,108 @@ interface ProfileUser {
 }
 
 const Profile = () => {
+  const { toast } = useToast();
+
   const [user, setUser] = useState<ProfileUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  /* ================= FETCH PROFILE ================= */
   useEffect(() => {
     const fetchProfile = async () => {
+      const token = getToken();
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        const userInfo = localStorage.getItem("userInfo");
-        if (!userInfo) return;
-
-        const parsed = JSON.parse(userInfo);
-
         const res = await axios.get(
           "http://localhost:5000/api/auth/me",
           {
             headers: {
-              Authorization: `Bearer ${parsed.token}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
 
         setUser(res.data);
       } catch (err) {
-        console.error("Failed to load profile", err);
+        toast({
+          title: "Error",
+          description: "Failed to load profile",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfile();
-  }, []);
+  }, [toast]);
 
+  /* ================= CHANGE PASSWORD ================= */
+  const handleChangePassword = async () => {
+    const token = getToken();
+    if (!token) {
+      toast({
+        title: "Not logged in",
+        description: "Please log in again",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!currentPassword || !newPassword) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill all password fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      await axios.put(
+        "http://localhost:5000/api/auth/change-password",
+        {
+          currentPassword,
+          newPassword,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      toast({
+        title: "Password Updated",
+        description: "Your password has been changed successfully",
+        className: "bg-[#5C3A21] text-white border-none",
+      });
+
+      setCurrentPassword("");
+      setNewPassword("");
+    } catch (err: any) {
+      toast({
+        title: "Update failed",
+        description:
+          err.response?.data?.message ||
+          "Failed to update password",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /* ================= STATES ================= */
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -67,6 +140,7 @@ const Profile = () => {
     );
   }
 
+  /* ================= UI ================= */
   return (
     <div className="min-h-screen bg-background pt-28 pb-16">
       <div className="container-custom px-6 max-w-5xl mx-auto space-y-10">
@@ -99,45 +173,14 @@ const Profile = () => {
           </CardHeader>
 
           <CardContent className="grid md:grid-cols-2 gap-6">
-            {/* Name */}
-            <div className="space-y-2">
-              <Label>Full Name</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                <Input className="pl-10" value={user.name} disabled />
-              </div>
-            </div>
-
-            {/* Email */}
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                <Input className="pl-10" value={user.email} disabled />
-              </div>
-            </div>
-
-            {/* Phone */}
-            <div className="space-y-2">
-              <Label>Phone Number</Label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                <Input className="pl-10" value={user.phoneNumber} disabled />
-              </div>
-            </div>
-
-            {/* Address */}
-            <div className="space-y-2">
-              <Label>Address</Label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                <Input
-                  className="pl-10"
-                  value={user.address || "Not provided"}
-                  disabled
-                />
-              </div>
-            </div>
+            <InfoField label="Full Name" icon={<User />} value={user.name} />
+            <InfoField label="Email" icon={<Mail />} value={user.email} />
+            <InfoField label="Phone Number" icon={<Phone />} value={user.phoneNumber} />
+            <InfoField
+              label="Address"
+              icon={<MapPin />}
+              value={user.address || "Not provided"}
+            />
           </CardContent>
         </Card>
 
@@ -146,57 +189,35 @@ const Profile = () => {
           <CardHeader>
             <CardTitle>Security</CardTitle>
           </CardHeader>
+
           <CardContent className="space-y-4 max-w-md">
-            <div className="space-y-2">
-              <Label>Current Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                <Input type="password" className="pl-10" />
-              </div>
-            </div>
+            <PasswordField
+              label="Current Password"
+              value={currentPassword}
+              onChange={setCurrentPassword}
+            />
+            <PasswordField
+              label="New Password"
+              value={newPassword}
+              onChange={setNewPassword}
+            />
 
-            <div className="space-y-2">
-              <Label>New Password</Label>
-              <Input type="password" />
-            </div>
-
-            <Button variant="outline">Change Password</Button>
+            <Button
+              variant="outline"
+              onClick={handleChangePassword}
+              disabled={saving}
+            >
+              {saving ? "Updating..." : "Change Password"}
+            </Button>
           </CardContent>
         </Card>
 
         {/* Activity Overview */}
-<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-  {/* Items Purchased */}
-  <Card>
-    <CardHeader>
-      <CardTitle>Items Purchased</CardTitle>
-    </CardHeader>
-    <CardContent className="text-sm text-muted-foreground">
-      No items purchased yet.
-    </CardContent>
-  </Card>
-
-  {/* Art Purchased */}
-  <Card>
-    <CardHeader>
-      <CardTitle>Art Purchased</CardTitle>
-    </CardHeader>
-    <CardContent className="text-sm text-muted-foreground">
-      No artworks purchased yet.
-    </CardContent>
-  </Card>
-
-  {/* Workshops Enrolled */}
-  <Card>
-    <CardHeader>
-      <CardTitle>Workshops Enrolled</CardTitle>
-    </CardHeader>
-    <CardContent className="text-sm text-muted-foreground">
-      No workshops enrolled yet.
-    </CardContent>
-  </Card>
-</div>
-
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <ActivityCard title="Items Purchased" />
+          <ActivityCard title="Art Purchased" />
+          <ActivityCard title="Workshops Enrolled" />
+        </div>
 
       </div>
     </div>
@@ -204,3 +225,59 @@ const Profile = () => {
 };
 
 export default Profile;
+
+/* ================= HELPERS ================= */
+
+const InfoField = ({
+  label,
+  icon,
+  value,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  value: string;
+}) => (
+  <div className="space-y-2">
+    <Label>{label}</Label>
+    <div className="relative">
+      <span className="absolute left-3 top-3 w-4 h-4 text-muted-foreground">
+        {icon}
+      </span>
+      <Input className="pl-10" value={value} disabled />
+    </div>
+  </div>
+);
+
+const PasswordField = ({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) => (
+  <div className="space-y-2">
+    <Label>{label}</Label>
+    <div className="relative">
+      <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+      <Input
+        type="password"
+        className="pl-10"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </div>
+  </div>
+);
+
+const ActivityCard = ({ title }: { title: string }) => (
+  <Card>
+    <CardHeader>
+      <CardTitle>{title}</CardTitle>
+    </CardHeader>
+    <CardContent className="text-sm text-muted-foreground">
+      No data yet.
+    </CardContent>
+  </Card>
+);

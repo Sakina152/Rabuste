@@ -8,6 +8,7 @@ import {
   getMe,
   getAllUsers,
   updateUserRole,
+  changePassword,
 } from '../controllers/authController.js';
 import { registerValidation, loginValidation, validate } from '../utils/validators.js';
 
@@ -20,6 +21,7 @@ router.post('/login', loginValidation, validate, loginUser);
 // Protected routes
 router.use(protect);
 router.get('/me', getMe);
+router.put("/change-password", protect, changePassword);
 
 // Admin routes
 router.use(authorize('super_admin'));
