@@ -42,19 +42,44 @@ export const useRazorpay = () => {
     setIsProcessing(true);
 
     try {
-      const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
-      const token = userInfo.token;
-
-      if (!token) {
-        toast({ title: "Please Login", description: "You need to be logged in to purchase.", variant: "destructive" });
-        navigate("/admin");
+      // Check if Razorpay script is loaded
+      if (typeof window === 'undefined' || !(window as any).Razorpay) {
+        toast({ 
+          title: "Payment Error", 
+          description: "Payment gateway is not loaded. Please refresh the page and try again.", 
+          variant: "destructive" 
+        });
+        setIsProcessing(false);
         return;
       }
 
-      const config = { headers: { Authorization: `Bearer ${token}` } };
+      // Get user info (optional - auth not set up yet)
+      const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+      const token = userInfo.token;
 
-      // 1. Get Key ID
-      const { data: keyData } = await axios.get("http://localhost:5000/api/payment/config", config);
+      // Validate inputs
+      if (requestType === 'MENU' && (!cartItems || cartItems.length === 0)) {
+        toast({ title: "Cart Empty", description: "Your cart is empty. Please add items before checkout.", variant: "destructive" });
+        setIsProcessing(false);
+        return;
+      }
+
+      if (requestType === 'ART' && (!artItem || !artItem._id)) {
+        toast({ title: "Invalid Item", description: "Art item information is missing. Please try again.", variant: "destructive" });
+        setIsProcessing(false);
+        return;
+      }
+
+      // Create config with optional auth header (not required since auth not set up)
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+      // 1. Get Key ID (no auth required)
+      const { data: keyData } = await axios.get(`${API_BASE}/api/payment/config`, config);
+
+      if (!keyData || !keyData.keyId) {
+        throw new Error('Payment gateway configuration error. Please contact support.');
+      }
 
       // 2. Prepare Payload for Backend
       let payload = {};
@@ -64,80 +89,162 @@ export const useRazorpay = () => {
         payload = { type: 'ART', itemId: artItem._id };
       }
 
-      // 3. Create Order on Backend
+      // 3. Create Order on Backend (no auth required)
       const { data: orderData } = await axios.post(
-        "http://localhost:5000/api/payment/create-order",
+        `${API_BASE}/api/payment/create-order`,
         payload,
         config
       );
 
+      if (!orderData || !orderData.id || !orderData.amount) {
+        throw new Error('Failed to create payment order. Invalid response from server.');
+      }
+
       // 4. Configure Razorpay
       const options: RazorpayOptions = {
         key: keyData.keyId,
-        amount: orderData.amount,
-        currency: orderData.currency,
+        amount: String(orderData.amount), // Razorpay requires amount as string
+        currency: orderData.currency || 'INR',
         name: "Rabuste Art Gallery",
-        description: requestType === 'ART' ? `Purchase: ${artItem.title}` : "Food Order",
-        image: requestType === 'ART' ? artItem.image : "https://cdn-icons-png.flaticon.com/512/924/924514.png",
+        description: requestType === 'ART' ? `Purchase: ${artItem.title || 'Artwork'}` : "Food Order",
+        image: requestType === 'ART' ? (artItem.imageUrl || artItem.image || "https://cdn-icons-png.flaticon.com/512/924/924514.png") : "https://cdn-icons-png.flaticon.com/512/924/924514.png",
         order_id: orderData.id,
         
         handler: async (response: any) => {
           try {
-            // Verify Signature
-            await axios.post("http://localhost:5000/api/payment/verify", {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-            }, config);
+            const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+            
+            // Log full payment response for debugging
+            console.log('Razorpay Payment Response (Full):', response);
+            
+            // Extract fields - Razorpay response can have different field name formats
+            const orderId = response.razorpay_order_id || response.order_id;
+            const paymentId = response.razorpay_payment_id || response.payment_id;
+            const signature = response.razorpay_signature || response.signature;
+            
+            // Validate response has all required fields
+            if (!orderId || !paymentId || !signature) {
+              console.error('Missing fields in Razorpay response:', {
+                has_order_id: !!orderId,
+                has_payment_id: !!paymentId,
+                has_signature: !!signature,
+                response_keys: Object.keys(response),
+                full_response: response
+              });
+              throw new Error('Incomplete payment response from Razorpay. Missing required fields.');
+            }
+            
+            // Verify Signature with backend (no auth required)
+            console.log('Sending verification request:', {
+              order_id: orderId,
+              payment_id: paymentId,
+              signature_length: signature.length
+            });
+            
+            const verifyResponse = await axios.post(
+              `${API_BASE}/api/payment/verify`, 
+              {
+                razorpay_order_id: orderId,
+                razorpay_payment_id: paymentId,
+                razorpay_signature: signature,
+              }, 
+              config
+            );
+            
+            console.log('Verification response:', verifyResponse.data);
+            
+            if (verifyResponse.data.status !== 'success') {
+              throw new Error(verifyResponse.data.message || 'Payment verification failed');
+            }
 
-            // SAVE SUCCESSFUL ORDER
+            // Payment verified successfully!
+            toast({ 
+              title: "Payment Successful!", 
+              description: "Your payment has been verified and processed.", 
+              className: "bg-green-600 text-white" 
+            });
+
+            // SAVE SUCCESSFUL ORDER (optional auth - will add later)
             if (requestType === 'MENU') {
-               // (Existing Menu Logic)
-               await axios.post("http://localhost:5000/api/orders", {
-                   orderItems: cartItems.map(item => ({ product: item.id, name: item.name, price: item.price, qty: item.quantity, image: item.image })),
-                   paymentMethod: "Razorpay",
-                   totalPrice: cartTotal,
-                   isPaid: true,
-                   paidAt: new Date(),
-                   paymentResult: { id: response.razorpay_payment_id, status: "success", email_address: userInfo.email }
-               }, config);
+               // Try to save order if orders endpoint exists (may require auth later)
+               try {
+                 await axios.post(`${API_BASE}/api/orders`, {
+                     orderItems: cartItems.map(item => ({ product: item.id, name: item.name, price: item.price, qty: item.quantity, image: item.image })),
+                     paymentMethod: "Razorpay",
+                     totalPrice: cartTotal,
+                     isPaid: true,
+                     paidAt: new Date(),
+                     paymentResult: { id: paymentId, status: "success", email_address: userInfo.email || "" }
+                 }, config);
+               } catch (orderError) {
+                 console.warn('Could not save order (endpoint may require auth):', orderError);
+                 // Continue anyway - payment is verified
+               }
                clearCart();
                navigate("/order-success");
 
             } else if (requestType === 'ART') {
-               // NEW ART LOGIC: Mark as Sold
-               await axios.post(`http://localhost:5000/api/art/purchase/${artItem._id}`, {}, config);
-               
-               toast({ title: "Art Purchased!", description: "Congratulations on your new artwork.", className: "bg-green-600 text-white" });
-               // Reload page to show "Sold" status
-               window.location.reload(); 
+               // Try to mark art as sold (may require auth later)
+               try {
+                 await axios.post(`${API_BASE}/api/art/purchase/${artItem._id}`, {}, config);
+                 toast({ title: "Art Purchased!", description: "Congratulations on your new artwork.", className: "bg-green-600 text-white" });
+                 // Reload page to show "Sold" status
+                 setTimeout(() => window.location.reload(), 2000);
+               } catch (purchaseError) {
+                 console.warn('Could not update art status (endpoint may require auth):', purchaseError);
+                 toast({ 
+                   title: "Payment Successful!", 
+                   description: "Payment verified. Please contact support to complete the purchase.", 
+                   className: "bg-green-600 text-white" 
+                 });
+               }
             }
 
-          } catch (error) {
-            toast({ title: "Verification Failed", description: "Payment succeeded but verification failed.", variant: "destructive" });
+          } catch (error: any) {
+            console.error('Payment verification error:', error);
+            toast({ 
+              title: "Verification Failed", 
+              description: error.response?.data?.message || "Payment succeeded but verification failed. Please contact support.", 
+              variant: "destructive" 
+            });
           }
         },
         prefill: {
-          name: userInfo.name,
-          email: userInfo.email,
-          contact: "",
+          name: userInfo.name || "",
+          email: userInfo.email || "",
+          contact: userInfo.phone || "",
         },
         theme: {
           color: "#D35400",
         },
+        modal: {
+          ondismiss: () => {
+            setIsProcessing(false);
+          }
+        }
       };
 
       const rzp1 = new (window as any).Razorpay(options);
+      rzp1.on('payment.failed', (response: any) => {
+        console.error('Payment failed:', response);
+        toast({ 
+          title: "Payment Failed", 
+          description: response.error?.description || "Your payment could not be processed. Please try again.", 
+          variant: "destructive" 
+        });
+        setIsProcessing(false);
+      });
+      
       rzp1.open();
 
     } catch (error: any) {
-      console.error(error);
+      console.error('Payment initiation error:', error);
+      const errorMessage = error.response?.data?.message || error.message || "Could not initiate payment. Please try again.";
       toast({ 
         title: "Payment Error", 
-        description: error.response?.data?.message || "Could not initiate payment", 
+        description: errorMessage, 
         variant: "destructive" 
       });
-    } finally {
       setIsProcessing(false);
     }
   };
