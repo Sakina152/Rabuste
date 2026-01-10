@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   LayoutDashboard, 
@@ -20,6 +20,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
 
 // Import logo
 import logo from "@/assets/rabuste-logo.png";
@@ -30,63 +31,139 @@ const navItems = [
   { title: "Users", icon: Users, href: "/admin/users" },
 ];
 
-const statsData = [
-  { 
-    title: "Total Revenue", 
-    value: "₹12,450", 
-    icon: DollarSign, 
-    trend: "+12.5%", 
-    trendUp: true,
-    description: "vs last month"
-  },
-  { 
-    title: "Active Orders", 
-    value: "24", 
-    icon: ShoppingBag, 
-    trend: "+8", 
-    trendUp: true,
-    description: "this week"
-  },
-  { 
-    title: "Pending Franchises", 
-    value: "3", 
-    icon: Building2, 
-    trend: "-1", 
-    trendUp: false,
-    description: "awaiting review"
-  },
-  { 
-    title: "Workshop Signups", 
-    value: "47", 
-    icon: Calendar, 
-    trend: "+23%", 
-    trendUp: true,
-    description: "this month"
-  },
-];
+// Stats will be loaded from API
+const getStatsData = (dashboardStats: any) => {
+  if (!dashboardStats) {
+    return [
+      { title: "Total Revenue", value: "₹0", icon: DollarSign, trend: "0%", trendUp: true, description: "Loading..." },
+      { title: "Active Orders", value: "0", icon: ShoppingBag, trend: "0", trendUp: true, description: "Loading..." },
+      { title: "Pending Franchises", value: "0", icon: Building2, trend: "0", trendUp: false, description: "Loading..." },
+      { title: "Workshop Signups", value: "0", icon: Calendar, trend: "0%", trendUp: true, description: "Loading..." },
+    ];
+  }
 
-const recentActivity = [
-  { action: "New franchise inquiry", time: "2 min ago", type: "franchise" },
-  { action: "Workshop booking confirmed", time: "15 min ago", type: "workshop" },
-  { action: "Menu item updated", time: "1 hour ago", type: "menu" },
-  { action: "New user registered", time: "3 hours ago", type: "user" },
-];
+  const revenueTrend = dashboardStats.revenueTrend || 0;
+  const ordersTrend = dashboardStats.ordersTrend || 0;
 
-const quickActions = [
-  { title: "View Menu", description: "Manage items", icon: Coffee, href: "/admin/dashboard/menu-management" },
-  { title: "Workshops", description: "5 upcoming", icon: Calendar , href: "/admin/dashboard/workshops"},
-  { 
-    title: "Gallery", 
-    description: "0 sold", // will become dynamic later
-    icon: TrendingUp,
-    href: "/admin/gallery"
-  },
-];
+  return [
+    { 
+      title: "Total Revenue", 
+      value: `₹${(dashboardStats.totalRevenue || 0).toLocaleString('en-IN')}`, 
+      icon: DollarSign, 
+      trend: `${revenueTrend >= 0 ? '+' : ''}${revenueTrend}%`, 
+      trendUp: revenueTrend >= 0,
+      description: "vs last week"
+    },
+    { 
+      title: "Active Orders", 
+      value: `${dashboardStats.paidOrders || 0}`, 
+      icon: ShoppingBag, 
+      trend: `${ordersTrend >= 0 ? '+' : ''}${ordersTrend}%`, 
+      trendUp: ordersTrend >= 0,
+      description: "vs last week"
+    },
+    { 
+      title: "Pending Franchises", 
+      value: `${dashboardStats.pendingFranchises || 0}`, 
+      icon: Building2, 
+      trend: "-", 
+      trendUp: false,
+      description: "awaiting review"
+    },
+    { 
+      title: "Workshop Signups", 
+      value: `${dashboardStats.confirmedWorkshops || 0}`, 
+      icon: Calendar, 
+      trend: `${dashboardStats.totalWorkshops || 0}`, 
+      trendUp: true,
+      description: "total bookings"
+    },
+  ];
+};
+
+// Recent activity will be fetched from API
+const getRecentActivity = (orders: any[]) => {
+  if (!orders || orders.length === 0) {
+    return [{ action: "No recent activity", time: "", type: "info" }];
+  }
+  
+  return orders.slice(0, 5).map(order => {
+    const timeAgo = new Date(order.createdAt).toLocaleString('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
+      day: 'numeric',
+      month: 'short'
+    });
+    
+    if (order.orderType === 'ART') {
+      return {
+        action: `Art purchase: ₹${order.totalPrice}`,
+        time: timeAgo,
+        type: "art"
+      };
+    } else {
+      return {
+        action: `Menu order: ₹${order.totalPrice} (${order.orderItems?.length || 0} items)`,
+        time: timeAgo,
+        type: "menu"
+      };
+    }
+  });
+};
+
+const getQuickActions = (dashboardStats: any) => {
+  return [
+    { title: "View Menu", description: "Manage items", icon: Coffee, href: "/admin/dashboard/menu-management" },
+    { title: "Workshops", description: "5 upcoming", icon: Calendar , href: "/admin/dashboard/workshops"},
+    { 
+      title: "Gallery", 
+      description: dashboardStats ? `${dashboardStats.totalArtSold || 0} sold` : "Loading...",
+      icon: TrendingUp,
+      href: "/admin/gallery"
+    },
+  ];
+};
 
 export default function AdminDashboard() {
   const [activeNav, setActiveNav] = useState("Dashboard");
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch dashboard stats
+        const statsResponse = await axios.get(`${API_BASE}/api/admin/stats/dashboard`);
+        setDashboardStats(statsResponse.data);
+        
+        // Fetch recent orders
+        const ordersResponse = await axios.get(`${API_BASE}/api/orders?status=completed`);
+        setRecentOrders(ordersResponse.data || []);
+      } catch (error: any) {
+        console.error('Error fetching dashboard data:', error);
+        toast({
+          title: "Error",
+          description: error.response?.data?.error || "Failed to load dashboard data",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+    // Refresh stats every 30 seconds
+    const interval = setInterval(fetchDashboardData, 30000);
+    
+    return () => clearInterval(interval);
+  }, [API_BASE, toast]);
 
   const handleSignOut = () => {
     toast({
@@ -210,7 +287,7 @@ export default function AdminDashboard() {
           >
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {statsData.map((stat, index) => (
+              {getStatsData(dashboardStats).map((stat, index) => (
                 <motion.div key={stat.title} variants={itemVariants}>
                   <Card className="bg-card/80 backdrop-blur-sm border-border hover:border-accent/30 transition-all duration-300 group hover:shadow-glow">
                     <CardContent className="p-6">
@@ -261,7 +338,9 @@ export default function AdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {recentActivity.map((activity, index) => (
+                      {loading ? (
+                        <div className="text-center py-8 text-muted-foreground">Loading recent activity...</div>
+                      ) : getRecentActivity(recentOrders).map((activity, index) => (
                         <motion.div 
                           key={index}
                           initial={{ opacity: 0, x: -20 }}
@@ -270,7 +349,11 @@ export default function AdminDashboard() {
                           className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors"
                         >
                           <div className="flex items-center gap-4">
-                            <div className="w-2 h-2 rounded-full bg-accent" />
+                            <div className={`w-2 h-2 rounded-full ${
+                              activity.type === 'art' ? 'bg-green-500' : 
+                              activity.type === 'menu' ? 'bg-blue-500' : 
+                              'bg-accent'
+                            }`} />
                             <span className="text-foreground font-medium">{activity.action}</span>
                           </div>
                           <span className="text-sm text-muted-foreground">{activity.time}</span>
@@ -292,7 +375,7 @@ export default function AdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {quickActions.map((action, index) => (
+                      {getQuickActions(dashboardStats).map((action, index) => (
                         <Link to={action.href || "#"} key={action.title}>
                         <motion.button
                           key={action.title}

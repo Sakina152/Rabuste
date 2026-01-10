@@ -16,7 +16,8 @@ import menuRoutes from './routes/menuRoutes.js';
 import workshopRoutes from './routes/workshopRoutes.js';
 import artRoutes from './routes/artRoutes.js';
 import franchiseRoutes from './routes/franchiseRoutes.js';
-import paymentRoutes from './routes/paymentRoutes.js'; // <--- 1. NEW IMPORT
+import paymentRoutes from './routes/paymentRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
 import adminStatsRoutes from './routes/adminStatsRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 
@@ -65,6 +66,7 @@ app.use('/api/workshops', workshopRoutes);
 app.use('/api/art', artRoutes);
 app.use('/api/franchise', franchiseRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/orders', orderRoutes);
 app.use('/api/admin/stats', adminStatsRoutes);
 // Basic route
 app.get('/', (req, res) => {

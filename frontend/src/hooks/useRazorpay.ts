@@ -164,34 +164,75 @@ export const useRazorpay = () => {
               className: "bg-green-600 text-white" 
             });
 
-            // SAVE SUCCESSFUL ORDER (optional auth - will add later)
+            // SAVE SUCCESSFUL ORDER
             if (requestType === 'MENU') {
-               // Try to save order if orders endpoint exists (may require auth later)
+               // Save menu order to database
                try {
                  await axios.post(`${API_BASE}/api/orders`, {
-                     orderItems: cartItems.map(item => ({ product: item.id, name: item.name, price: item.price, qty: item.quantity, image: item.image })),
-                     paymentMethod: "Razorpay",
+                     orderType: 'MENU',
+                     orderItems: cartItems.map(item => ({ 
+                       product: item.id, 
+                       name: item.name, 
+                       price: item.price, 
+                       qty: item.quantity, 
+                       image: item.image 
+                     })),
                      totalPrice: cartTotal,
+                     paymentMethod: "Razorpay",
                      isPaid: true,
                      paidAt: new Date(),
-                     paymentResult: { id: paymentId, status: "success", email_address: userInfo.email || "" }
+                     paymentResult: { 
+                       id: paymentId, 
+                       status: "success", 
+                       email_address: userInfo.email || "",
+                       razorpay_order_id: orderId,
+                       razorpay_payment_id: paymentId
+                     },
+                     customerEmail: userInfo.email || "",
+                     customerName: userInfo.name || ""
                  }, config);
-               } catch (orderError) {
-                 console.warn('Could not save order (endpoint may require auth):', orderError);
-                 // Continue anyway - payment is verified
+                 console.log('Order saved successfully');
+               } catch (orderError: any) {
+                 console.error('Error saving order:', orderError);
+                 // Still show success since payment was verified
                }
                clearCart();
                navigate("/order-success");
 
             } else if (requestType === 'ART') {
-               // Try to mark art as sold (may require auth later)
+               // Save art purchase order and mark art as sold
                try {
-                 await axios.post(`${API_BASE}/api/art/purchase/${artItem._id}`, {}, config);
+                 // First save the order
+                 await axios.post(`${API_BASE}/api/orders`, {
+                     orderType: 'ART',
+                     artItem: artItem._id,
+                     totalPrice: artItem.price,
+                     paymentMethod: "Razorpay",
+                     isPaid: true,
+                     paidAt: new Date(),
+                     paymentResult: { 
+                       id: paymentId, 
+                       status: "success", 
+                       email_address: userInfo.email || "",
+                       razorpay_order_id: orderId,
+                       razorpay_payment_id: paymentId
+                     },
+                     customerEmail: userInfo.email || "",
+                     customerName: userInfo.name || ""
+                 }, config);
+                 
+                 // Also try to mark art as sold directly (if endpoint exists)
+                 try {
+                   await axios.post(`${API_BASE}/api/art/purchase/${artItem._id}`, {}, config);
+                 } catch (purchaseError) {
+                   console.warn('Art purchase endpoint not available, order saved anyway');
+                 }
+                 
                  toast({ title: "Art Purchased!", description: "Congratulations on your new artwork.", className: "bg-green-600 text-white" });
                  // Reload page to show "Sold" status
                  setTimeout(() => window.location.reload(), 2000);
-               } catch (purchaseError) {
-                 console.warn('Could not update art status (endpoint may require auth):', purchaseError);
+               } catch (orderError: any) {
+                 console.error('Error saving art order:', orderError);
                  toast({ 
                    title: "Payment Successful!", 
                    description: "Payment verified. Please contact support to complete the purchase.", 
