@@ -29,6 +29,7 @@ import OrderSuccess from "./pages/OrderSuccess";
 import AdminRegister from "./pages/admin/AdminRegister";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import OrderManagement from "./pages/admin/OrderManagement";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
@@ -74,6 +75,7 @@ const App = () => (
             <Route path="/admin/dashboard/menu-management/new" element={<MenuItemForm />} />
             <Route path="/admin/dashboard/menu-management/edit/:id" element={<MenuItemForm />} />
             <Route path="/admin/dashboard/workshops" element={<WorkshopManager />} />
+            <Route path="/admin/dashboard/orders" element={<OrderManagement />} />
 
             <Route path="/admin/gallery" element={<GalleryManagement />} />
 

@@ -16,7 +16,7 @@ import {
   Clock,
   ChevronRight
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -27,6 +27,7 @@ import logo from "@/assets/rabuste-logo.png";
 
 const navItems = [
   { title: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard", active: true },
+  { title: "Orders", icon: ShoppingBag, href: "/admin/dashboard/orders" },
   { title: "Applications", icon: FileText, href: "/admin/applications" },
   { title: "Users", icon: Users, href: "/admin/users" },
 ];
@@ -125,6 +126,7 @@ const getQuickActions = (dashboardStats: any) => {
 };
 
 export default function AdminDashboard() {
+  const location = useLocation();
   const [activeNav, setActiveNav] = useState("Dashboard");
   const [dashboardStats, setDashboardStats] = useState<any>(null);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
@@ -133,6 +135,14 @@ export default function AdminDashboard() {
   const { toast } = useToast();
 
   const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+  // Update active nav based on current route
+  useEffect(() => {
+    const currentItem = navItems.find(item => location.pathname === item.href);
+    if (currentItem) {
+      setActiveNav(currentItem.title);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -210,8 +220,9 @@ export default function AdminDashboard() {
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-2">
           {navItems.map((item) => (
-            <button
+            <Link
               key={item.title}
+              to={item.href}
               onClick={() => setActiveNav(item.title)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                 activeNav === item.title
@@ -224,7 +235,7 @@ export default function AdminDashboard() {
               {activeNav === item.title && (
                 <ChevronRight className="w-4 h-4 ml-auto" />
               )}
-            </button>
+            </Link>
           ))}
         </nav>
 
