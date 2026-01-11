@@ -176,21 +176,18 @@ const About = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className={`relative lg:grid lg:grid-cols-2 lg:gap-8 ${
-                    index % 2 === 0 ? "" : "lg:flex-row-reverse"
-                  }`}
+                  className={`relative lg:grid lg:grid-cols-2 lg:gap-8 ${index % 2 === 0 ? "" : "lg:flex-row-reverse"
+                    }`}
                 >
                   <div
-                    className={`lg:text-right ${
-                      index % 2 === 0 ? "" : "lg:col-start-2 lg:text-left"
-                    }`}
+                    className={`lg:text-right ${index % 2 === 0 ? "" : "lg:col-start-2 lg:text-left"
+                      }`}
                   >
                     <div
-                      className={`p-8 rounded-2xl bg-card border border-border ${
-                        index % 2 === 0
+                      className={`p-8 rounded-2xl bg-card border border-border ${index % 2 === 0
                           ? "lg:mr-12"
                           : "lg:ml-12 lg:col-start-2"
-                      }`}
+                        }`}
                     >
                       <span className="font-display text-3xl font-bold text-accent">
                         {item.year}
@@ -338,7 +335,7 @@ const About = () => {
               Why We Choose Robusta
             </h2>
             <p className="text-muted-foreground text-lg mt-4 max-w-2xl mx-auto">
-              While the world obsesses over Arabica, we've discovered the untapped potential of Robusta—a bean that delivers unmatched intensity.
+              While the world obsesses over Arabica, we've discovered the untapped potential of Robusta — a bean that delivers unmatched intensity.
             </p>
           </motion.div>
 
@@ -385,7 +382,7 @@ const About = () => {
               <p className="text-muted-foreground text-lg leading-relaxed mb-8">
                 Every sip of premium Robusta takes you on an adventure. From the first bold hit to the lingering finish, experience a symphony of flavors that Arabica simply can't match.
               </p>
-              
+
               {/* Flavor bars */}
               <div className="space-y-6">
                 {flavorNotes.map((flavor, index) => (
@@ -451,7 +448,7 @@ const About = () => {
                     <path d="M50 10 Q55 50 50 90" stroke="hsl(var(--espresso))" strokeWidth="4" fill="none" />
                   </svg>
                 </motion.div>
-                
+
                 {/* Floating particles */}
                 {[...Array(8)].map((_, i) => (
                   <motion.div
