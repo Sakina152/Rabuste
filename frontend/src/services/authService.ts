@@ -6,7 +6,10 @@ import {
   signInWithEmailAndPassword 
 } from 'firebase/auth';
 
-const API_URL = "http://localhost:5000/api/auth";
+import axios from 'axios';
+
+
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api/auth";
 const googleProvider = new GoogleAuthProvider();
 
 
@@ -55,40 +58,43 @@ export const signInWithGoogle = async () => {
 };
 
 // Email/Password Sign Up
-export const signUpWithEmail = async (email: string, password: string, name: string) => {
+export const signUpWithEmail = async (email: string, password: string, name?: string) => {
   try {
-    const result = await createUserWithEmailAndPassword(auth, email, password);
-    const user = result.user;
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
     
     // Get ID token
     const idToken = await user.getIdToken();
     
     // Send to backend
-    const userData = await firebaseAuth(idToken, {
+    const response = await axios.post(`${API_URL}/api/auth/firebase-login`, {
+      idToken,
       name,
+      email,
     });
     
-    return userData;
+    return response.data;
   } catch (error: any) {
-    throw new Error(error.message);
+    throw new Error(error.message || "Registration failed");
   }
 };
-
-// Email/Password Sign In
 export const signInWithEmail = async (email: string, password: string) => {
   try {
-    const result = await signInWithEmailAndPassword(auth, email, password);
-    const user = result.user;
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
     
     // Get ID token
     const idToken = await user.getIdToken();
     
     // Send to backend
-    const userData = await firebaseAuth(idToken);
+    const response = await axios.post(`${API_URL}/api/auth/firebase-login`, {
+      idToken,
+      email,
+    });
     
-    return userData;
+    return response.data;
   } catch (error: any) {
-    throw new Error(error.message);
+    throw new Error(error.message || "Login failed");
   }
 };
 

@@ -42,25 +42,25 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const res = await axios.post(`${API_URL}/api/auth/login`, data);
-      localStorage.setItem("userInfo", JSON.stringify(res.data));
+  const userData = await signInWithEmail(data.email, data.password);
+  localStorage.setItem("userInfo", JSON.stringify(userData));
 
-      toast({
-        title: "Welcome back ☕",
-        description: "You've s  uccessfully signed in",
-        className: "bg-terracotta text-white border-none",
-      });
+  toast({
+    title: "Welcome back ☕",
+    description: "Login successful",
+    className: "bg-terracotta text-white",
+  });
 
-      navigate("/");
-    } catch (err: any) {
-      toast({
-        title: "Login failed",
-        description: err.message || "Invalid credentials",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  navigate("/profile");
+} catch (err: any) {
+  toast({
+    title: "Login failed",
+    description: err.message || "Invalid credentials",
+    variant: "destructive",
+  });
+} finally {
+  setIsLoading(false);
+}
   };
 
   const handleGoogleSignIn = async () => {

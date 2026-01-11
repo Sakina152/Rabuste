@@ -69,28 +69,27 @@ export default function Register() {
   }
 };
 
-  const onSubmit = async (data: RegisterFormData) => {
-    setIsLoading(true);
-    try {
-      await axios.post(`${API_URL}/api/auth/register`, data);
-
-      toast({
-        title: "Account created",
-        description: "You can now log in",
-        className: "bg-terracotta text-white",
-      });
-
-      navigate("/login");
-    } catch (err: any) {
-      toast({
-        title: "Registration failed",
-        description: err.response?.data?.message || "Try again",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const onSubmit = async (data: RegisterFormData) => {
+  setIsLoading(true);
+  try {
+    await signUpWithEmail(data.email, data.password, data.name);
+    
+    toast({
+      title: "Account created",
+      description: "You can now log in",
+      className: "bg-terracotta text-white",
+    });
+    navigate("/login");
+  } catch (err: any) {
+    toast({
+      title: "Registration failed",
+      description: err.message || "Try again",
+      variant: "destructive",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-hero-gradient flex items-center justify-center p-4">
