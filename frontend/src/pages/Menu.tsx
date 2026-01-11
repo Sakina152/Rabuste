@@ -20,6 +20,7 @@ interface MenuItem {
   name: string;
   price: number;
   description: string;
+  image?: string; // Added image property
   category: {
     name: string;
   };
@@ -63,9 +64,9 @@ const getCategoryConfig = (categoryName: string) => {
 const MenuItemCard = ({ item, index, fallbackImage }: { item: MenuItem; index: number; fallbackImage?: string }) => {
   const { addToCart } = useCart(); // Use the hook
 
-  const tag = item.isBestSeller ? "House Favourite" : 
-              item.isNew ? "New" : 
-              item.isSeasonal ? "Seasonal" : undefined;
+  const tag = item.isBestSeller ? "House Favourite" :
+    item.isNew ? "New" :
+      item.isSeasonal ? "Seasonal" : undefined;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent triggering any parent click events
@@ -73,9 +74,13 @@ const MenuItemCard = ({ item, index, fallbackImage }: { item: MenuItem; index: n
       id: item._id,
       name: item.name,
       price: item.price,
-      image: fallbackImage || "", // Use section image as fallback
+      image: item.image ? `${import.meta.env.VITE_API_BASE_URL}/${item.image.replace(/\\/g, "/")}` : (fallbackImage || ""),
     });
   };
+
+  const imageUrl = item.image
+    ? `${import.meta.env.VITE_API_BASE_URL}/${item.image.replace(/\\/g, "/")}`
+    : fallbackImage;
 
   return (
     <motion.div
@@ -83,41 +88,72 @@ const MenuItemCard = ({ item, index, fallbackImage }: { item: MenuItem; index: n
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.4 }}
       viewport={{ once: true }}
-      className="group flex justify-between items-start p-4 rounded-xl bg-card/50 border border-border/30 hover:bg-card hover:border-accent/30 hover:shadow-lg transition-all duration-300"
+      className="group flex flex-col h-full rounded-xl bg-card/50 border border-border/30 hover:bg-card hover:border-accent/30 hover:shadow-lg transition-all duration-300 overflow-hidden"
     >
-      <div className="flex-1 pr-4">
-        <h4 className="font-body font-medium text-foreground group-hover:text-accent transition-colors duration-300">
-          {item.name}
-          {item.isVegetarian && (
-            <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
-              Veg
-            </span>
-          )}
-        </h4>
-        {item.description && (
-          <p className="text-muted-foreground text-xs mt-1 opacity-70 group-hover:opacity-100 transition-opacity duration-300">
-            {item.description}
-          </p>
+      {/* Image Section */}
+      <div className="w-full h-48 overflow-hidden relative">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={item.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            onError={(e) => {
+              // Fallback if individual image fails
+              if (fallbackImage && e.currentTarget.src !== fallbackImage) {
+                e.currentTarget.src = fallbackImage;
+              } else {
+                e.currentTarget.style.display = 'none';
+              }
+            }}
+          />
+        ) : (
+          <div className="w-full h-full bg-accent/5 flex items-center justify-center text-accent/20">
+            <Coffee className="w-12 h-12" />
+          </div>
         )}
+
+        {/* Tag Overlay */}
         {tag && (
-          <span className="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-accent/20 text-accent rounded-full">
-            {tag}
-          </span>
+          <div className="absolute top-3 left-3">
+            <span className="px-2 py-1 text-xs font-medium bg-accent text-white rounded-full shadow-sm backdrop-blur-md">
+              {tag}
+            </span>
+          </div>
         )}
       </div>
 
-      {/* Right Side: Price & Add Button */}
-      <div className="flex flex-col items-end gap-3">
-        <span className="font-display text-lg text-accent group-hover:scale-110 transition-transform duration-300">
-          ₹{item.price}
-        </span>
-        <Button 
-          size="sm" 
-          onClick={handleAddToCart}
-          className="h-8 text-xs bg-accent hover:bg-accent/90 text-white"
-        >
-          Add
-        </Button>
+      {/* Content Section */}
+      <div className="p-4 flex flex-col flex-grow">
+        <div className="flex justify-between items-start mb-2">
+          <h4 className="font-body font-medium text-lg text-foreground group-hover:text-accent transition-colors duration-300 line-clamp-1">
+            {item.name}
+          </h4>
+          {item.isVegetarian && (
+            <span className="flex-shrink-0 ml-2 text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+              Veg
+            </span>
+          )}
+        </div>
+
+        {item.description && (
+          <p className="text-muted-foreground text-sm opacity-80 line-clamp-2 mb-4 flex-grow">
+            {item.description}
+          </p>
+        )}
+
+        {/* Footer: Price & Add Button */}
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-border/30">
+          <span className="font-display text-xl text-accent">
+            ₹{item.price}
+          </span>
+          <Button
+            size="sm"
+            onClick={handleAddToCart}
+            className="bg-accent hover:bg-accent/90 text-white shadow-sm hover:shadow-md transition-all"
+          >
+            Add to Cart
+          </Button>
+        </div>
       </div>
     </motion.div>
   );
@@ -131,31 +167,22 @@ const MenuSectionBlock = ({ section, sectionIndex }: { section: MenuSection; sec
     viewport={{ once: true }}
     className="mb-16"
   >
-    <div className="flex flex-col md:flex-row gap-6 mb-6">
-      {section.image && (
-        <div className="w-full md:w-32 h-24 md:h-24 rounded-xl overflow-hidden flex-shrink-0">
-          <img 
-            src={section.image} 
-            alt={section.title}
-            className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
-          />
-        </div>
-      )}
+    <div className="flex flex-col md:flex-row gap-6 mb-8 items-end border-b border-border/30 pb-4">
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-lg bg-accent/10 text-accent">
           {section.icon}
         </div>
-        <h3 className="font-display text-2xl text-foreground">{section.title}</h3>
+        <h3 className="font-display text-3xl text-foreground">{section.title}</h3>
       </div>
     </div>
-    
-    <div className="grid gap-3 md:grid-cols-2">
+
+    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
       {section.items.map((item, index) => (
-        <MenuItemCard 
-            key={item._id} 
-            item={item} 
-            index={index} 
-            fallbackImage={section.image} // Pass image down
+        <MenuItemCard
+          key={item._id}
+          item={item}
+          index={index}
+          fallbackImage={section.image} // Pass image down as fallback
         />
       ))}
     </div>
@@ -236,7 +263,7 @@ const Menu = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="pt-32 pb-16 px-6">
         <div className="container-custom text-center">

@@ -22,7 +22,7 @@ interface Category {
 
 export default function MenuItemForm() {
   const { id } = useParams();
-  const isEdit = Boolean(id);
+  const isEdit = Boolean(id); ``
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -76,7 +76,7 @@ export default function MenuItemForm() {
   /* ================= SUBMIT ================= */
 
   const submit = async () => {
-    const token = getToken();
+    const token = await getToken();
 
     if (!token) {
       toast({
@@ -225,7 +225,7 @@ export default function MenuItemForm() {
             <Label>Menu Item Image</Label>
             {existingImage && !imageFile && (
               <img
-                src={`${API}/${existingImage}`}
+                src={`${API}/${existingImage.replace(/\\/g, "/")}`}
                 className="w-32 h-32 object-cover rounded mb-2"
               />
             )}

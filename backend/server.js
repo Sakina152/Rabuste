@@ -52,19 +52,25 @@ app.use(cors({
   credentials: true // Important for headers/cookies
 }));
 
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/ai', aiRoutes);
 
 // Make uploads folder static
-const uploadsDir = path.join(__dirname, 'uploads');
-app.use('/uploads', express.static(uploadsDir));
+const uploadsDir = path.join(__dirname, "uploads");
+const menuDir = path.join(uploadsDir, "menu");
+
+app.use("/uploads", express.static(uploadsDir));
 
 // Create uploads directory if it doesn't exist
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
-  fs.mkdirSync(path.join(uploadsDir, 'menu'), { recursive: true });
+}
+if (!fs.existsSync(menuDir)) {
+  fs.mkdirSync(menuDir, { recursive: true });
 }
 
 // Routes

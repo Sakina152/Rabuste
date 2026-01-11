@@ -62,7 +62,7 @@ export default function MenuManagement() {
             "Are you sure you want to delete this item?"
         );
         if (!confirmDelete) return;
-        const token = getToken();
+        const token = await getToken();
         if (!token) {
             alert("Not logged in. Please login again.");
             return;
@@ -136,11 +136,12 @@ export default function MenuManagement() {
                                     <div className="w-full h-40 rounded-lg overflow-hidden bg-muted">
                                         {item.image && item.image !== "null" ? (
                                             <img
-                                                src={`${API}/${item.image}`}
+                                                src={`${API}/${item.image.replace(/\\/g, "/")}`}
                                                 alt={item.name}
                                                 className="w-full h-full object-cover"
                                                 onError={(e) => {
-                                                    e.currentTarget.style.display = "none";
+                                                    console.error("Image load failed:", e.currentTarget.src);
+                                                    // e.currentTarget.style.display = "none"; 
                                                 }}
                                             />
                                         ) : (
