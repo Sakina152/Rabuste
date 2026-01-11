@@ -241,7 +241,7 @@ const Menu = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="flex items-center justify-center h-[60vh]">
-          <div className="animate-pulse">Loading menu...</div>
+          <div className="animate-pulse">Loading Menu...</div>
         </div>
         <Footer />
       </div>
