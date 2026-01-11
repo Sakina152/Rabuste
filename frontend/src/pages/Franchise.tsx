@@ -21,6 +21,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 
+const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 // Define the shape of data sending to Backend
 interface FranchiseFormData {
   name: string;
@@ -33,7 +35,7 @@ interface FranchiseFormData {
 
 const Franchise = () => {
   const { toast } = useToast();
-  
+
   // React Hook Form setup
   const {
     register,
@@ -113,12 +115,12 @@ const Franchise = () => {
   const onSubmit = async (data: FranchiseFormData) => {
     try {
       // Send data to your backend
-      await axios.post('http://localhost:5000/api/franchise', data);
+      await axios.post(`${API}/api/franchise`, data);
 
       toast({
         title: "Inquiry Submitted!",
         description: "Thank you! We have received your application and emailed you a confirmation.",
-        variant: "default", 
+        variant: "default",
       });
 
       reset(); // Clear the form
@@ -389,7 +391,7 @@ const Franchise = () => {
                     {...register("email", { required: "Email is required" })}
                     placeholder="your@email.com"
                   />
-                   {errors.email && <span className="text-red-500 text-xs">{errors.email.message}</span>}
+                  {errors.email && <span className="text-red-500 text-xs">{errors.email.message}</span>}
                 </div>
               </div>
 
@@ -402,7 +404,7 @@ const Franchise = () => {
                     {...register("phone", { required: "Phone is required" })}
                     placeholder="+1 (555) 000-0000"
                   />
-                   {errors.phone && <span className="text-red-500 text-xs">{errors.phone.message}</span>}
+                  {errors.phone && <span className="text-red-500 text-xs">{errors.phone.message}</span>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="location">Preferred Location *</Label>
@@ -411,7 +413,7 @@ const Franchise = () => {
                     {...register("location", { required: "Location is required" })}
                     placeholder="City, State/Country"
                   />
-                   {errors.location && <span className="text-red-500 text-xs">{errors.location.message}</span>}
+                  {errors.location && <span className="text-red-500 text-xs">{errors.location.message}</span>}
                 </div>
               </div>
 
@@ -428,7 +430,7 @@ const Franchise = () => {
                   <option value="50k-100k">$50,000 - $100,000</option>
                   <option value="100k+">$100,000+</option>
                 </select>
-                 {errors.budget && <span className="text-red-500 text-xs">{errors.budget.message}</span>}
+                {errors.budget && <span className="text-red-500 text-xs">{errors.budget.message}</span>}
               </div>
 
               <div className="space-y-2">
@@ -439,13 +441,13 @@ const Franchise = () => {
                   placeholder="Share your background, why you're interested in Rabuste Coffee, and any relevant experience..."
                   rows={4}
                 />
-                 {errors.experience && <span className="text-red-500 text-xs">{errors.experience.message}</span>}
+                {errors.experience && <span className="text-red-500 text-xs">{errors.experience.message}</span>}
               </div>
 
-              <Button 
-                type="submit" 
-                variant="hero" 
-                size="xl" 
+              <Button
+                type="submit"
+                variant="hero"
+                size="xl"
                 className="w-full"
                 disabled={isSubmitting} // Disable while sending
               >

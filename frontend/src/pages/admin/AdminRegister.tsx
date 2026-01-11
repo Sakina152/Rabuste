@@ -15,6 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/rabuste-logo.png";
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 // 1. Zod Schema with "Confirm Password" check
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -44,26 +46,26 @@ const AdminRegister = () => {
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
-    
+
     try {
       // 2. The Real API Call
-      await axios.post('http://localhost:5000/api/auth/register', {
+      await axios.post(`${API_URL}/api/auth/register`, {
         name: data.name,
         email: data.email,
         password: data.password,
         role: 'admin' // <--- CRITICAL: Force this user to be an Admin
       });
-      
+
       toast({
         title: "Account Created!",
         description: "Welcome to the team. Please sign in.",
         className: "bg-green-600 text-white border-none"
       });
-      
-      navigate('/admin'); // Redirect to login after success
-    } catch (error:any) {
 
-        const errorMessage = error.response?.data?.message || "Registration failed";
+      navigate('/admin'); // Redirect to login after success
+    } catch (error: any) {
+
+      const errorMessage = error.response?.data?.message || "Registration failed";
 
       toast({
         title: "Registration Failed",
@@ -83,16 +85,16 @@ const AdminRegister = () => {
           <motion.div
             key={i}
             className="absolute text-terracotta/20"
-            initial={{ 
+            initial={{
               x: Math.random() * window.innerWidth,
               y: Math.random() * window.innerHeight,
               rotate: Math.random() * 360
             }}
-            animate={{ 
+            animate={{
               y: [null, -20, 20, -10, 10, 0],
               rotate: [null, 10, -10, 5, -5, 0]
             }}
-            transition={{ 
+            transition={{
               duration: 8 + i * 2,
               repeat: Infinity,
               repeatType: "reverse",
@@ -113,7 +115,7 @@ const AdminRegister = () => {
       >
         <Card className="bg-card/95 backdrop-blur-md border-terracotta/20 shadow-2xl">
           <CardHeader className="text-center space-y-4 pb-2">
-            <motion.div 
+            <motion.div
               className="flex justify-center"
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -121,7 +123,7 @@ const AdminRegister = () => {
             >
               <img src={logo} alt="Rabuste Coffee" className="h-12 w-auto" />
             </motion.div>
-            
+
             <div>
               <CardTitle className="font-display text-2xl text-foreground">
                 Join the Team
@@ -134,7 +136,7 @@ const AdminRegister = () => {
 
           <CardContent className="pt-4">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              
+
               {/* Name Field */}
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
@@ -228,7 +230,7 @@ const AdminRegister = () => {
                 Sign in
               </button>
             </div>
-            
+
             <div className="mt-4 text-center">
               <button onClick={() => navigate("/")} className="text-xs text-muted-foreground hover:text-foreground">
                 ← Back to website

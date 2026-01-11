@@ -14,6 +14,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getToken } from "@/utils/getToken";
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 /* ================= TYPES ================= */
 
 interface Art {
@@ -44,16 +46,16 @@ export default function GalleryManagement() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const artRes = await fetch("http://localhost:5000/api/art");
+        const artRes = await fetch(`${API_URL}/api/art`);
         setArtworks(await artRes.json());
 
         if (!token) return;
 
         const [overviewRes, weeklyRes] = await Promise.all([
-          fetch("http://localhost:5000/api/admin/stats/overview", {
+          fetch(`${API_URL}/api/admin/stats/overview`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch("http://localhost:5000/api/admin/stats/weekly-sales", {
+          fetch(`${API_URL}/api/admin/stats/weekly-sales`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -71,57 +73,57 @@ export default function GalleryManagement() {
   /* ---------- ACTION HANDLERS ---------- */
 
   const handleDelete = async (id: string) => {
-  if (!confirm("Delete this artwork?")) return;
+    if (!confirm("Delete this artwork?")) return;
 
-  const res = await fetch(`http://localhost:5000/api/art/${id}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!res.ok) {
-    const err = await res.json();
-    alert(err.message || "Failed to delete artwork");
-    return;
-  }
-
-  setArtworks((prev) => prev.filter((a) => a._id !== id));
-};
-
-  const handleStatusChange = async (
-  id: string,
-  status: "Available" | "Reserved" | "Sold"
-) => {
-  const token = getToken();
-  if (!token) return;
-
-  const res = await fetch(
-    `http://localhost:5000/api/art/${id}/status`,
-    {
-      method: "PATCH",
+    const res = await fetch(`${API_URL}/api/art/${id}`, {
+      method: "DELETE",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ status }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      alert(err.message || "Failed to delete artwork");
+      return;
     }
-  );
 
-  if (!res.ok) {
-    alert("Failed to update status");
-    return;
-  }
+    setArtworks((prev) => prev.filter((a) => a._id !== id));
+  };
 
-  const updatedArt = await res.json();
+  const handleStatusChange = async (
+    id: string,
+    status: "Available" | "Reserved" | "Sold"
+  ) => {
+    const token = getToken();
+    if (!token) return;
 
-  // 🔥 THIS LINE IS THE FIX
-  setArtworks((prev) =>
-    prev.map((art) =>
-      art._id === updatedArt._id ? updatedArt : art
-    )
-  );
-};
+    const res = await fetch(
+      `${API_URL}/api/art/${id}/status`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status }),
+      }
+    );
+
+    if (!res.ok) {
+      alert("Failed to update status");
+      return;
+    }
+
+    const updatedArt = await res.json();
+
+    // 🔥 THIS LINE IS THE FIX
+    setArtworks((prev) =>
+      prev.map((art) =>
+        art._id === updatedArt._id ? updatedArt : art
+      )
+    );
+  };
 
   const openAddModal = () => {
     setEditingArt(null);
@@ -181,112 +183,111 @@ export default function GalleryManagement() {
       </div>
 
       {/* All Paintings */}
-<div className="space-y-4">
-  <Card>
-    <CardHeader className="flex flex-row items-center justify-between">
-      <CardTitle>All Paintings ({artworks.length})</CardTitle>
+      <div className="space-y-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>All Paintings ({artworks.length})</CardTitle>
 
-      <Button
-        variant="hero"
-        size="sm"
-        onClick={openAddModal}
-        className="flex gap-2"
-      >
-        <Plus size={16} />
-        Add Art
-      </Button>
-    </CardHeader>
-  </Card>
-
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {artworks.map((art) => (
-      <motion.div
-        key={art._id}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <Card className="relative overflow-hidden bg-card/80 border-border">
-
-          {/* Image */}
-          <div className="aspect-[4/5] bg-muted/40 overflow-hidden">
-            {art.imageUrl ? (
-              <img
-                src={art.imageUrl}
-                alt={art.title}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                No image
-              </div>
-            )}
-          </div>
-
-          {/* Actions */}
-          <div className="absolute top-3 right-3 flex gap-2">
-            <button
-              onClick={() => openEditModal(art)}
-              className="p-2 bg-black/60 rounded-full hover:bg-black"
+            <Button
+              variant="hero"
+              size="sm"
+              onClick={openAddModal}
+              className="flex gap-2"
             >
-              <Pencil size={14} />
-            </button>
-
-            <button
-              onClick={() => handleDelete(art._id)}
-              className="p-2 bg-red-600/80 rounded-full hover:bg-red-600"
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
-
-          {/* Content */}
-          <div className="p-4 space-y-2">
-            <h3 className="font-semibold">{art.title}</h3>
-            <p className="text-sm text-muted-foreground">
-              {art.artist}
-            </p>
-
-            <div className="flex items-center justify-between pt-2">
-              <span className="text-accent font-bold">
-                ₹{art.price ? Number(art.price).toLocaleString("en-IN") : "0"}
-              </span>
-
-              <span
-                className={`px-3 py-1 text-xs rounded-full ${
-                  art.status === "Sold"
-                    ? "bg-red-500 text-white"
-                    : art.status === "Reserved"
-                    ? "bg-yellow-500 text-black"
-                    : "bg-accent/20 text-accent"
-                }`}
-              >
-                {art.status}
-              </span>
-            </div>
-          </div>
+              <Plus size={16} />
+              Add Art
+            </Button>
+          </CardHeader>
         </Card>
-      </motion.div>
-    ))}
-  </div>
-</div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {artworks.map((art) => (
+            <motion.div
+              key={art._id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Card className="relative overflow-hidden bg-card/80 border-border">
+
+                {/* Image */}
+                <div className="aspect-[4/5] bg-muted/40 overflow-hidden">
+                  {art.imageUrl ? (
+                    <img
+                      src={art.imageUrl}
+                      alt={art.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                      No image
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="absolute top-3 right-3 flex gap-2">
+                  <button
+                    onClick={() => openEditModal(art)}
+                    className="p-2 bg-black/60 rounded-full hover:bg-black"
+                  >
+                    <Pencil size={14} />
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(art._id)}
+                    className="p-2 bg-red-600/80 rounded-full hover:bg-red-600"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+
+                {/* Content */}
+                <div className="p-4 space-y-2">
+                  <h3 className="font-semibold">{art.title}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {art.artist}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-2">
+                    <span className="text-accent font-bold">
+                      ₹{art.price ? Number(art.price).toLocaleString("en-IN") : "0"}
+                    </span>
+
+                    <span
+                      className={`px-3 py-1 text-xs rounded-full ${art.status === "Sold"
+                          ? "bg-red-500 text-white"
+                          : art.status === "Reserved"
+                            ? "bg-yellow-500 text-black"
+                            : "bg-accent/20 text-accent"
+                        }`}
+                    >
+                      {art.status}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </div>
 
 
       {/* ================= MODAL ================= */}
       {showModal && (
-  <ArtModal
-    art={editingArt}
-    onClose={() => setShowModal(false)}
-    onSuccess={(savedArt) => {
-      setArtworks((prev) =>
-        editingArt
-        ? prev.map((a) => (a._id === savedArt._id ? savedArt : a))
-        : [...prev, savedArt]
-      );
-      setShowModal(false);
-    }}
+        <ArtModal
+          art={editingArt}
+          onClose={() => setShowModal(false)}
+          onSuccess={(savedArt) => {
+            setArtworks((prev) =>
+              editingArt
+                ? prev.map((a) => (a._id === savedArt._id ? savedArt : a))
+                : [...prev, savedArt]
+            );
+            setShowModal(false);
+          }}
 
-  />
-)}
+        />
+      )}
 
     </div>
   );
@@ -345,45 +346,45 @@ function ArtModal({
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!token) {
-    alert("Not authenticated");
-    return;
-  }
+    if (!token) {
+      alert("Not authenticated");
+      return;
+    }
 
-  const url = art
-  ? `http://localhost:5000/api/art/${art._id}`
-  : "http://localhost:5000/api/art";
+    const url = art
+      ? `${API_URL}/api/art/${art._id}`
+      : `${API_URL}/api/art`;
 
-const method = art ? "PUT" : "POST";
+    const method = art ? "PUT" : "POST";
 
-const res = await fetch(url, {
-  method,
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  },
-  body: JSON.stringify({
-    title: form.title,
-    artist: form.artist,
-    price: Number(form.price),
-    status: form.status,
-    imageUrl: form.imageUrl,
-  }),
-});
+    const res = await fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        title: form.title,
+        artist: form.artist,
+        price: Number(form.price),
+        status: form.status,
+        imageUrl: form.imageUrl,
+      }),
+    });
 
 
-  if (!res.ok) {
-    const err = await res.json();
-    console.error("Backend error:", err);
-    alert(err.message || "Failed to save artwork");
-    return;
-  }
+    if (!res.ok) {
+      const err = await res.json();
+      console.error("Backend error:", err);
+      alert(err.message || "Failed to save artwork");
+      return;
+    }
 
-  const savedArt = await res.json();
-  onSuccess(savedArt);
-};
+    const savedArt = await res.json();
+    onSuccess(savedArt);
+  };
 
 
   return (
@@ -440,7 +441,7 @@ const res = await fetch(url, {
             <label className="text-sm text-muted-foreground">Status</label>
             <select
               value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value as "Available" | "Reserved" | "Sold",})}
+              onChange={(e) => setForm({ ...form, status: e.target.value as "Available" | "Reserved" | "Sold", })}
               className="w-full rounded-xl bg-muted/40 border border-border px-4 py-2"
             >
               <option value="Available">Available</option>

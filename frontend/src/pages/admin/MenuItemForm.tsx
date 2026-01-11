@@ -26,7 +26,7 @@ export default function MenuItemForm() {
 
   const navigate = useNavigate();
   const { toast } = useToast();
-  const API = import.meta.env.VITE_API_BASE_URL;
+  const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);

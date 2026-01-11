@@ -32,6 +32,7 @@ import {
   Type
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 interface WorkshopFormProps {
   workshop?: any;
@@ -88,7 +89,7 @@ export default function WorkshopForm({
 
     if (workshop.image) {
       // If image path doesn't start with http, assume it's relative
-      setImagePreview(workshop.image.startsWith('http') ? workshop.image : `http://localhost:5000${workshop.image}`);
+      setImagePreview(workshop.image.startsWith('http') ? workshop.image : `${API_URL}${workshop.image}`);
     }
   }, [workshop]);
 
@@ -146,7 +147,7 @@ export default function WorkshopForm({
     }
 
     try {
-      const url = isEdit ? `/api/workshops/${workshop._id}` : `/api/workshops`;
+      const url = isEdit ? `${API_URL}/workshops/${workshop._id}` : `${API_URL}/workshops`;
       const method = isEdit ? "PUT" : "POST";
 
       const res = await fetch(url, {
