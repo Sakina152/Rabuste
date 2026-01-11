@@ -42,7 +42,7 @@ app.use(cors({
     "http://localhost:8080", // Your current frontend port
     "http://127.0.0.1:5173",
     "http://127.0.0.1:8080",
-    "https://rabuste-omegon.vercel.app/"
+    "https://rabuste-omegon.vercel.app"
   ],
   credentials: true // Important for headers/cookies
 }));
