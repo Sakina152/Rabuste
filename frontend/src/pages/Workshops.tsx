@@ -93,7 +93,7 @@ const Workshops = () => {
         });
         setSelectedWorkshop(null);
         setFormData({ name: "", email: "", phone: "", numberOfSeats: 1 });
-        
+
         // Optionally refresh workshops to update seat count
         const refreshRes = await fetch("/api/workshops");
         const refreshJson = await refreshRes.json();
@@ -165,7 +165,7 @@ const Workshops = () => {
       <section className="section-padding bg-background">
         <div className="container-custom">
           {loading ? (
-             <div className="text-center text-muted-foreground">Loading experiences...</div>
+            <div className="text-center text-muted-foreground">Loading experiences...</div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {workshops.map((workshop, index) => {

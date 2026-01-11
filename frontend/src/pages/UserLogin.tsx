@@ -20,6 +20,8 @@ const loginSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function Login() {
@@ -40,7 +42,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", data);
+      const res = await axios.post(`${API_URL}/api/auth/login`, data);
       localStorage.setItem("userInfo", JSON.stringify(res.data));
 
       toast({

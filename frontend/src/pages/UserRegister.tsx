@@ -14,13 +14,15 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/rabuste-logo.png";
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 /* ================== SCHEMA ================== */
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Invalid email"),
   phoneNumber: z.string().min(10, "Phone number required"),
-  address: z.string().optional(),   
+  address: z.string().optional(),
   password: z.string().min(6, "Minimum 6 characters"),
 });
 
@@ -45,7 +47,7 @@ export default function Register() {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      await axios.post("http://localhost:5000/api/auth/register", data);
+      await axios.post(`${API_URL}/api/auth/register`, data);
 
       toast({
         title: "Account created",
