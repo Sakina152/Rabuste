@@ -25,11 +25,13 @@ import axios from "axios";
 // Import logo
 import logo from "@/assets/rabuste-logo.png";
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 const navItems = [
-  { title: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard", active: true },
-  { title: "Orders", icon: ShoppingBag, href: "/admin/dashboard/orders" },
-  { title: "Applications", icon: FileText, href: "/admin/applications" },
-  { title: "Users", icon: Users, href: "/admin/users" },
+  { title: "Dashboard", icon: LayoutDashboard, href: `${API_URL}/admin/dashboard`, active: true },
+  { title: "Orders", icon: ShoppingBag, href: `${API_URL}/admin/dashboard/orders` },
+  { title: "Applications", icon: FileText, href: `${API_URL}/admin/applications` },
+  { title: "Users", icon: Users, href: `${API_URL}/admin/users` },
 ];
 
 // Stats will be loaded from API
@@ -114,13 +116,13 @@ const getRecentActivity = (orders: any[]) => {
 
 const getQuickActions = (dashboardStats: any) => {
   return [
-    { title: "View Menu", description: "Manage items", icon: Coffee, href: "/admin/dashboard/menu-management" },
-    { title: "Workshops", description: "5 upcoming", icon: Calendar, href: "/admin/dashboard/workshops" },
+    { title: "View Menu", description: "Manage items", icon: Coffee, href: `${API_URL}/admin/dashboard/menu-management` },
+    { title: "Workshops", description: "5 upcoming", icon: Calendar, href: `${API_URL}/admin/dashboard/workshops` },
     {
       title: "Gallery",
       description: dashboardStats ? `${dashboardStats.totalArtSold || 0} sold` : "Loading...",
       icon: TrendingUp,
-      href: "/admin/gallery"
+      href: `${API_URL}/admin/gallery`
     },
   ];
 };
@@ -225,8 +227,8 @@ export default function AdminDashboard() {
               to={item.href}
               onClick={() => setActiveNav(item.title)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${activeNav === item.title
-                  ? "bg-accent/20 text-accent border border-accent/30"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                ? "bg-accent/20 text-accent border border-accent/30"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
             >
               <item.icon className="w-5 h-5" />
@@ -359,8 +361,8 @@ export default function AdminDashboard() {
                         >
                           <div className="flex items-center gap-4">
                             <div className={`w-2 h-2 rounded-full ${activity.type === 'art' ? 'bg-green-500' :
-                                activity.type === 'menu' ? 'bg-blue-500' :
-                                  'bg-accent'
+                              activity.type === 'menu' ? 'bg-blue-500' :
+                                'bg-accent'
                               }`} />
                             <span className="text-foreground font-medium">{activity.action}</span>
                           </div>
