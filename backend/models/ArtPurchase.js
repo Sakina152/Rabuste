@@ -33,12 +33,14 @@ const artPurchaseSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-artPurchaseSchema.pre('save', async function() {
+
+artPurchaseSchema.pre('save', async function (next) {
   if (!this.purchaseNumber) {
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const random = Math.floor(1000 + Math.random() * 9000);
-    this.purchaseNumber = `ART-${date}-${random}`;
+    this.purchaseNumber = `PU${date}${random}`;
   }
+  next();
 });
 
 artPurchaseSchema.post('save', async function() {

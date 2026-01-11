@@ -83,7 +83,7 @@ const Profile = () => {
   /* ================= FETCH USER PROFILE ================= */
   useEffect(() => {
     const fetchProfile = async () => {
-      const token = getToken();
+      const token = await getToken();
       if (!token) {
         setLoading(false);
         setDataLoading(false);
@@ -118,7 +118,7 @@ const Profile = () => {
   /* ================= FETCH PROFILE DATA ================= */
   useEffect(() => {
     const fetchProfileData = async () => {
-      const token = getToken();
+      const token = await getToken();
       if (!token) {
         setDataLoading(false);
         return;
@@ -147,7 +147,7 @@ const Profile = () => {
 
   /* ================= CHANGE PASSWORD ================= */
   const handleChangePassword = async () => {
-    const token = getToken();
+    const token = await getToken();
     if (!token) {
       toast({
         title: "Not logged in",
@@ -168,7 +168,6 @@ const Profile = () => {
 
     try {
       setSaving(true);
-
       await axios.put(
         "http://localhost:5000/api/auth/change-password",
         {

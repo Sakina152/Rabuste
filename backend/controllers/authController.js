@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import generateToken from '../utils/generateToken.js';
 import User from '../models/User.js';
+import firebaseAdmin from '../firebase.js';
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -152,4 +153,59 @@ const changePassword = asyncHandler(async (req, res) => {
   res.json({ message: "Password updated successfully" });
 });
 
-export { registerUser, loginUser, getMe, getAllUsers, updateUserRole, changePassword };
+// @desc    Register/Login user with Firebase
+// @route   POST /api/auth/firebase-login
+// @access  Public
+const firebaseAuth = asyncHandler(async (req, res) => {
+  const { idToken, name, phoneNumber, address } = req.body;
+  if (!idToken) {
+    res.status(400);
+    throw new Error('Firebase ID token is required');
+  }
+  try {
+    // Verify Firebase ID token
+    const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
+    const { uid, email, email_verified } = decodedToken;
+    // For development, allow unverified emails. For production, you might want to require verification.
+    if (!email_verified && process.env.NODE_ENV === 'production') {
+      res.status(400);
+      throw new Error('Email not verified in Firebase');
+    }
+    // Check if user exists in our database
+    let user = await User.findOne({ firebaseUid: uid });
+    if (!user) {
+      // Create new user in our database
+      user = await User.create({
+        firebaseUid: uid,
+        name: name || decodedToken.name || email.split('@')[0],
+        email,
+        phoneNumber: phoneNumber || '', // Make phone number optional
+        address: address || '',
+        authMethod: 'firebase',
+        role: 'user'
+      });
+    } else {
+      // Update user info if needed
+      if (name && user.name !== name) user.name = name;
+      if (phoneNumber !== undefined && user.phoneNumber !== phoneNumber) user.phoneNumber = phoneNumber;
+      if (address && user.address !== address) user.address = address;
+      await user.save();
+    }
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      address: user.address,
+      role: user.role,
+      firebaseUid: user.firebaseUid,
+      authMethod: user.authMethod,
+    });
+  } catch (error) {
+    console.error('Firebase auth error:', error);
+    res.status(401);
+    throw new Error('Firebase authentication failed');
+  }
+});
+
+export { registerUser, loginUser, getMe, getAllUsers, updateUserRole, changePassword, firebaseAuth};

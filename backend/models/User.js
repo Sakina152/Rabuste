@@ -3,6 +3,11 @@ import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema(
   {
+    firebaseUid: {
+      type: String,
+      unique: true,
+      sparse: true, // Allows multiple null values for backward compatibility
+    },
     name: {
       type: String,
       required: [true, 'Please add a name'],
@@ -10,8 +15,13 @@ const userSchema = new mongoose.Schema(
     },
     phoneNumber: {
       type: String,
-      required: [true, 'Please add a phone number'],
+      required: function() {
+        return !this.firebaseUid; // Phone number required only if not using Firebase
+      },
       trim: true,
+      default: function() {
+        return this.firebaseUid ? '' : undefined;
+      },
     },
     address: {
       type: String,
@@ -31,47 +41,50 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, 'Please add a password'],
+      required: function() {
+        return !this.firebaseUid; // Password required only if not using Firebase
+      },
       minlength: [6, 'Password must be at least 6 characters'],
       select: false, 
     },
     role: {
       type: String,
-      enum: ['admin', 'user'], 
+      enum: ['admin', 'user', 'super_admin'], 
+      default: 'user',
     },
     isActive: {
       type: Boolean,
       default: true,
     },
-    orders: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Order'
-    }],
-    artPurchases: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'ArtPurchase'
-    }],
-    workshopBookings: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Booking'
-    }]
+    authMethod: {
+      type: String,
+      enum: ['firebase', 'local'],
+      default: 'local',
+    },
   },
   {
     timestamps: true,
   }
 );
 
-// Encrypt password using bcrypt
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    next();
-  }
+// Encrypt password using bcrypt (only for local auth)
+userSchema.pre('save', async function () {
+  // Firebase users do NOT have passwords
+  if (this.firebaseUid) return;
+
+  // Only hash when password is created/changed
+  if (!this.isModified('password')) return;
+
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Match user entered password to hashed password in database
+
+// Match user entered password to hashed password in database (only for local auth)
 userSchema.methods.matchPassword = async function (enteredPassword) {
+  if (this.firebaseUid) {
+    return false; // Firebase users don't have local passwords
+  }
   return await bcrypt.compare(enteredPassword, this.password);
 };
 

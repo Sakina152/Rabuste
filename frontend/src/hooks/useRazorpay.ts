@@ -3,6 +3,7 @@ import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
+import { getToken } from "@/utils/getToken";
 
 // Define generic interface for payment data
 interface PaymentRequest {
@@ -55,7 +56,7 @@ export const useRazorpay = () => {
 
       // Get user info (optional - auth not set up yet)
       const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
-      const token = userInfo.token;
+      const token = await getToken();
 
       // Validate inputs
       if (requestType === 'MENU' && (!cartItems || cartItems.length === 0)) {

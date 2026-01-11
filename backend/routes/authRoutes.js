@@ -1,31 +1,30 @@
-// routes/authRoutes.js
 import express from 'express';
-import { protect } from '../middleware/authMiddleware.js';
-import { authorize } from '../middleware/roleMiddleware.js';  // Fixed import
-import {
-  registerUser,
-  loginUser,
-  getMe,
-  getAllUsers,
-  updateUserRole,
+import { 
+  registerUser, 
+  loginUser, 
+  getMe, 
+  getAllUsers, 
+  updateUserRole, 
   changePassword,
+  firebaseAuth 
 } from '../controllers/authController.js';
-import { registerValidation, loginValidation, validate } from '../utils/validators.js';
+import { protect, authorize, adminOnly } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Public routes
-router.post('/register', registerValidation, validate, registerUser);
-router.post('/login', loginValidation, validate, loginUser);
+// Firebase authentication route
+router.post('/firebase-login', firebaseAuth);
+
+// Keep existing routes for backward compatibility
+router.post('/register', registerUser);
+router.post('/login', loginUser);
 
 // Protected routes
-router.use(protect);
-router.get('/me', getMe);
-router.put("/change-password", protect, changePassword);
+router.get('/me', protect, getMe);
+router.put('/change-password', protect, changePassword);
 
 // Admin routes
-router.use(authorize('super_admin'));
-router.get('/users', getAllUsers);
-router.put('/users/:id/role', updateUserRole);
+router.get('/users', protect, adminOnly, getAllUsers);
+router.put('/users/:id/role', protect, adminOnly, updateUserRole);
 
 export default router;

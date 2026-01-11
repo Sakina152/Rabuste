@@ -18,6 +18,8 @@ import MenuItemForm from "./pages/admin/MenuItemForm";
 import Checkout from "./pages/Checkout";
 import Profile from "@/pages/Profile";
 
+import UserProtectedRoute from "./components/UserProtectedRoute";
+
 
 import { CartProvider } from "@/context/CartContext";
 import FloatingCart from "./components/FloatingCart";
@@ -79,7 +81,9 @@ const App = () => (
 
             <Route path="/admin/gallery" element={<GalleryManagement />} />
 
-            <Route path="/profile" element={<Profile />} />
+            <Route element={<UserProtectedRoute />}>
+              <Route path="/profile" element={<Profile />} />
+            </Route>
 
             <Route path="*" element={<NotFound />} />
           </Routes>

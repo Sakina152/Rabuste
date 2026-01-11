@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { auth } from '../firebase';
 
-const ProtectedRoute = () => {
+const UserProtectedRoute = () => {
   // Check Firebase auth state
   const user = auth.currentUser;
   
@@ -18,4 +18,4 @@ const ProtectedRoute = () => {
   return <Outlet />;
 };
 
-export default ProtectedRoute;
+export default UserProtectedRoute;

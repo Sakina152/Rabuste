@@ -1,8 +1,9 @@
 import jwt from 'jsonwebtoken';
 import asyncHandler from 'express-async-handler';
+import firebaseAdmin from '../firebase.js'; 
 import User from '../models/User.js';
 
-// Protect routes - Verifies the JWT Token
+// Protect routes - Verifies both JWT and Firebase tokens
 const protect = asyncHandler(async (req, res, next) => {
   let token;
 
@@ -14,19 +15,46 @@ const protect = asyncHandler(async (req, res, next) => {
       // Get token from header
       token = req.headers.authorization.split(' ')[1];
 
-      // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // Try Firebase token first
+      try {
+        const decodedToken = await firebaseAdmin.auth().verifyIdToken(token); // Use firebaseAdmin instead of admin
+        
+        // Get user from Firebase UID
+        req.user = await User.findOne({ firebaseUid: decodedToken.uid });
+        
+        if (!req.user) {
+          res.status(401);
+          throw new Error('Not authorized, user not found in database');
+        }
 
-      // Get user from token (exclude password)
-      // We rely on the decoded.id matching the token generated in authController
-      req.user = await User.findById(decoded.id).select('-password');
+        if (!req.user.isActive) {
+          res.status(401);
+          throw new Error('Account is deactivated');
+        }
 
-      if (!req.user) {
-        res.status(401);
-        throw new Error('Not authorized, user not found');
+        // Add Firebase user info to request for potential use
+        req.firebaseUser = decodedToken;
+        
+        next();
+        return;
+      } catch (firebaseError) {
+        // If Firebase token fails, try JWT (backward compatibility)
+        try {
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          req.user = await User.findById(decoded.id).select('-password');
+
+          if (!req.user) {
+            res.status(401);
+            throw new Error('Not authorized, user not found');
+          }
+
+          next();
+          return;
+        } catch (jwtError) {
+          // Both Firebase and JWT failed
+          throw new Error('Not authorized, invalid token');
+        }
       }
-
-      next();
     } catch (error) {
       console.error('Authentication error:', error);
       res.status(401);
@@ -40,23 +68,19 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 });
 
-// ✅ NEW: Flexible Role Checker
-// Usage in routes: authorize('super_admin', 'menu_admin')
+// Role authorization
 const authorize = (...roles) => {
   return (req, res, next) => {
-    // 1. Check if user is logged in (req.user exists)
-    // 2. Check if their role is in the allowed list
     if (!req.user || !roles.includes(req.user.role)) {
-      res.status(403); // 403 means "Forbidden" (Logged in, but no permission)
+      res.status(403);
       throw new Error(`User role '${req.user?.role}' is not authorized to access this route`);
     }
     next();
   };
 };
 
-// ✅ NEW: Simple Admin Check (Shortcut)
-// Checks if the user is ANYTHING other than a basic 'user'
-const admin = (req, res, next) => {
+
+const adminOnly = (req, res, next) => {
   if (req.user && req.user.role !== 'user') {
     next();
   } else {
@@ -65,4 +89,4 @@ const admin = (req, res, next) => {
   }
 };
 
-export { protect, authorize, admin };
+export { protect, authorize, adminOnly };

@@ -22,10 +22,15 @@ import adminStatsRoutes from './routes/adminStatsRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 
+// firebase
+
+
 
 
 // Load environment variables
 dotenv.config();
+
+import firebase from './firebase.js';
 
 // Connect to database
 connectDB();

@@ -80,15 +80,6 @@ bookingSchema.pre('save', async function() {
         }
     }
 });
-
-// --- Post-save Hook ---
-bookingSchema.post('save', async function() {
-    const Workshop = mongoose.model('Workshop');
-    await Workshop.findByIdAndUpdate(this.workshop, {
-        $inc: { currentParticipants: this.numberOfSeats }
-    });
-});
-
 const Booking = mongoose.model('Booking', bookingSchema);
 
 export default Booking;
