@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Coffee, User, LogOut } from "lucide-react";
+import { Menu, X, Coffee, User, LogOut, LogIn } from "lucide-react"; // Added LogIn icon
 import { Button } from "@/components/ui/button";
 import rabusteLogo from "@/assets/rabuste-logo.png";
 
@@ -19,9 +19,22 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
+  // Auth State
+  const [user, setUser] = useState<any>(null);
+
   const location = useLocation();
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Check login status on mount & route change
+  useEffect(() => {
+    const userInfo = localStorage.getItem("userInfo");
+    if (userInfo) {
+      setUser(JSON.parse(userInfo));
+    } else {
+      setUser(null);
+    }
+  }, [location]); // Re-check when URL changes (e.g. after login redirect)
 
   /* ---------------- Scroll effect ---------------- */
   useEffect(() => {
@@ -54,6 +67,7 @@ const Navbar = () => {
   /* ---------------- Logout ---------------- */
   const handleLogout = () => {
     localStorage.removeItem("userInfo");
+    setUser(null);
     navigate("/login");
   };
 
@@ -62,11 +76,10 @@ const Navbar = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        isScrolled
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
           ? "bg-background/95 backdrop-blur-md shadow-soft"
           : "bg-transparent"
-      }`}
+        }`}
     >
       <nav className="container-custom flex items-center justify-between h-20 px-6">
         {/* Logo */}
@@ -80,11 +93,10 @@ const Navbar = () => {
             <Link
               key={link.path}
               to={link.path}
-              className={`text-sm transition-colors ${
-                location.pathname === link.path
-                  ? "text-accent"
+              className={`text-sm transition-colors ${location.pathname === link.path
+                  ? "text-accent font-medium"
                   : "text-muted-foreground hover:text-foreground"
-              }`}
+                }`}
             >
               {link.name}
             </Link>
@@ -100,98 +112,111 @@ const Navbar = () => {
             </Link>
           </Button>
 
-          {/* Profile Dropdown */}
-          <div ref={dropdownRef} className="relative">
-            <button
-              onClick={() => setProfileOpen((p) => !p)}
-              className="
-                w-10 h-10 rounded-full
-                bg-[#5C3A21] text-white
-                flex items-center justify-center
-                hover:bg-[#6F4A2D]
-                transition
-              "
-              aria-label="User menu"
-            >
-              <User className="w-5 h-5" />
-            </button>
+          {/* AUTH LOGIC: Show Dropdown OR Login Button */}
+          {user ? (
+            <div ref={dropdownRef} className="relative">
+              <button
+                onClick={() => setProfileOpen((p) => !p)}
+                className="w-10 h-10 rounded-full bg-[#5C3A21] text-white flex items-center justify-center hover:bg-[#6F4A2D] transition shadow-md"
+                aria-label="User menu"
+              >
+                <User className="w-5 h-5" />
+              </button>
 
-            <AnimatePresence>
-              {profileOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2 }}
-                  className="
-                    absolute right-0 mt-3 w-40
-                    rounded-xl overflow-hidden
-                    bg-[#5C3A21] text-white
-                    shadow-xl
-                  "
-                >
-                  <Link
-                    to="/profile"
-                    className="
-                      flex items-center gap-2 px-4 py-3
-                      hover:bg-[#6F4A2D] transition
-                    "
+              <AnimatePresence>
+                {profileOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 mt-3 w-48 rounded-xl overflow-hidden bg-[#5C3A21] text-white shadow-xl border border-[#6F4A2D]"
                   >
-                    <User className="w-4 h-4" />
-                    Profile
-                  </Link>
+                    <div className="px-4 py-3 border-b border-[#6F4A2D]">
+                      <p className="text-sm font-medium truncate">{user.name || "User"}</p>
+                      <p className="text-xs text-white/70 truncate">{user.email}</p>
+                    </div>
 
-                  <button
-                    onClick={handleLogout}
-                    className="
-                      w-full flex items-center gap-2 px-4 py-3
-                      hover:bg-[#6F4A2D] transition
-                      text-left
-                    "
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Logout
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                    <Link
+                      to="/profile"
+                      className="flex items-center gap-2 px-4 py-3 hover:bg-[#6F4A2D] transition text-sm"
+                    >
+                      <User className="w-4 h-4" /> Profile
+                    </Link>
+
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-4 py-3 hover:bg-[#6F4A2D] transition text-left text-sm text-red-200 hover:text-red-100"
+                    >
+                      <LogOut className="w-4 h-4" /> Logout
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            // IF NOT LOGGED IN
+            <Button variant="outline" asChild className="gap-2">
+              <Link to="/login">
+                <LogIn className="w-4 h-4" /> Login
+              </Link>
+            </Button>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="lg:hidden p-2"
+          className="lg:hidden p-2 text-foreground"
         >
           {isMobileMenuOpen ? <X /> : <Menu />}
         </button>
       </nav>
 
-      {/* Mobile Menu (unchanged) */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-background border-t"
+            className="lg:hidden bg-background border-t shadow-xl"
           >
             <div className="px-6 py-6 flex flex-col gap-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className="text-lg text-muted-foreground"
+                  className="text-lg text-muted-foreground hover:text-accent transition-colors"
                 >
                   {link.name}
                 </Link>
               ))}
-              <Button variant="hero" asChild>
-                <Link to="/franchise">Partner With Us</Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to="/profile">Profile</Link>
-              </Button>
+              <hr className="border-border" />
+
+              {user ? (
+                <>
+                  <div className="flex items-center gap-3 px-2 py-2">
+                    <div className="w-8 h-8 rounded-full bg-[#5C3A21] text-white flex items-center justify-center">
+                      <User size={16} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{user.name}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                  </div>
+                  <Button variant="outline" asChild>
+                    <Link to="/profile">My Profile</Link>
+                  </Button>
+                  <Button variant="ghost" onClick={handleLogout} className="text-red-500 hover:text-red-600 justify-start px-0">
+                    <LogOut className="w-4 h-4 mr-2" /> Logout
+                  </Button>
+                </>
+              ) : (
+                <Button variant="default" asChild>
+                  <Link to="/login">Login / Sign Up</Link>
+                </Button>
+              )}
             </div>
           </motion.div>
         )}

@@ -3,6 +3,8 @@ import { MessageCircle, X, Send, Coffee, Loader2, ShoppingBag } from 'lucide-rea
 import { useCart } from '../context/CartContext';
 import { toast } from 'sonner';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 interface Message {
     role: 'user' | 'bot';
     content: string;
@@ -43,7 +45,7 @@ export default function AiBaristaBot() {
 
         try {
             // Send to Backend
-            const response = await fetch('http://localhost:5000/api/ai/chat', {
+            const response = await fetch(`${API_URL}/api/ai/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
