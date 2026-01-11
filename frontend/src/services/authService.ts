@@ -46,14 +46,16 @@ export const signInWithGoogle = async () => {
     const idToken = await user.getIdToken();
     
     // Send to backend
-    const userData = await firebaseAuth(idToken, {
+    const response = await axios.post(`${API_URL}/api/auth/firebase-login`, {
+      idToken,
       name: user.displayName || undefined,
       phoneNumber: user.phoneNumber || undefined,
+      email: user.email,
     });
     
-    return userData;
+    return response.data;
   } catch (error: any) {
-    throw new Error(error.message);
+    throw new Error(error.message || "Google sign-in failed");
   }
 };
 
