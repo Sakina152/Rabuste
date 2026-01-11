@@ -21,22 +21,72 @@ interface ProfileUser {
   address?: string;
 }
 
+interface Order {
+  _id: string;
+  items: Array<{
+    menuItem: {
+      _id: string;
+      name: string;
+      image: string;
+    };
+    quantity: number;
+    price: number;
+  }>;
+  totalAmount: number;
+  status: string;
+  createdAt: string;
+  orderNumber: string;
+}
+
+interface ArtPurchase {
+  _id: string;
+  art: {
+    _id: string;
+    title: string;
+    artist: string;
+    imageUrl: string;
+    price: number;
+  };
+  purchasePrice: number;
+  status: string;
+  createdAt: string;
+  purchaseNumber: string;
+}
+
+interface Workshop {
+  _id: string;
+  workshop: {
+    _id: string;
+    title: string;
+    date: string;
+    price: number;
+  };
+  status: string;
+  numberOfSeats: number;
+  totalAmount: number;
+  registrationNumber: string;
+}
+
 const Profile = () => {
   const { toast } = useToast();
 
   const [user, setUser] = useState<ProfileUser | null>(null);
   const [loading, setLoading] = useState(true);
-
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [saving, setSaving] = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [artPurchases, setArtPurchases] = useState<ArtPurchase[]>([]);
+  const [workshops, setWorkshops] = useState<Workshop[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
 
-  /* ================= FETCH PROFILE ================= */
+  /* ================= FETCH USER PROFILE ================= */
   useEffect(() => {
     const fetchProfile = async () => {
       const token = getToken();
       if (!token) {
         setLoading(false);
+        setDataLoading(false);
         return;
       }
 
@@ -63,6 +113,36 @@ const Profile = () => {
     };
 
     fetchProfile();
+  }, [toast]);
+
+  /* ================= FETCH PROFILE DATA ================= */
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      const token = getToken();
+      if (!token) {
+        setDataLoading(false);
+        return;
+      }
+      try {
+        const res = await axios.get("http://localhost:5000/api/profile/data", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        setOrders(res.data.orders || []);
+        setArtPurchases(res.data.artPurchases || []);
+        setWorkshops(res.data.workshops || []);
+      } catch (err: any) {
+        console.error("Failed to load profile data", err);
+        toast({
+          title: "Error",
+          description: "Failed to load purchase history",
+          variant: "destructive",
+        });
+      } finally {
+        setDataLoading(false);
+      }
+    };
+    fetchProfileData();
   }, [toast]);
 
   /* ================= CHANGE PASSWORD ================= */
@@ -214,9 +294,108 @@ const Profile = () => {
 
         {/* Activity Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <ActivityCard title="Items Purchased" />
-          <ActivityCard title="Art Purchased" />
-          <ActivityCard title="Workshops Enrolled" />
+          {/* Items Purchased */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Items Purchased ({orders.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {dataLoading ? (
+                <p className="text-sm text-muted-foreground">Loading...</p>
+              ) : orders.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No items purchased yet.</p>
+              ) : (
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {orders.map((order) => (
+                    <div key={order._id} className="border rounded p-3">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="font-medium text-xs">{order.orderNumber}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(order.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="space-y-1">
+                        {order.items.map((item, idx) => (
+                          <div key={idx} className="text-sm">
+                            {item.menuItem.name} x {item.quantity}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-2 font-medium">₹{order.totalAmount}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Art Purchased */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Art Purchased ({artPurchases.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {dataLoading ? (
+                <p className="text-sm text-muted-foreground">Loading...</p>
+              ) : artPurchases.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No artworks purchased yet.</p>
+              ) : (
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {artPurchases.map((purchase) => (
+                    <div key={purchase._id} className="border rounded p-3">
+                      <div className="flex gap-3">
+                        <img 
+                          src={purchase.art.imageUrl} 
+                          alt={purchase.art.title}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                        <div className="flex-1">
+                          <div className="font-medium text-sm">{purchase.art.title}</div>
+                          <div className="text-xs text-muted-foreground">
+                            by {purchase.art.artist}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {purchase.purchaseNumber}
+                          </div>
+                          <div className="mt-1 font-medium text-sm">₹{purchase.purchasePrice}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Workshops Enrolled */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Workshops Enrolled ({workshops.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {dataLoading ? (
+                <p className="text-sm text-muted-foreground">Loading...</p>
+              ) : workshops.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No workshops enrolled yet.</p>
+              ) : (
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {workshops.map((workshop) => (
+                    <div key={workshop._id} className="border rounded p-3">
+                      <div className="font-medium text-sm">{workshop.workshop.title}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(workshop.workshop.date).toLocaleDateString()}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {workshop.registrationNumber}
+                      </div>
+                      <div className="text-sm">Seats: {workshop.numberOfSeats}</div>
+                      <div className="mt-1 font-medium text-sm">₹{workshop.totalAmount}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
       </div>
@@ -269,15 +448,4 @@ const PasswordField = ({
       />
     </div>
   </div>
-);
-
-const ActivityCard = ({ title }: { title: string }) => (
-  <Card>
-    <CardHeader>
-      <CardTitle>{title}</CardTitle>
-    </CardHeader>
-    <CardContent className="text-sm text-muted-foreground">
-      No data yet.
-    </CardContent>
-  </Card>
 );

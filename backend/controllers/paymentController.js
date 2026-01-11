@@ -3,6 +3,8 @@ import crypto from 'crypto';
 import asyncHandler from 'express-async-handler';
 import MenuItem from '../models/MenuItem.js';
 import Art from '../models/Art.js';
+import Order from '../models/Order.js'; 
+import ArtPurchase from '../models/ArtPurchase.js';
 
 // Validate Razorpay credentials
 if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
@@ -168,12 +170,56 @@ export const verifyPayment = asyncHandler(async (req, res) => {
   });
 
   if (signatureMatch) {
-    res.json({ 
-      status: "success", 
-      message: "Payment verified successfully",
-      order_id: orderId,
-      payment_id: paymentId
-    });
+    try {
+      // Get order data from request body
+      const { orderData } = req.body;
+      
+      console.log('Order data received:', orderData); // Add debug log
+      
+      if (orderData) {
+        // Create order records based on type
+        if (orderData.type === 'ART' && orderData.itemId) {
+          const artPurchase = new ArtPurchase({
+            user: req.user._id,
+            art: orderData.itemId,
+            purchasePrice: orderData.amount,
+            paymentStatus: 'completed',
+            paymentId: paymentId,
+            status: 'confirmed'
+          });
+          await artPurchase.save();
+          console.log('Art purchase saved:', artPurchase._id);
+        } else if (orderData.type === 'MENU' && orderData.cartItems) {
+          const order = new Order({
+            user: req.user._id,
+            items: orderData.cartItems.map(item => ({
+              menuItem: item.id || item._id,
+              quantity: item.quantity || 1,
+              price: item.price
+            })),
+            totalAmount: orderData.amount,
+            paymentStatus: 'completed',
+            paymentId: paymentId,
+            status: 'confirmed'
+          });
+          await order.save();
+          console.log('Order saved:', order._id);
+        }
+      } else {
+        console.log('No orderData received in payment verification');
+      }
+
+      res.json({ 
+        status: "success", 
+        message: "Payment verified successfully",
+        order_id: orderId,
+        payment_id: paymentId
+      });
+    } catch (error) {
+      console.error('Error creating order after payment:', error);
+      res.status(500);
+      throw new Error('Payment verified but failed to create order');
+    }
   } else {
     // Don't log full signatures in error (security)
     console.error('Payment verification failed - Signature mismatch:', {

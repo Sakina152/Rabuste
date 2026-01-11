@@ -82,11 +82,16 @@ export const useRazorpay = () => {
       }
 
       // 2. Prepare Payload for Backend
-      let payload = {};
+      // 3. Prepare Payload for Backend
+      let payload: any;
+      let orderAmount: number;
+
       if (requestType === 'MENU') {
         payload = { type: 'MENU', cartItems };
+        orderAmount = cartTotal;
       } else if (requestType === 'ART') {
         payload = { type: 'ART', itemId: artItem._id };
+        orderAmount = artItem.price || 0;
       }
 
       // 3. Create Order on Backend (no auth required)
@@ -147,7 +152,13 @@ export const useRazorpay = () => {
                 razorpay_order_id: orderId,
                 razorpay_payment_id: paymentId,
                 razorpay_signature: signature,
-              }, 
+                orderData: {
+                  type: requestType,
+                  cartItems: requestType === 'MENU' ? cartItems : undefined,
+                  itemId: requestType === 'ART' ? artItem?._id : undefined,
+                  amount: orderAmount  // Use the stored amount instead of orderData.amount
+                }
+              },
               config
             );
             

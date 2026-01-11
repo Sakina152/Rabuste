@@ -43,6 +43,18 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    orders: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Order'
+    }],
+    artPurchases: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ArtPurchase'
+    }],
+    workshopBookings: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Booking'
+    }]
   },
   {
     timestamps: true,

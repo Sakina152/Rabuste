@@ -20,6 +20,8 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import adminStatsRoutes from './routes/adminStatsRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
+import profileRoutes from './routes/profileRoutes.js';
+
 
 
 // Load environment variables
@@ -68,6 +70,7 @@ app.use('/api/franchise', franchiseRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin/stats', adminStatsRoutes);
+app.use('/api/profile', profileRoutes);
 // Basic route
 app.get('/', (req, res) => {
   res.send('Rabuste Coffee API is running...');
