@@ -27,6 +27,8 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 interface Workshop {
   _id: string;
   title: string;
@@ -57,7 +59,7 @@ export default function WorkshopManager() {
   const fetchWorkshops = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/workshops");
+      const res = await fetch(`${API_URL}/workshops`);
       const data = await res.json();
       if (data.success) {
         setWorkshops(data.data || []);
@@ -97,7 +99,7 @@ export default function WorkshopManager() {
     if (!confirm(`Are you sure you want to cancel "${title}"? This will cancel all bookings.`)) return;
 
     try {
-      const res = await fetch(`/api/workshops/${id}/cancel`, {
+      const res = await fetch(`${API_URL}/workshops/${id}/cancel`, {
         method: "PUT",
         headers: auth(),
       });
@@ -117,7 +119,7 @@ export default function WorkshopManager() {
     if (!confirm(`PERMANENTLY DELETE "${title}"? This cannot be undone and deletes all booking history.`)) return;
 
     try {
-      const res = await fetch(`/api/workshops/${id}/force`, {
+      const res = await fetch(`${API_URL}/workshops/${id}/force`, {
         method: "DELETE",
         headers: auth(),
       });

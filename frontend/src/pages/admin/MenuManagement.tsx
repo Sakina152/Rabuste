@@ -31,7 +31,7 @@ export default function MenuManagement() {
 
     const navigate = useNavigate();
     const { toast } = useToast();
-    const API = import.meta.env.VITE_API_BASE_URL;
+    const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
     const fetchMenuItems = async () => {
         const res = await fetch(`${API}/api/menu/items`);
@@ -59,43 +59,43 @@ export default function MenuManagement() {
     const deleteItem = async (id: string) => {
 
         const confirmDelete = window.confirm(
-          "Are you sure you want to delete this item?"
+            "Are you sure you want to delete this item?"
         );
         if (!confirmDelete) return;
         const token = getToken();
         if (!token) {
-          alert("Not logged in. Please login again.");
-          return;
-        }
-      
-        try {
-          const res = await fetch(`${API}/api/menu/items/${id}`, {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-      
-          if (!res.ok) {
-            const errorText = await res.text();
-            console.error("DELETE ERROR:", errorText);
-            alert("Delete failed. Check console.");
+            alert("Not logged in. Please login again.");
             return;
-          }
-      
-          toast({
-            title: "Deleted",
-            description: "Menu item removed successfully",
-          });
-      
-          fetchMenuItems();
-      
-        } catch (err) {
-          console.error("DELETE FAILED:", err);
-          alert("Something went wrong");
         }
-      };
-      
+
+        try {
+            const res = await fetch(`${API}/api/menu/items/${id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error("DELETE ERROR:", errorText);
+                alert("Delete failed. Check console.");
+                return;
+            }
+
+            toast({
+                title: "Deleted",
+                description: "Menu item removed successfully",
+            });
+
+            fetchMenuItems();
+
+        } catch (err) {
+            console.error("DELETE FAILED:", err);
+            alert("Something went wrong");
+        }
+    };
+
 
     useEffect(() => {
         fetchMenuItems();
@@ -160,8 +160,8 @@ export default function MenuManagement() {
                                         </p>
                                         <p
                                             className={`text-xs mt-1 ${item.isAvailable
-                                                    ? "text-green-500"
-                                                    : "text-red-400"
+                                                ? "text-green-500"
+                                                : "text-red-400"
                                                 }`}
                                         >
                                             {item.isAvailable ? "Available" : "Hidden"}

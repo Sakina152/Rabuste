@@ -18,6 +18,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 // Updated Interface to match your Mongoose Model
 interface Workshop {
   _id: string; // Changed from id: number to match MongoDB _id
@@ -51,7 +53,7 @@ const Workshops = () => {
   useEffect(() => {
     const fetchWorkshops = async () => {
       try {
-        const response = await fetch("/api/workshops");
+        const response = await fetch(`${API_URL}/api/workshops`);
         const json = await response.json();
         if (json.success) {
           setWorkshops(json.data);
@@ -71,7 +73,7 @@ const Workshops = () => {
     if (!selectedWorkshop) return;
 
     try {
-      const response = await fetch(`/api/workshops/${selectedWorkshop._id}/register`, {
+      const response = await fetch(`${API_URL}/api/workshops/${selectedWorkshop._id}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -93,9 +95,9 @@ const Workshops = () => {
         });
         setSelectedWorkshop(null);
         setFormData({ name: "", email: "", phone: "", numberOfSeats: 1 });
-        
+
         // Optionally refresh workshops to update seat count
-        const refreshRes = await fetch("/api/workshops");
+        const refreshRes = await fetch(`${API_URL}/api/workshops`);
         const refreshJson = await refreshRes.json();
         setWorkshops(refreshJson.data);
       } else {
@@ -165,7 +167,7 @@ const Workshops = () => {
       <section className="section-padding bg-background">
         <div className="container-custom">
           {loading ? (
-             <div className="text-center text-muted-foreground">Loading experiences...</div>
+            <div className="text-center text-muted-foreground">Loading experiences...</div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {workshops.map((workshop, index) => {

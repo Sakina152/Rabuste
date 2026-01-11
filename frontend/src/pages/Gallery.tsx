@@ -40,13 +40,15 @@ const Gallery = () => {
   // Razorpay Hook
   const { handlePayment, isProcessing } = useRazorpay(); // <--- 2. Use Hook
 
+  const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
   useEffect(() => {
     const fetchArtworks = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        const response = await fetch('http://localhost:5000/api/art');
+        const response = await fetch(`${API_URL}/api/art`);
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -91,7 +93,7 @@ const Gallery = () => {
     setSuccessMsg("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/art/inquiry", {
+      const res = await fetch(`${API_URL}/api/art/inquiry`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -204,9 +206,9 @@ const Gallery = () => {
 
                       {/* Status badge */}
                       {artwork.status === "Sold" && (
-                        <div 
-                        key={`${artwork._id}-sold`}
-                        className="absolute top-4 right-4 bg-destructive text-destructive-foreground px-3 py-1 rounded-full text-xs font-medium">
+                        <div
+                          key={`${artwork._id}-sold`}
+                          className="absolute top-4 right-4 bg-destructive text-destructive-foreground px-3 py-1 rounded-full text-xs font-medium">
                           Sold
                         </div>
                       )}

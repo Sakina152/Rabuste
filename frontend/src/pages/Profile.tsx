@@ -67,6 +67,8 @@ interface Workshop {
   registrationNumber: string;
 }
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 const Profile = () => {
   const { toast } = useToast();
 
@@ -92,7 +94,7 @@ const Profile = () => {
 
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/auth/me",
+          `${API_URL}/api/auth/me`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -124,10 +126,10 @@ const Profile = () => {
         return;
       }
       try {
-        const res = await axios.get("http://localhost:5000/api/profile/data", {
+        const res = await axios.get(`${API_URL}/api/profile/data`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        
+
         setOrders(res.data.orders || []);
         setArtPurchases(res.data.artPurchases || []);
         setWorkshops(res.data.workshops || []);
@@ -169,7 +171,7 @@ const Profile = () => {
     try {
       setSaving(true);
       await axios.put(
-        "http://localhost:5000/api/auth/change-password",
+        `${API_URL}/api/auth/change-password`,
         {
           currentPassword,
           newPassword,
@@ -343,8 +345,8 @@ const Profile = () => {
                   {artPurchases.map((purchase) => (
                     <div key={purchase._id} className="border rounded p-3">
                       <div className="flex gap-3">
-                        <img 
-                          src={purchase.art.imageUrl} 
+                        <img
+                          src={purchase.art.imageUrl}
                           alt={purchase.art.title}
                           className="w-16 h-16 object-cover rounded"
                         />

@@ -16,6 +16,8 @@ import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/rabuste-logo.png";
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -40,30 +42,31 @@ const AdminLogin = () => {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
-    
+
     try {
       // 1. The Real API Call to your Backend
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post(`${API_URL}/api/auth/login`, {
         email: data.email,
         password: data.password,
       });
-      
+
       if (response.data.role !== 'admin') {
         throw new Error("Access Denied: You are not an Admin");
       }
 
       localStorage.setItem('userInfo', JSON.stringify(response.data));
 
-      
+
       toast({
         title: "Login Successful",
         description: "Welcome back, Admin!",
-        className: "bg-terracotta text-white border-none"      });
-      
+        className: "bg-terracotta text-white border-none"
+      });
+
       // Navigate to admin dashboard after successful login
       navigate('/admin/dashboard');
 
-    } catch (error : any) {
+    } catch (error: any) {
       toast({
         title: "Login Failed",
         description: "Invalid credentials. Please try again.",
@@ -82,16 +85,16 @@ const AdminLogin = () => {
           <motion.div
             key={i}
             className="absolute text-terracotta/20"
-            initial={{ 
+            initial={{
               x: Math.random() * window.innerWidth,
               y: Math.random() * window.innerHeight,
               rotate: Math.random() * 360
             }}
-            animate={{ 
+            animate={{
               y: [null, -20, 20, -10, 10, 0],
               rotate: [null, 10, -10, 5, -5, 0]
             }}
-            transition={{ 
+            transition={{
               duration: 8 + i * 2,
               repeat: Infinity,
               repeatType: "reverse",
@@ -135,19 +138,19 @@ const AdminLogin = () => {
         <Card className="bg-card/95 backdrop-blur-md border-terracotta/20 shadow-2xl">
           <CardHeader className="text-center space-y-4 pb-2">
             {/* Logo */}
-            <motion.div 
+            <motion.div
               className="flex justify-center"
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
             >
-              <img 
-                src={logo} 
-                alt="Rabuste Coffee" 
+              <img
+                src={logo}
+                alt="Rabuste Coffee"
                 className="h-16 w-auto"
               />
             </motion.div>
-            
+
             <div>
               <CardTitle className="font-display text-3xl text-foreground">
                 Admin Portal
@@ -176,7 +179,7 @@ const AdminLogin = () => {
                   />
                 </div>
                 {errors.email && (
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-sm text-destructive"
@@ -209,7 +212,7 @@ const AdminLogin = () => {
                   </button>
                 </div>
                 {errors.password && (
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-sm text-destructive"
@@ -222,14 +225,14 @@ const AdminLogin = () => {
               {/* Remember Me & Forgot Password */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="remember" 
+                  <Checkbox
+                    id="remember"
                     checked={rememberMe}
                     onCheckedChange={(checked) => setRememberMe(checked as boolean)}
                     className="border-border/50 data-[state=checked]:bg-terracotta data-[state=checked]:border-terracotta"
                   />
-                  <Label 
-                    htmlFor="remember" 
+                  <Label
+                    htmlFor="remember"
                     className="text-sm text-muted-foreground cursor-pointer"
                   >
                     Remember me

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Users, 
+import {
+  LayoutDashboard,
+  FileText,
+  Users,
   LogOut,
   DollarSign,
   ShoppingBag,
@@ -47,35 +47,35 @@ const getStatsData = (dashboardStats: any) => {
   const ordersTrend = dashboardStats.ordersTrend || 0;
 
   return [
-    { 
-      title: "Total Revenue", 
-      value: `₹${(dashboardStats.totalRevenue || 0).toLocaleString('en-IN')}`, 
-      icon: DollarSign, 
-      trend: `${revenueTrend >= 0 ? '+' : ''}${revenueTrend}%`, 
+    {
+      title: "Total Revenue",
+      value: `₹${(dashboardStats.totalRevenue || 0).toLocaleString('en-IN')}`,
+      icon: DollarSign,
+      trend: `${revenueTrend >= 0 ? '+' : ''}${revenueTrend}%`,
       trendUp: revenueTrend >= 0,
       description: "vs last week"
     },
-    { 
-      title: "Active Orders", 
-      value: `${dashboardStats.paidOrders || 0}`, 
-      icon: ShoppingBag, 
-      trend: `${ordersTrend >= 0 ? '+' : ''}${ordersTrend}%`, 
+    {
+      title: "Active Orders",
+      value: `${dashboardStats.paidOrders || 0}`,
+      icon: ShoppingBag,
+      trend: `${ordersTrend >= 0 ? '+' : ''}${ordersTrend}%`,
       trendUp: ordersTrend >= 0,
       description: "vs last week"
     },
-    { 
-      title: "Pending Franchises", 
-      value: `${dashboardStats.pendingFranchises || 0}`, 
-      icon: Building2, 
-      trend: "-", 
+    {
+      title: "Pending Franchises",
+      value: `${dashboardStats.pendingFranchises || 0}`,
+      icon: Building2,
+      trend: "-",
       trendUp: false,
       description: "awaiting review"
     },
-    { 
-      title: "Workshop Signups", 
-      value: `${dashboardStats.confirmedWorkshops || 0}`, 
-      icon: Calendar, 
-      trend: `${dashboardStats.totalWorkshops || 0}`, 
+    {
+      title: "Workshop Signups",
+      value: `${dashboardStats.confirmedWorkshops || 0}`,
+      icon: Calendar,
+      trend: `${dashboardStats.totalWorkshops || 0}`,
       trendUp: true,
       description: "total bookings"
     },
@@ -87,7 +87,7 @@ const getRecentActivity = (orders: any[]) => {
   if (!orders || orders.length === 0) {
     return [{ action: "No recent activity", time: "", type: "info" }];
   }
-  
+
   return orders.slice(0, 5).map(order => {
     const timeAgo = new Date(order.createdAt).toLocaleString('en-US', {
       hour: 'numeric',
@@ -95,7 +95,7 @@ const getRecentActivity = (orders: any[]) => {
       day: 'numeric',
       month: 'short'
     });
-    
+
     if (order.orderType === 'ART') {
       return {
         action: `Art purchase: ₹${order.totalPrice}`,
@@ -115,9 +115,9 @@ const getRecentActivity = (orders: any[]) => {
 const getQuickActions = (dashboardStats: any) => {
   return [
     { title: "View Menu", description: "Manage items", icon: Coffee, href: "/admin/dashboard/menu-management" },
-    { title: "Workshops", description: "5 upcoming", icon: Calendar , href: "/admin/dashboard/workshops"},
-    { 
-      title: "Gallery", 
+    { title: "Workshops", description: "5 upcoming", icon: Calendar, href: "/admin/dashboard/workshops" },
+    {
+      title: "Gallery",
       description: dashboardStats ? `${dashboardStats.totalArtSold || 0} sold` : "Loading...",
       icon: TrendingUp,
       href: "/admin/gallery"
@@ -148,11 +148,11 @@ export default function AdminDashboard() {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch dashboard stats
         const statsResponse = await axios.get(`${API_BASE}/api/admin/stats/dashboard`);
         setDashboardStats(statsResponse.data);
-        
+
         // Fetch recent orders
         const ordersResponse = await axios.get(`${API_BASE}/api/orders?status=completed`);
         setRecentOrders(ordersResponse.data || []);
@@ -171,7 +171,7 @@ export default function AdminDashboard() {
     fetchDashboardData();
     // Refresh stats every 30 seconds
     const interval = setInterval(fetchDashboardData, 30000);
-    
+
     return () => clearInterval(interval);
   }, [API_BASE, toast]);
 
@@ -199,7 +199,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
-      <motion.aside 
+      <motion.aside
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -224,11 +224,10 @@ export default function AdminDashboard() {
               key={item.title}
               to={item.href}
               onClick={() => setActiveNav(item.title)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                activeNav === item.title
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${activeNav === item.title
                   ? "bg-accent/20 text-accent border border-accent/30"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
+                }`}
             >
               <item.icon className="w-5 h-5" />
               <span className="font-medium">{item.title}</span>
@@ -241,8 +240,8 @@ export default function AdminDashboard() {
 
         {/* Sign Out */}
         <div className="p-4 border-t border-border">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={handleSignOut}
             className="w-full justify-start gap-3 text-accent hover:text-accent hover:bg-accent/10"
           >
@@ -255,7 +254,7 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
         {/* Header */}
-        <motion.header 
+        <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -276,10 +275,10 @@ export default function AdminDashboard() {
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">Today</p>
                   <p className="font-medium text-foreground">
-                    {new Date().toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      month: 'short', 
-                      day: 'numeric' 
+                    {new Date().toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      month: 'short',
+                      day: 'numeric'
                     })}
                   </p>
                 </div>
@@ -311,9 +310,8 @@ export default function AdminDashboard() {
                             {stat.value}
                           </p>
                           <div className="flex items-center gap-2">
-                            <span className={`flex items-center text-sm font-medium ${
-                              stat.trendUp ? 'text-green-500' : 'text-red-400'
-                            }`}>
+                            <span className={`flex items-center text-sm font-medium ${stat.trendUp ? 'text-green-500' : 'text-red-400'
+                              }`}>
                               {stat.trendUp ? (
                                 <ArrowUpRight className="w-4 h-4" />
                               ) : (
@@ -352,7 +350,7 @@ export default function AdminDashboard() {
                       {loading ? (
                         <div className="text-center py-8 text-muted-foreground">Loading recent activity...</div>
                       ) : getRecentActivity(recentOrders).map((activity, index) => (
-                        <motion.div 
+                        <motion.div
                           key={index}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
@@ -360,11 +358,10 @@ export default function AdminDashboard() {
                           className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors"
                         >
                           <div className="flex items-center gap-4">
-                            <div className={`w-2 h-2 rounded-full ${
-                              activity.type === 'art' ? 'bg-green-500' : 
-                              activity.type === 'menu' ? 'bg-blue-500' : 
-                              'bg-accent'
-                            }`} />
+                            <div className={`w-2 h-2 rounded-full ${activity.type === 'art' ? 'bg-green-500' :
+                                activity.type === 'menu' ? 'bg-blue-500' :
+                                  'bg-accent'
+                              }`} />
                             <span className="text-foreground font-medium">{activity.action}</span>
                           </div>
                           <span className="text-sm text-muted-foreground">{activity.time}</span>
@@ -388,22 +385,22 @@ export default function AdminDashboard() {
                     <div className="space-y-3">
                       {getQuickActions(dashboardStats).map((action, index) => (
                         <Link to={action.href || "#"} key={action.title}>
-                        <motion.button
-                          key={action.title}
-                          onClick={() => action.href && navigate(action.href)}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          className="w-full p-4 rounded-xl border border-border hover:border-accent/30 bg-muted/20 hover:bg-muted/40 transition-all flex items-center gap-4 group"
-                        >
-                          <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                            <action.icon className="w-5 h-5 text-accent" />
-                          </div>
-                          <div className="text-left">
-                            <p className="font-medium text-foreground">{action.title}</p>
-                            <p className="text-sm text-muted-foreground">{action.description}</p>
-                          </div>
-                          <ChevronRight className="w-5 h-5 text-muted-foreground ml-auto group-hover:text-accent transition-colors" />
-                        </motion.button>
+                          <motion.button
+                            key={action.title}
+                            onClick={() => action.href && navigate(action.href)}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="w-full p-4 rounded-xl border border-border hover:border-accent/30 bg-muted/20 hover:bg-muted/40 transition-all flex items-center gap-4 group"
+                          >
+                            <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                              <action.icon className="w-5 h-5 text-accent" />
+                            </div>
+                            <div className="text-left">
+                              <p className="font-medium text-foreground">{action.title}</p>
+                              <p className="text-sm text-muted-foreground">{action.description}</p>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-muted-foreground ml-auto group-hover:text-accent transition-colors" />
+                          </motion.button>
                         </Link>
                       ))}
                     </div>
@@ -423,7 +420,7 @@ export default function AdminDashboard() {
                     Select a Module
                   </h3>
                   <p className="text-muted-foreground max-w-md mx-auto">
-                    Choose a section from the sidebar to manage your coffee shop. 
+                    Choose a section from the sidebar to manage your coffee shop.
                     View menu items, workshops, gallery, or franchise applications.
                   </p>
                 </CardContent>
