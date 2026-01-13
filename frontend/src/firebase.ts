@@ -2,15 +2,15 @@ import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
 import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 
-// Your Firebase web config
+// Firebase web config from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyDdXNiRRkeXq8JZ9gecR5gsmytmca3p1DY",
-  authDomain: "rabuste-coffee-d621d.firebaseapp.com",
-  projectId: "rabuste-coffee-d621d",
-  storageBucket: "rabuste-coffee-d621d.firebasestorage.app",
-  messagingSenderId: "973156930028",
-  appId: "1:973156930028:web:9278dd6dc99197da90f0c9",
-  measurementId: "G-JFYEWNQNBV"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
