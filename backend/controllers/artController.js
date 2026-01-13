@@ -4,24 +4,28 @@ import sendEmail from '../utils/emailSender.js';
 
 // 1. Get all Art (Customers see this) 
 export const getAllArt = async (req, res) => {
-    try {
-        const filter = req.query.status ? { status: req.query.status } : {};
-        const gallery = await Art.find(filter);
-        res.status(200).json(gallery);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+  try {
+    const filter = req.query.status ? { status: req.query.status } : {};
+    const gallery = await Art.find(filter);
+    res.status(200).json(gallery);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }
 
 // 2. Add New Art (Admin only)
 export const addArt = async (req, res) => {
-    try {
-        const newArt = new Art(req.body);
-        await newArt.save();
-        res.status(201).json({ message: "Art piece added successfully", newArt });
-    } catch (error) {
-        res.status(400).json({ message: "Failed to add art", error });
-    }
+  try {
+    const artData = {
+      ...req.body,
+      image: req.file ? req.file.path : null // Handle image upload
+    };
+    const newArt = new Art(artData);
+    await newArt.save();
+    res.status(201).json({ message: "Art piece added successfully", newArt });
+  } catch (error) {
+    res.status(400).json({ message: "Failed to add art", error });
+  }
 };
 
 // 3. Toggle Art Status (The "Available -> Reserved -> Sold" logic)
@@ -32,9 +36,6 @@ export const updateArtStatus = async (req, res) => {
 
     const update = { status };
 
-        if (status === 'Sold') {
-            update.soldAt = new Date();
-        }
     if (status === "Sold") {
       update.soldAt = new Date();
     }
@@ -82,7 +83,7 @@ export const submitInquiry = async (req, res) => {
     // 3. Email to ADMIN
     // (Ensure EMAIL_USER is set in your .env)
     if (process.env.EMAIL_USER) {
-        await sendEmail({
+      await sendEmail({
         email: process.env.EMAIL_USER, // admin email
         subject: `📩 New Art Inquiry: ${art.title}`,
         message: `
@@ -109,10 +110,10 @@ export const submitInquiry = async (req, res) => {
             <p><strong>Message:</strong></p>
             <p>${message}</p>
         `
-        });
+      });
 
-        // 4. Email CONFIRMATION to CUSTOMER
-        await sendEmail({
+      // 4. Email CONFIRMATION to CUSTOMER
+      await sendEmail({
         email,
         subject: `We received your inquiry – Rabuste Gallery`,
         message: `
@@ -130,7 +131,7 @@ export const submitInquiry = async (req, res) => {
             <br/>
             <p>– Rabuste Gallery ☕</p>
         `
-        });
+      });
     }
 
     res.status(201).json({
@@ -152,37 +153,37 @@ export const submitInquiry = async (req, res) => {
 
 // 5. Purchase Art (Called automatically after payment success)
 export const purchaseArt = async (req, res) => {
-    try {
-        const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-        // Find the art
-        const art = await Art.findById(id);
+    // Find the art
+    const art = await Art.findById(id);
 
-        if (!art) {
-            return res.status(404).json({ message: "Art not found" });
-        }
-
-        // Double check status to prevent race conditions
-        if (art.status === 'Sold') {
-            return res.status(400).json({ message: "This piece is already sold!" });
-        }
-
-        // Update to Sold
-        art.status = 'Sold';
-        art.soldAt = new Date();
-        
-        // If the user is logged in (from authMiddleware), save who bought it
-        if (req.user) {
-            art.owner = req.user._id;
-        }
-
-        await art.save();
-
-        res.status(200).json({ message: "Purchase successful", art });
-    } catch (error) {
-        console.error("Purchase Error:", error);
-        res.status(500).json({ message: "Purchase failed", error: error.message });
+    if (!art) {
+      return res.status(404).json({ message: "Art not found" });
     }
+
+    // Double check status to prevent race conditions
+    if (art.status === 'Sold') {
+      return res.status(400).json({ message: "This piece is already sold!" });
+    }
+
+    // Update to Sold
+    art.status = 'Sold';
+    art.soldAt = new Date();
+
+    // If the user is logged in (from authMiddleware), save who bought it
+    if (req.user) {
+      art.owner = req.user._id;
+    }
+
+    await art.save();
+
+    res.status(200).json({ message: "Purchase successful", art });
+  } catch (error) {
+    console.error("Purchase Error:", error);
+    res.status(500).json({ message: "Purchase failed", error: error.message });
+  }
 };
 
 // 6. Editing Art Details (Admin-Side)
@@ -199,7 +200,10 @@ export const updateArt = async (req, res) => {
     art.artist = req.body.artist ?? art.artist;
     art.price = req.body.price ?? art.price;
     art.status = req.body.status ?? art.status;
-    art.imageUrl = req.body.imageUrl ?? art.imageUrl;
+
+    if (req.file) {
+      art.image = req.file.path;
+    }
 
     const updatedArt = await art.save();
 

@@ -13,7 +13,7 @@ interface Artwork {
   artist: string;
   price: number;
   status: "Available" | "Reserved" | "Sold";
-  imageUrl?: string;
+  image?: string;
   dimensions?: string;
   description?: string;
   category?: "abstract" | "landscape" | "portrait";
@@ -67,7 +67,7 @@ const Gallery = () => {
           artist: art.artist,
           price: art.price,
           status: art.status,
-          imageUrl: art.imageUrl,
+          image: art.image,
           dimensions: art.dimensions,
           description: art.description,
           category: art.category || 'abstract'
@@ -185,9 +185,9 @@ const Gallery = () => {
                   >
                     {/* Placeholder Art Pattern */}
                     <div className="aspect-[4/5] rounded-2xl overflow-hidden border border-border hover:border-accent/50 transition-all duration-500 cursor-pointer">
-                      {artwork.imageUrl ? (
+                      {artwork.image ? (
                         <img
-                          src={artwork.imageUrl}
+                          src={`${API_URL}/${artwork.image.replace(/\\/g, "/")}`}
                           alt={artwork.title}
                           className="w-full h-full object-cover"
                         />
@@ -263,9 +263,9 @@ const Gallery = () => {
               <div className="grid md:grid-cols-2">
                 {/* Art Preview */}
                 <div className="aspect-square overflow-hidden">
-                  {selectedArt.imageUrl ? (
+                  {selectedArt.image ? (
                     <img
-                      src={selectedArt.imageUrl}
+                      src={`${API_URL}/${selectedArt.image.replace(/\\/g, "/")}`}
                       alt={selectedArt.title}
                       className="w-full h-full object-cover"
                     />

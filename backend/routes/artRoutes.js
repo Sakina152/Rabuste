@@ -1,6 +1,8 @@
 import express from 'express';
 import { protect } from '../middleware/authMiddleware.js';
 import { authorize } from '../middleware/roleMiddleware.js';
+import multer from 'multer';
+import path from 'path';
 import {
     getAllArt,
     addArt,
@@ -8,10 +10,25 @@ import {
     submitInquiry,
     updateArt,
     deleteArt,
-    purchaseArt // <--- 1. Import this
+    purchaseArt
 } from '../controllers/artController.js';
 
 const router = express.Router();
+
+// Multer Config
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/art/');
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        cb(
+            null,
+            file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname)
+        );
+    },
+});
+const upload = multer({ storage: storage });
 
 // --- Public Routes ---
 // Anyone can view the gallery and send an inquiry
@@ -20,15 +37,15 @@ router.post('/inquiry', submitInquiry);
 
 // --- Protected Routes (Any Logged-in User) ---
 // Buying art requires login, but you don't need to be an admin
-router.post('/purchase/:id', protect, purchaseArt); // <--- 2. Add this route
+router.post('/purchase/:id', protect, purchaseArt);
 
 // --- Admin Only Routes ---
 // Everything below this line requires Admin privileges
 router.use(protect);
 router.use(authorize('admin', 'super_admin'));
 
-router.post('/', addArt);
-router.put('/:id', updateArt);
+router.post('/', upload.single('image'), addArt);
+router.put('/:id', upload.single('image'), updateArt);
 router.patch('/:id/status', updateArtStatus);
 router.delete('/:id', deleteArt);
 

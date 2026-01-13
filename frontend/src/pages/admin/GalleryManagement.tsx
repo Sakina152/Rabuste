@@ -24,7 +24,7 @@ interface Art {
   artist: string;
   price: number;
   status: "Available" | "Reserved" | "Sold";
-  imageUrl?: string;
+  image?: string; // Renamed from imageUrl
 }
 
 /* ================= COMPONENT ================= */
@@ -49,14 +49,23 @@ export default function GalleryManagement() {
         const artRes = await fetch(`${API_URL}/api/art`);
         setArtworks(await artRes.json());
 
-        if (!token) return;
+        // Wait for token to be available if it's a promise (although here it seems synchronous based on usage,
+        // but previous context suggested it might be async. 
+        // Based on the code viewed previously, getToken() returns the token string directly if using localStorage, 
+        // or a promise? Let's check imports. It imports getToken from utils.
+        // Assuming synchronous usage based on existing code, but best to be safe if it was async earlier.
+        // The existing code was : const token = getToken(); then using it in useEffect.
+        // If it's async, we should await it.
+        const resolvedToken = await Promise.resolve(token);
+
+        if (!resolvedToken) return;
 
         const [overviewRes, weeklyRes] = await Promise.all([
           fetch(`${API_URL}/api/admin/stats/overview`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${resolvedToken}` },
           }),
           fetch(`${API_URL}/api/admin/stats/weekly-sales`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${resolvedToken}` },
           }),
         ]);
 
@@ -75,10 +84,12 @@ export default function GalleryManagement() {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this artwork?")) return;
 
+    const resolvedToken = await Promise.resolve(token);
+
     const res = await fetch(`${API_URL}/api/art/${id}`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${resolvedToken}`,
       },
     });
 
@@ -95,8 +106,8 @@ export default function GalleryManagement() {
     id: string,
     status: "Available" | "Reserved" | "Sold"
   ) => {
-    const token = getToken();
-    if (!token) return;
+    const resolvedToken = await Promise.resolve(token);
+    if (!resolvedToken) return;
 
     const res = await fetch(
       `${API_URL}/api/art/${id}/status`,
@@ -104,7 +115,7 @@ export default function GalleryManagement() {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${resolvedToken}`,
         },
         body: JSON.stringify({ status }),
       }
@@ -117,7 +128,6 @@ export default function GalleryManagement() {
 
     const updatedArt = await res.json();
 
-    // 🔥 THIS LINE IS THE FIX
     setArtworks((prev) =>
       prev.map((art) =>
         art._id === updatedArt._id ? updatedArt : art
@@ -211,9 +221,9 @@ export default function GalleryManagement() {
 
                 {/* Image */}
                 <div className="aspect-[4/5] bg-muted/40 overflow-hidden">
-                  {art.imageUrl ? (
+                  {art.image ? (
                     <img
-                      src={art.imageUrl}
+                      src={`${API_URL}/${art.image.replace(/\\/g, "/")}`}
                       alt={art.title}
                       className="w-full h-full object-cover"
                     />
@@ -255,10 +265,10 @@ export default function GalleryManagement() {
 
                     <span
                       className={`px-3 py-1 text-xs rounded-full ${art.status === "Sold"
-                          ? "bg-red-500 text-white"
-                          : art.status === "Reserved"
-                            ? "bg-yellow-500 text-black"
-                            : "bg-accent/20 text-accent"
+                        ? "bg-red-500 text-white"
+                        : art.status === "Reserved"
+                          ? "bg-yellow-500 text-black"
+                          : "bg-accent/20 text-accent"
                         }`}
                     >
                       {art.status}
@@ -337,18 +347,28 @@ function ArtModal({
 }) {
   const token = getToken();
 
-  const [form, setForm] = useState({
-    title: art?.title || "",
-    artist: art?.artist || "",
-    price: art?.price || "",
-    status: art?.status || "Available",
-    imageUrl: art?.imageUrl || "",
-  });
+  const [title, setTitle] = useState(art?.title || "");
+  const [artist, setArtist] = useState(art?.artist || "");
+  const [price, setPrice] = useState(art?.price?.toString() || "");
+  const [status, setStatus] = useState(art?.status || "Available");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    art?.image ? `${API_URL}/${art.image.replace(/\\/g, "/")}` : null
+  );
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const resolvedToken = await Promise.resolve(token);
 
-    if (!token) {
+    if (!resolvedToken) {
       alert("Not authenticated");
       return;
     }
@@ -359,19 +379,21 @@ function ArtModal({
 
     const method = art ? "PUT" : "POST";
 
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("artist", artist);
+    formData.append("price", price);
+    formData.append("status", status);
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
+
     const res = await fetch(url, {
       method,
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${resolvedToken}`,
       },
-      body: JSON.stringify({
-        title: form.title,
-        artist: form.artist,
-        price: Number(form.price),
-        status: form.status,
-        imageUrl: form.imageUrl,
-      }),
+      body: formData,
     });
 
 
@@ -406,8 +428,8 @@ function ArtModal({
           <div className="space-y-1">
             <label className="text-sm text-muted-foreground">Title</label>
             <input
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               placeholder="Artwork title"
               className="w-full rounded-xl bg-muted/40 border border-border px-4 py-2"
             />
@@ -417,8 +439,8 @@ function ArtModal({
           <div className="space-y-1">
             <label className="text-sm text-muted-foreground">Artist</label>
             <input
-              value={form.artist}
-              onChange={(e) => setForm({ ...form, artist: e.target.value })}
+              value={artist}
+              onChange={(e) => setArtist(e.target.value)}
               placeholder="Artist name"
               className="w-full rounded-xl bg-muted/40 border border-border px-4 py-2"
             />
@@ -429,8 +451,8 @@ function ArtModal({
             <label className="text-sm text-muted-foreground">Price (₹)</label>
             <input
               type="number"
-              value={form.price}
-              onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
               placeholder="Price (₹)"
               className="w-full rounded-xl bg-muted/40 border border-border px-4 py-2"
             />
@@ -440,8 +462,8 @@ function ArtModal({
           <div className="space-y-1">
             <label className="text-sm text-muted-foreground">Status</label>
             <select
-              value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value as "Available" | "Reserved" | "Sold", })}
+              value={status}
+              onChange={(e) => setStatus(e.target.value as "Available" | "Reserved" | "Sold")}
               className="w-full rounded-xl bg-muted/40 border border-border px-4 py-2"
             >
               <option value="Available">Available</option>
@@ -450,13 +472,24 @@ function ArtModal({
             </select>
           </div>
 
-          {/* Image URL */}
+          {/* Image Upload */}
           <div className="space-y-1">
-            <label className="text-sm text-muted-foreground">Image URL</label>
+            <label className="text-sm text-muted-foreground">Artwork Image</label>
+
+            {imagePreview && (
+              <div className="mb-2 h-40 w-full rounded-xl overflow-hidden border border-border">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            )}
+
             <input
-              value={form.imageUrl}
-              onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-              placeholder="https://example.com/image.jpg"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
               className="w-full rounded-xl bg-muted/40 border border-border px-4 py-2"
             />
           </div>

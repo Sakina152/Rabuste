@@ -28,10 +28,10 @@ import logo from "@/assets/rabuste-logo.png";
 const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const navItems = [
-  { title: "Dashboard", icon: LayoutDashboard, href: `${API_URL}/admin/dashboard`, active: true },
-  { title: "Orders", icon: ShoppingBag, href: `${API_URL}/admin/dashboard/orders` },
-  { title: "Applications", icon: FileText, href: `${API_URL}/admin/applications` },
-  { title: "Users", icon: Users, href: `${API_URL}/admin/users` },
+  { title: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard", active: true },
+  { title: "Orders", icon: ShoppingBag, href: "/admin/dashboard/orders" },
+  { title: "Applications", icon: FileText, href: "/admin/applications" },
+  { title: "Users", icon: Users, href: "/admin/users" },
 ];
 
 // Stats will be loaded from API
@@ -116,13 +116,13 @@ const getRecentActivity = (orders: any[]) => {
 
 const getQuickActions = (dashboardStats: any) => {
   return [
-    { title: "View Menu", description: "Manage items", icon: Coffee, href: `${API_URL}/admin/dashboard/menu-management` },
-    { title: "Workshops", description: "5 upcoming", icon: Calendar, href: `${API_URL}/admin/dashboard/workshops` },
+    { title: "View Menu", description: "Manage items", icon: Coffee, href: "/admin/dashboard/menu-management" },
+    { title: "Workshops", description: "5 upcoming", icon: Calendar, href: "/admin/dashboard/workshops" },
     {
       title: "Gallery",
       description: dashboardStats ? `${dashboardStats.totalArtSold || 0} sold` : "Loading...",
       icon: TrendingUp,
-      href: `${API_URL}/admin/gallery`
+      href: "/admin/gallery"
     },
   ];
 };
@@ -389,7 +389,6 @@ export default function AdminDashboard() {
                         <Link to={action.href || "#"} key={action.title}>
                           <motion.button
                             key={action.title}
-                            onClick={() => action.href && navigate(action.href)}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             className="w-full p-4 rounded-xl border border-border hover:border-accent/30 bg-muted/20 hover:bg-muted/40 transition-all flex items-center gap-4 group"

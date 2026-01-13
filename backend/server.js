@@ -62,6 +62,7 @@ app.use('/api/ai', aiRoutes);
 // Make uploads folder static
 const uploadsDir = path.join(__dirname, "uploads");
 const menuDir = path.join(uploadsDir, "menu");
+const artDir = path.join(uploadsDir, "art");
 
 app.use("/uploads", express.static(uploadsDir));
 
@@ -71,6 +72,9 @@ if (!fs.existsSync(uploadsDir)) {
 }
 if (!fs.existsSync(menuDir)) {
   fs.mkdirSync(menuDir, { recursive: true });
+}
+if (!fs.existsSync(artDir)) {
+  fs.mkdirSync(artDir, { recursive: true });
 }
 
 // Routes
