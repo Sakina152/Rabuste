@@ -43,48 +43,47 @@ const App = () => (
       <CartProvider>
         <Toaster />
         <Sonner />
-      
-      <BrowserRouter>
-        <ScrollToTop />
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/menu" element={<Menu />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/workshops" element={<Workshops />} />
-          <Route path="/franchise" element={<Franchise />} />
-          
-          {/* Checkout */}
-          <Route path="/checkout" element={<Checkout />} />
 
-            {/*Order success*/}
+        <BrowserRouter>
+          <ScrollToTop />
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/menu" element={<Menu />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/workshops" element={<Workshops />} />
+            <Route path="/franchise" element={<Franchise />} />
+
+            {/* Checkout */}
+            <Route path="/checkout" element={<Checkout />} />
+
+            {/* Order Success */}
             <Route path="/order-success" element={<OrderSuccess />} />
+
             {/* Admin Auth Routes */}
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin/register" element={<AdminRegister />} />
 
-            <Route path="/checkout" element={<Checkout />} />
-            {/*. PROTECTED ADMIN ROUTES */}
-            {/* Anything inside this wrapper requires Login + Admin Role */}
+            {/* PROTECTED ADMIN ROUTES */}
             <Route element={<ProtectedRoute />}>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/dashboard/menu-management" element={<MenuManagement />} />
+              <Route path="/admin/dashboard/menu-management/new" element={<MenuItemForm />} />
+              <Route path="/admin/dashboard/menu-management/edit/:id" element={<MenuItemForm />} />
+              <Route path="/admin/dashboard/workshops" element={<WorkshopManager />} />
+              <Route path="/admin/dashboard/orders" element={<OrderManagement />} />
+              <Route path="/admin/gallery" element={<GalleryManagement />} />
             </Route>
 
-            <Route path="/admin/dashboard/menu-management" element={<MenuManagement />} />
-            <Route path="/admin/dashboard/menu-management/new" element={<MenuItemForm />} />
-            <Route path="/admin/dashboard/menu-management/edit/:id" element={<MenuItemForm />} />
-            <Route path="/admin/dashboard/workshops" element={<WorkshopManager />} />
-            <Route path="/admin/dashboard/orders" element={<OrderManagement />} />
-
-            <Route path="/admin/gallery" element={<GalleryManagement />} />
-
+            {/* Protected User Routes */}
             <Route element={<UserProtectedRoute />}>
               <Route path="/profile" element={<Profile />} />
             </Route>
 
+            {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
           <FloatingCart />
