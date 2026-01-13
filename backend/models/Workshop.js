@@ -127,11 +127,10 @@ workshopSchema.virtual('isPast').get(function() {
 // --- Pre-save Hook ---
 // Removed the 'next' parameter to prevent "next is not a function" errors.
 // Modern Mongoose handles hooks that return nothing or a promise automatically.
-workshopSchema.pre('save', async function (next) {
+workshopSchema.pre('save', async function () {
   if (this.isModified('title')) {
     this.slug = createSlug(this.title);
   }
-  next();
 });
 
 const Workshop = mongoose.model('Workshop', workshopSchema);

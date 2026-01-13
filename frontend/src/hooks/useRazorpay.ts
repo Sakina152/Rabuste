@@ -41,6 +41,16 @@ export const useRazorpay = () => {
   // Updated function accepts optional params
   const handlePayment = async (requestType: 'MENU' | 'ART' = 'MENU', artItem?: any) => {
     setIsProcessing(true);
+    const userInfo = localStorage.getItem("userInfo");
+    if (!userInfo) {
+      toast({
+        title: "Authentication Required",
+        description: "Please login or signup to make a purchase",
+        variant: "destructive",
+      });
+      setIsProcessing(false);
+      return;
+    }
 
     try {
       // Check if Razorpay script is loaded
