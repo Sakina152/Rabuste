@@ -22,7 +22,6 @@ import UserProtectedRoute from "./components/UserProtectedRoute";
 
 
 import { CartProvider } from "@/context/CartContext";
-import FloatingCart from "./components/FloatingCart";
 import GalleryManagement from "@/pages/admin/GalleryManagement";
 import AiBaristaBot from "./components/aiBaristaBot";
 
@@ -86,7 +85,6 @@ const App = () => (
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <FloatingCart />
           <AiBaristaBot />
         </BrowserRouter>
       </CartProvider>

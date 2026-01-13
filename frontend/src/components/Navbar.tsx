@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Coffee, User, LogOut, LogIn } from "lucide-react"; // Added LogIn icon
+import { Menu, X, Coffee, User, LogOut, LogIn, ShoppingBag } from "lucide-react"; // Added LogIn icon
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/context/CartContext";
 import rabusteLogo from "@/assets/rabuste-logo.png";
 
 const navLinks = [
@@ -18,9 +19,11 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const { cartCount } = useCart();
 
   // Auth State
   const [user, setUser] = useState<any>(null);
+
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -77,8 +80,8 @@ const Navbar = () => {
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
-          ? "bg-background/95 backdrop-blur-md shadow-soft"
-          : "bg-transparent"
+        ? "bg-background/95 backdrop-blur-md shadow-soft"
+        : "bg-transparent"
         }`}
     >
       <nav className="container-custom flex items-center justify-between h-20 px-6">
@@ -94,8 +97,8 @@ const Navbar = () => {
               key={link.path}
               to={link.path}
               className={`text-sm transition-colors ${location.pathname === link.path
-                  ? "text-accent font-medium"
-                  : "text-muted-foreground hover:text-foreground"
+                ? "text-accent font-medium"
+                : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               {link.name}
@@ -103,6 +106,7 @@ const Navbar = () => {
           ))}
         </div>
 
+        {/* Desktop Actions */}
         {/* Desktop Actions */}
         <div className="hidden lg:flex items-center gap-3 relative">
           <Button variant="hero" asChild>
@@ -114,45 +118,64 @@ const Navbar = () => {
 
           {/* AUTH LOGIC: Show Dropdown OR Login Button */}
           {user ? (
-            <div ref={dropdownRef} className="relative">
-              <button
-                onClick={() => setProfileOpen((p) => !p)}
-                className="w-10 h-10 rounded-full bg-[#5C3A21] text-white flex items-center justify-center hover:bg-[#6F4A2D] transition shadow-md"
-                aria-label="User menu"
-              >
-                <User className="w-5 h-5" />
-              </button>
+            <div className="flex items-center gap-3">
+              {/* Cart Icon - Only show when logged in */}
+              <Link to="/checkout">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="relative flex items-center gap-2"
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-terracotta text-white text-xs font-bold h-5 w-5 flex items-center justify-center rounded-full">
+                      {cartCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
 
-              <AnimatePresence>
-                {profileOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute right-0 mt-3 w-48 rounded-xl overflow-hidden bg-[#5C3A21] text-white shadow-xl border border-[#6F4A2D]"
-                  >
-                    <div className="px-4 py-3 border-b border-[#6F4A2D]">
-                      <p className="text-sm font-medium truncate">{user.name || "User"}</p>
-                      <p className="text-xs text-white/70 truncate">{user.email}</p>
-                    </div>
+              {/* Profile Dropdown */}
+              <div ref={dropdownRef} className="relative">
+                <button
+                  onClick={() => setProfileOpen((p) => !p)}
+                  className="w-10 h-10 rounded-full bg-[#5C3A21] text-white flex items-center justify-center hover:bg-[#6F4A2D] transition shadow-md"
+                  aria-label="User menu"
+                >
+                  <User className="w-5 h-5" />
+                </button>
 
-                    <Link
-                      to="/profile"
-                      className="flex items-center gap-2 px-4 py-3 hover:bg-[#6F4A2D] transition text-sm"
+                <AnimatePresence>
+                  {profileOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-0 mt-3 w-48 rounded-xl overflow-hidden bg-[#5C3A21] text-white shadow-xl border border-[#6F4A2D]"
                     >
-                      <User className="w-4 h-4" /> Profile
-                    </Link>
+                      <div className="px-4 py-3 border-b border-[#6F4A2D]">
+                        <p className="text-sm font-medium truncate">{user.name || "User"}</p>
+                        <p className="text-xs text-white/70 truncate">{user.email}</p>
+                      </div>
 
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-4 py-3 hover:bg-[#6F4A2D] transition text-left text-sm text-red-200 hover:text-red-100"
-                    >
-                      <LogOut className="w-4 h-4" /> Logout
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                      <Link
+                        to="/profile"
+                        className="flex items-center gap-2 px-4 py-3 hover:bg-[#6F4A2D] transition text-sm"
+                      >
+                        <User className="w-4 h-4" /> Profile
+                      </Link>
+
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2 px-4 py-3 hover:bg-[#6F4A2D] transition text-left text-sm text-red-200 hover:text-red-100"
+                      >
+                        <LogOut className="w-4 h-4" /> Logout
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           ) : (
             // IF NOT LOGGED IN
