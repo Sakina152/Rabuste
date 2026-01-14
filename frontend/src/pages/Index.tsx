@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Coffee, Palette, Users, Sparkles } from "lucide-react";
+import { ArrowRight, Coffee, Palette, Users, Sparkles, MapPin, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -460,6 +460,104 @@ const Index = () => {
             </div>
           </div>
         </section> */}
+
+        {/* Visit Section */}
+        <section className="section-padding bg-coffee-dark">
+          <div className="container-custom grid lg:grid-cols-2 gap-12 items-start">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="space-y-4"
+            >
+              <span className="text-accent text-sm tracking-[0.3em] uppercase font-body">
+                Visit Us
+              </span>
+              <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground">
+                Experience Rabuste in Person
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-2xl">
+                Drop by our Surat flagship to enjoy bold Robusta brews, browse the micro
+                art gallery, and connect with the community.
+              </p>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 text-muted-foreground">
+                  <div className="p-2 rounded-lg bg-accent/10 text-accent">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">Rabuste Coffee</p>
+                    <p>Dimpal Row House, 15, Gymkhana Rd, Piplod</p>
+                    <p>Surat, Gujarat 395007</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 text-muted-foreground">
+                  <div className="p-2 rounded-lg bg-accent/10 text-accent">
+                    <Phone className="w-5 h-5" />
+                  </div>
+                  <p>+1 (555) 123-4567</p>
+                </div>
+                <div className="flex items-center gap-3 text-muted-foreground">
+                  <div className="p-2 rounded-lg bg-accent/10 text-accent">
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <p>hello@rabuste.coffee</p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="space-y-4"
+            >
+              <div className="relative rounded-2xl overflow-hidden border border-border shadow-xl bg-background">
+                <iframe
+                  title="Rabuste Coffee Location"
+                  src="https://www.google.com/maps?q=21.1614147,72.7711702&z=17&output=embed"
+                  className="w-full h-[320px]"
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+
+              <a
+                href="https://www.google.com/maps/place/RABUSTE/@21.1614147,72.7711702,17z/data=!3m1!4b1!4m6!3m5!1s0x3be04d00111b19b5:0xba45eb84da00c79f!8m2!3d21.1614147!4d72.7711702!16s%2Fg%2F11w4td8150?entry=ttu"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative rounded-2xl overflow-hidden border border-border shadow-xl bg-card p-6 block hover:shadow-2xl hover:border-accent/50 transition-all duration-500"
+              >
+                <div className="space-y-3">
+                  <h3 className="font-display text-2xl font-bold text-foreground">RABUSTE</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    Dimpal Row House, 15, Gymkhana Rd, Piplod, Surat, Gujarat 395007
+                  </p>
+                  <div className="flex items-center gap-2 text-accent">
+                    <span className="font-semibold text-lg">4.8</span>
+                    <div className="flex">
+                      {[...Array(5)].map((_, i) => (
+                        <span key={i} className="text-accent">★</span>
+                      ))}
+                    </div>
+                    <span className="text-muted-foreground text-sm ml-2">41 reviews</span>
+                  </div>
+                  <div className="flex gap-4 pt-4">
+                    <span className="text-accent text-sm font-semibold hover:underline">
+                      Directions
+                    </span>
+                    <span className="text-accent text-sm font-semibold hover:underline">
+                      View larger map
+                    </span>
+                  </div>
+                </div>
+              </a>
+            </motion.div>
+          </div>
+        </section>
 
         {/* CTA Section */}
         <section className="section-padding bg-gradient-to-br from-accent/20 via-background to-coffee-medium">

@@ -299,7 +299,7 @@ const Franchise = () => {
               <ul className="space-y-4">
                 {[
                   "Passion for coffee and customer experience",
-                  "Minimum investment capacity of $150K - $300K",
+                  "Minimum investment capacity of ₹150K - ₹300K",
                   "Suitable retail location (500-1000 sq ft)",
                   "Commitment to brand standards and quality",
                   "Entrepreneurial mindset and local market knowledge",
@@ -329,7 +329,7 @@ const Franchise = () => {
               <div className="aspect-square rounded-2xl bg-gradient-to-br from-coffee-medium to-espresso p-8 flex items-center justify-center">
                 <div className="text-center">
                   <div className="font-display text-6xl font-bold text-accent mb-4">
-                    $150K+
+                    ₹150K+
                   </div>
                   <p className="text-foreground text-lg">
                     Initial Investment Range
@@ -426,9 +426,9 @@ const Franchise = () => {
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="">Select a range...</option>
-                  <option value="10k-50k">$10,000 - $50,000</option>
-                  <option value="50k-100k">$50,000 - $100,000</option>
-                  <option value="100k+">$100,000+</option>
+                  <option value="10k-50k">₹10,000 - ₹50,000</option>
+                  <option value="50k-100k">₹50,000 - ₹100,000</option>
+                  <option value="100k+">₹100,000+</option>
                 </select>
                 {errors.budget && <span className="text-red-500 text-xs">{errors.budget.message}</span>}
               </div>

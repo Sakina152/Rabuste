@@ -187,7 +187,7 @@ const Workshops = () => {
                           <CategoryIcon className="w-6 h-6" />
                         </div>
                         <span className="font-display text-2xl font-bold text-accent">
-                          {workshop.price === 0 ? "Free" : `$${workshop.price}`}
+                          {workshop.price === 0 ? "Free" : `₹${workshop.price}`}
                         </span>
                       </div>
 
@@ -327,7 +327,7 @@ const Workshops = () => {
                   <div className="flex justify-between items-center mb-6">
                     <span className="text-muted-foreground">Total</span>
                     <span className="font-display text-2xl font-bold text-accent">
-                      {selectedWorkshop.price === 0 ? "Free" : `$${selectedWorkshop.price * formData.numberOfSeats}`}
+                      {selectedWorkshop.price === 0 ? "Free" : `₹${selectedWorkshop.price * formData.numberOfSeats}`}
                     </span>
                   </div>
 
