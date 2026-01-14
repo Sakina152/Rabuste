@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Coffee, Palette, Users, Sparkles } from "lucide-react";
@@ -13,7 +13,17 @@ import cappuccinoImg from "@/assets/menu/robusta-cappuccino.jpg";
 import icedAmericanoImg from "@/assets/menu/robusta-iced-americano.jpg";
 
 const Index = () => {
-  const [showIntro, setShowIntro] = useState(true);
+  const [showIntro, setShowIntro] = useState(() => {
+    // Check if user has already seen the intro
+    return !localStorage.getItem('introAnimationSeen');
+  });
+
+  useEffect(() => {
+    if (!showIntro) {
+      // Mark intro as seen
+      localStorage.setItem('introAnimationSeen', 'true');
+    }
+  }, [showIntro]);
 
   const features = [
     {
