@@ -261,461 +261,511 @@ const Profile = () => {
 
   /* ================= UI ================= */
   return (
-    <div className="min-h-screen bg-background pt-28 pb-16">
-      <div className="container-custom px-6 max-w-5xl mx-auto space-y-10">
+    <div className="min-h-screen bg-hero-gradient pt-24 pb-16">
+      <div className="container-custom px-4 md:px-6 max-w-7xl mx-auto space-y-8">
 
-        {/* Back */}
-        <Button variant="ghost" asChild className="flex items-center gap-2">
+        {/* Back Button */}
+        <Button variant="ghost" asChild className="flex items-center gap-2 hover:bg-white/5 text-white">
           <Link to="/">
             <ArrowLeft className="w-4 h-4" />
             Back to Home
           </Link>
         </Button>
 
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-[#5C3A21] flex items-center justify-center text-white">
-            <User className="w-8 h-8" />
+        {/* Profile Header Card */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/5 backdrop-blur-xl rounded-2xl p-8 md:p-10 border border-white/10 shadow-2xl"
+        >
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-terracotta/30 to-accent/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-terracotta/90 to-accent/90 flex items-center justify-center text-white shadow-2xl ring-2 ring-white/20">
+                <User className="w-12 h-12 md:w-14 md:h-14" />
+              </div>
+              <div className="absolute -bottom-1 -right-1 bg-emerald-500 w-8 h-8 rounded-full border-4 border-background flex items-center justify-center shadow-lg">
+                <Award className="w-4 h-4 text-white" />
+              </div>
+            </div>
+            <div className="flex-1 text-center md:text-left space-y-4">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent mb-2 tracking-tight">{user.name}</h1>
+                <p className="text-white/60 text-sm md:text-base font-medium">{user.email}</p>
+              </div>
+              <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                <Badge className={`
+                  ${totalOrders >= 20 ? 'bg-gradient-to-r from-amber-600 to-amber-500' :
+                    totalOrders >= 10 ? 'bg-gradient-to-r from-blue-600 to-blue-500' :
+                    totalOrders >= 5 ? 'bg-gradient-to-r from-emerald-600 to-emerald-500' :
+                    'bg-gradient-to-r from-slate-600 to-slate-500'}
+                  text-white border-none px-4 py-1.5 text-sm font-medium shadow-lg
+                `}>
+                  <Coffee className="w-3.5 h-3.5 mr-1.5" />
+                  {totalOrders >= 20 ? "Coffee Master" : 
+                   totalOrders >= 10 ? "Regular Member" : 
+                   totalOrders >= 5 ? "Enthusiast" : 
+                   "Beginner"}
+                </Badge>
+                <Badge variant="outline" className="border-white/30 text-white/90 px-4 py-1.5 text-sm font-medium bg-white/5">
+                  <Calendar className="w-3.5 h-3.5 mr-1.5" />
+                  Member since 2026
+                </Badge>
+              </div>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-heading">My Profile</h1>
-            <p className="text-muted-foreground text-sm">
-              Manage your account information
-            </p>
-          </div>
+        </motion.div>
+
+        {/* Stats Cards - AT THE TOP */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.5 }}
+            whileHover={{ y: -4 }}
+            className="group"
+          >
+            <Card className="relative overflow-hidden bg-white/5 backdrop-blur-sm border-white/10 hover:border-terracotta/50 transition-all duration-300 shadow-lg hover:shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-terracotta/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <CardContent className="pt-6 pb-6 relative">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="w-12 h-12 bg-terracotta/10 rounded-xl flex items-center justify-center ring-1 ring-terracotta/20 group-hover:scale-110 transition-transform duration-300">
+                    <Coffee className="w-6 h-6 text-terracotta" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-white/50 font-medium uppercase tracking-wider">Total Spent</p>
+                  <p className="text-3xl md:text-4xl font-bold text-white">₹{totalSpent}</p>
+                  <p className="text-xs text-white/40">Lifetime purchases</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            whileHover={{ y: -4 }}
+            className="group"
+          >
+            <Card className="relative overflow-hidden bg-white/5 backdrop-blur-sm border-white/10 hover:border-accent/50 transition-all duration-300 shadow-lg hover:shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <CardContent className="pt-6 pb-6 relative">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center ring-1 ring-accent/20 group-hover:scale-110 transition-transform duration-300">
+                    <Package className="w-6 h-6 text-accent" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-white/50 font-medium uppercase tracking-wider">Orders</p>
+                  <p className="text-3xl md:text-4xl font-bold text-white">{totalOrders}</p>
+                  <p className="text-xs text-white/40">Successfully delivered</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            whileHover={{ y: -4 }}
+            className="group"
+          >
+            <Card className="relative overflow-hidden bg-white/5 backdrop-blur-sm border-white/10 hover:border-purple-500/50 transition-all duration-300 shadow-lg hover:shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <CardContent className="pt-6 pb-6 relative">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center ring-1 ring-purple-500/20 group-hover:scale-110 transition-transform duration-300">
+                    <Heart className="w-6 h-6 text-purple-500" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-white/50 font-medium uppercase tracking-wider">Favorites</p>
+                  <p className="text-3xl md:text-4xl font-bold text-white">{favoriteItems.length}</p>
+                  <p className="text-xs text-white/40">Most ordered items</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            whileHover={{ y: -4 }}
+            className="group"
+          >
+            <Card className="relative overflow-hidden bg-white/5 backdrop-blur-sm border-white/10 hover:border-emerald-500/50 transition-all duration-300 shadow-lg hover:shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <CardContent className="pt-6 pb-6 relative">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center ring-1 ring-emerald-500/20 group-hover:scale-110 transition-transform duration-300">
+                    <Star className="w-6 h-6 text-emerald-500" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-white/50 font-medium uppercase tracking-wider">Collection</p>
+                  <p className="text-3xl md:text-4xl font-bold text-white">{artPurchases.length + workshops.length}</p>
+                  <p className="text-xs text-white/40">Art pieces & events</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
 
-        {/* Personal Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Personal Information</CardTitle>
-          </CardHeader>
-
-          <CardContent className="grid md:grid-cols-2 gap-6">
-            <InfoField label="Full Name" icon={<User />} value={user.name} />
-            <InfoField label="Email" icon={<Mail />} value={user.email} />
-            <InfoField label="Phone Number" icon={<Phone />} value={user.phoneNumber} />
-            <InfoField
-              label="Address"
-              icon={<MapPin />}
-              value={user.address || "Not provided"}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Security */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Security</CardTitle>
-          </CardHeader>
-
-          <CardContent className="space-y-4 max-w-md">
-            <PasswordField
-              label="Current Password"
-              value={currentPassword}
-              onChange={setCurrentPassword}
-            />
-            <PasswordField
-              label="New Password"
-              value={newPassword}
-              onChange={setNewPassword}
-            />
-
-            <Button
-              variant="outline"
-              onClick={handleChangePassword}
-              disabled={saving}
+        {/* Main Content - Two Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+          {/* Left Sidebar - Personal Info & Security */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Personal Info */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
             >
-              {saving ? "Updating..." : "Change Password"}
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Order History & Analytics */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-card/50">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="orders">Order History</TabsTrigger>
-            <TabsTrigger value="favorites">Your Favorites</TabsTrigger>
-            <TabsTrigger value="purchases">Art & Workshops</TabsTrigger>
-          </TabsList>
-
-          {/* OVERVIEW TAB */}
-          <TabsContent value="overview" className="space-y-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                <Card className="bg-gradient-to-br from-terracotta/10 to-terracotta/5 border-terracotta/20">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Total Spent</p>
-                        <p className="text-3xl font-bold text-terracotta">₹{totalSpent}</p>
-                      </div>
-                      <div className="w-12 h-12 bg-terracotta/20 rounded-full flex items-center justify-center">
-                        <Coffee className="w-6 h-6 text-terracotta" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Total Orders</p>
-                        <p className="text-3xl font-bold text-accent">{totalOrders}</p>
-                      </div>
-                      <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center">
-                        <Package className="w-6 h-6 text-accent" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Loyalty Status</p>
-                        <p className="text-xl font-bold text-green-500">
-                          {totalOrders >= 20 ? "☕ Coffee Master" : totalOrders >= 10 ? "☕ Regular" : totalOrders >= 5 ? "☕ Enthusiast" : "☕ Beginner"}
-                        </p>
-                      </div>
-                      <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
-                        <Award className="w-6 h-6 text-green-500" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </div>
-
-            {/* Your Favorites Preview */}
-            {favoriteItems.length > 0 && (
-              <Card>
+              <Card className="bg-card/90 backdrop-blur-md border-white/10 shadow-xl">
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Heart className="w-5 h-5 text-red-500" />
-                      <CardTitle>Your Favorites</CardTitle>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-terracotta/20 rounded-xl flex items-center justify-center">
+                      <User className="w-5 h-5 text-terracotta" />
                     </div>
-                    <Badge variant="secondary" className="bg-terracotta/20 text-terracotta">
-                      Based on your orders
-                    </Badge>
+                    <CardTitle className="text-lg">Personal Info</CardTitle>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {favoriteItems.map((item, idx) => (
-                      <motion.div
-                        key={idx}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.1 * idx }}
-                        className="relative group"
-                      >
-                        <div className="bg-card border rounded-xl overflow-hidden hover:shadow-lg transition-all">
-                          <div className="relative h-32">
-                            <img
-                              src={item.image}
-                              alt={item.name}
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute top-2 right-2 bg-terracotta text-white px-2 py-1 rounded-full text-xs font-bold">
-                              #{idx + 1}
-                            </div>
-                          </div>
-                          <div className="p-4">
-                            <p className="font-semibold text-sm">{item.name}</p>
-                            <div className="flex items-center gap-2 mt-2">
-                              <Flame className="w-4 h-4 text-orange-500" />
-                              <p className="text-xs text-muted-foreground">
-                                Ordered {item.count} times
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
+
+                <CardContent className="space-y-4">
+                  <InfoField label="Full Name" icon={<User className="w-4 h-4" />} value={user.name} />
+                  <InfoField label="Email" icon={<Mail className="w-4 h-4" />} value={user.email} />
+                  <InfoField label="Phone" icon={<Phone className="w-4 h-4" />} value={user.phoneNumber} />
+                  <InfoField
+                    label="Address"
+                    icon={<MapPin className="w-4 h-4" />}
+                    value={user.address || "Not provided"}
+                  />
                 </CardContent>
               </Card>
-            )}
-          </TabsContent>
+            </motion.div>
 
-          {/* ORDER HISTORY TAB */}
-          <TabsContent value="orders" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-terracotta" />
-                  <CardTitle>Complete Order History</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {dataLoading ? (
-                  <div className="text-center py-8 text-muted-foreground">Loading orders...</div>
-                ) : orders.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Coffee className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
-                    <p className="text-muted-foreground">No orders yet. Start exploring our menu!</p>
-                    <Button asChild className="mt-4">
-                      <Link to="/menu">Browse Menu</Link>
-                    </Button>
+            {/* Security */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 }}
+            >
+              <Card className="bg-card/90 backdrop-blur-md border-white/10 shadow-xl">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center">
+                      <Lock className="w-5 h-5 text-red-500" />
+                    </div>
+                    <CardTitle className="text-lg">Security</CardTitle>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    {orders.map((order, idx) => (
-                      <motion.div
-                        key={order._id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.05 }}
-                        className="border rounded-xl p-6 hover:shadow-md transition-shadow bg-card"
-                      >
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="font-mono text-xs">
-                                {order.orderNumber}
-                              </Badge>
-                              <Badge className={
-                                order.status === 'Completed' ? 'bg-green-500' :
-                                order.status === 'Pending' ? 'bg-yellow-500' :
-                                'bg-blue-500'
-                              }>
-                                {order.status}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {new Date(order.createdAt).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </p>
-                          </div>
-                          <div className="mt-4 md:mt-0">
-                            <p className="text-2xl font-bold text-terracotta">₹{order.totalAmount}</p>
-                          </div>
-                        </div>
+                </CardHeader>
 
-                        <div className="space-y-3">
-                          {order.items.map((item, itemIdx) => (
-                            <div key={itemIdx} className="flex items-center gap-4 bg-muted/30 rounded-lg p-3">
-                              <img
-                                src={item.menuItem.image}
-                                alt={item.menuItem.name}
-                                className="w-16 h-16 object-cover rounded"
-                              />
-                              <div className="flex-1">
-                                <p className="font-medium">{item.menuItem.name}</p>
-                                <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
+                <CardContent className="space-y-4">
+                  <PasswordField
+                    label="Current Password"
+                    value={currentPassword}
+                    onChange={setCurrentPassword}
+                  />
+                  <PasswordField
+                    label="New Password"
+                    value={newPassword}
+                    onChange={setNewPassword}
+                  />
+
+                  <Button
+                    className="w-full bg-gradient-to-r from-terracotta to-accent hover:from-terracotta/90 hover:to-accent/90 shadow-lg"
+                    onClick={handleChangePassword}
+                    disabled={saving}
+                  >
+                    {saving ? "Updating..." : "Change Password"}
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Right Main Content - Order History Tabs */}
+          <div className="lg:col-span-2">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <Tabs defaultValue="orders" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-3 bg-card/80 backdrop-blur-md border border-white/10 p-1">
+                  <TabsTrigger value="orders" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-terracotta data-[state=active]:to-accent">
+                    Order History
+                  </TabsTrigger>
+                  <TabsTrigger value="favorites" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-terracotta data-[state=active]:to-accent">
+                    Favorites
+                  </TabsTrigger>
+                  <TabsTrigger value="collection" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-terracotta data-[state=active]:to-accent">
+                    Collection
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* ORDER HISTORY TAB */}
+                <TabsContent value="orders" className="space-y-4">
+                  <Card className="bg-card/90 backdrop-blur-md border-white/10 shadow-xl">
+                    <CardHeader>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-5 h-5 text-terracotta" />
+                        <CardTitle>Order History</CardTitle>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {dataLoading ? (
+                        <div className="text-center py-8 text-muted-foreground">Loading...</div>
+                      ) : orders.length === 0 ? (
+                        <div className="text-center py-12">
+                          <Coffee className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
+                          <p className="text-muted-foreground mb-4">No orders yet!</p>
+                          <Button asChild className="bg-gradient-to-r from-terracotta to-accent">
+                            <Link to="/menu">Browse Menu</Link>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                          {orders.map((order, idx) => (
+                            <motion.div
+                              key={order._id}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: idx * 0.05 }}
+                              className="border border-white/10 rounded-xl p-4 md:p-5 hover:shadow-lg hover:shadow-terracotta/10 transition-all bg-gradient-to-r from-card/60 to-card/40 backdrop-blur-sm"
+                            >
+                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <Badge variant="outline" className="font-mono text-xs border-white/20">
+                                      {order.orderNumber}
+                                    </Badge>
+                                    <Badge className={
+                                      order.status === 'Completed' ? 'bg-green-500' :
+                                      order.status === 'Pending' ? 'bg-yellow-500' : 'bg-blue-500'
+                                    }>
+                                      {order.status}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground">
+                                    {new Date(order.createdAt).toLocaleDateString('en-US', {
+                                      month: 'short',
+                                      day: 'numeric',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </p>
+                                </div>
+                                <p className="text-xl md:text-2xl font-bold bg-gradient-to-r from-terracotta to-accent bg-clip-text text-transparent">
+                                  ₹{order.totalAmount}
+                                </p>
                               </div>
-                              <p className="font-semibold">₹{item.price * item.quantity}</p>
+
+                              <div className="space-y-2">
+                                {order.items.map((item, itemIdx) => (
+                                  <div key={itemIdx} className="flex items-center gap-3 bg-background/50 rounded-lg p-2 border border-white/5">
+                                    <img
+                                      src={item.menuItem.image}
+                                      alt={item.menuItem.name}
+                                      className="w-12 h-12 object-cover rounded-md"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                      <p className="font-medium text-sm truncate">{item.menuItem.name}</p>
+                                      <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                                    </div>
+                                    <p className="font-semibold text-sm whitespace-nowrap">₹{item.price * item.quantity}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* FAVORITES TAB */}
+                <TabsContent value="favorites" className="space-y-4">
+                  <Card className="bg-card/90 backdrop-blur-md border-white/10 shadow-xl">
+                    <CardHeader>
+                      <div className="flex items-center gap-2">
+                        <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                        <CardTitle>Your Favorites</CardTitle>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Most ordered items based on your history
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      {favoriteItems.length === 0 ? (
+                        <div className="text-center py-12">
+                          <Heart className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
+                          <p className="text-muted-foreground">Order more to see your favorites!</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                          {favoriteItems.map((item, idx) => (
+                            <motion.div
+                              key={idx}
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: idx * 0.1 }}
+                              className="group"
+                            >
+                              <div className="bg-gradient-to-br from-card/90 to-card/50 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-terracotta/30 transition-all">
+                                {/* Rank Badge */}
+                                <div className="absolute top-3 left-3 z-10">
+                                  <div className={`
+                                    w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shadow-lg text-sm
+                                    ${idx === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600' :
+                                      idx === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500' :
+                                      'bg-gradient-to-br from-orange-400 to-orange-600'}
+                                  `}>
+                                    #{idx + 1}
+                                  </div>
+                                </div>
+
+                                {/* Image */}
+                                <div className="relative h-40">
+                                  <img
+                                    src={item.image}
+                                    alt={item.name}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                                </div>
+
+                                {/* Content */}
+                                <div className="p-4 md:p-5">
+                                  <h3 className="font-bold text-base md:text-lg mb-2">{item.name}</h3>
+                                  <div className="flex items-center gap-2 text-terracotta mb-3">
+                                    <Flame className="w-4 h-4" />
+                                    <span className="text-sm font-semibold">
+                                      Ordered {item.count}x
+                                    </span>
+                                  </div>
+                                  <div className="flex gap-2 flex-wrap">
+                                    {idx === 0 && (
+                                      <Badge className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white border-none text-xs">
+                                        🏆 Top Choice
+                                      </Badge>
+                                    )}
+                                    {item.count >= 5 && (
+                                      <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white border-none text-xs">
+                                        🔥 Hot Streak
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* COLLECTION TAB */}
+                <TabsContent value="collection" className="space-y-6">
+                  {/* Art Purchases */}
+                  <Card className="bg-card/90 backdrop-blur-md border-white/10 shadow-xl">
+                    <CardHeader>
+                      <CardTitle>Art Collection ({artPurchases.length})</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {dataLoading ? (
+                        <p className="text-center py-8 text-muted-foreground">Loading...</p>
+                      ) : artPurchases.length === 0 ? (
+                        <div className="text-center py-8">
+                          <p className="text-muted-foreground mb-4">No art purchases yet</p>
+                          <Button asChild variant="outline">
+                            <Link to="/gallery">Explore Gallery</Link>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {artPurchases.map((purchase) => (
+                            <motion.div
+                              key={purchase._id}
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="border border-white/10 rounded-xl overflow-hidden hover:shadow-lg transition-all"
+                            >
+                              <img
+                                src={purchase.art.imageUrl}
+                                alt={purchase.art.title}
+                                className="w-full h-40 object-cover"
+                              />
+                              <div className="p-4">
+                                <h3 className="font-bold text-sm">{purchase.art.title}</h3>
+                                <p className="text-xs text-muted-foreground mb-2">by {purchase.art.artist}</p>
+                                <div className="flex items-center justify-between">
+                                  <Badge variant="outline" className="text-xs">{purchase.purchaseNumber}</Badge>
+                                  <p className="font-semibold text-terracotta">₹{purchase.purchasePrice}</p>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Workshops */}
+                  <Card className="bg-card/90 backdrop-blur-md border-white/10 shadow-xl">
+                    <CardHeader>
+                      <CardTitle>Workshop Enrollments ({workshops.length})</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {dataLoading ? (
+                        <p className="text-center py-8 text-muted-foreground">Loading...</p>
+                      ) : workshops.length === 0 ? (
+                        <div className="text-center py-8">
+                          <p className="text-muted-foreground mb-4">No workshops enrolled</p>
+                          <Button asChild variant="outline">
+                            <Link to="/workshops">Browse Workshops</Link>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {workshops.map((workshop) => (
+                            <div key={workshop._id} className="border border-white/10 rounded-xl p-4 hover:shadow-md transition-all bg-card/50">
+                              <div className="flex justify-between items-start gap-3">
+                                <div className="flex-1">
+                                  <h3 className="font-semibold text-sm mb-1">{workshop.workshop.title}</h3>
+                                  <p className="text-xs text-muted-foreground mb-2">
+                                    {new Date(workshop.workshop.date).toLocaleDateString('en-US', {
+                                      weekday: 'short',
+                                      month: 'short',
+                                      day: 'numeric',
+                                      year: 'numeric'
+                                    })}
+                                  </p>
+                                  <Badge variant="outline" className="text-xs">{workshop.registrationNumber}</Badge>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-xs text-muted-foreground mb-1">{workshop.numberOfSeats} seats</p>
+                                  <p className="font-bold text-terracotta">₹{workshop.totalAmount}</p>
+                                </div>
+                              </div>
                             </div>
                           ))}
                         </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* FAVORITES TAB */}
-          <TabsContent value="favorites" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                  <CardTitle>Your Most Loved Items</CardTitle>
-                </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Based on your ordering patterns, these are your go-to favorites
-                </p>
-              </CardHeader>
-              <CardContent>
-                {favoriteItems.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Heart className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
-                    <p className="text-muted-foreground">Order more to discover your favorites!</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {favoriteItems.map((item, idx) => (
-                      <motion.div
-                        key={idx}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.1 }}
-                        className="relative"
-                      >
-                        <div className="bg-gradient-to-br from-terracotta/5 to-accent/5 border border-terracotta/20 rounded-2xl overflow-hidden hover:shadow-xl transition-all">
-                          {/* Rank Badge */}
-                          <div className="absolute top-4 left-4 z-10">
-                            <div className={`
-                              w-10 h-10 rounded-full flex items-center justify-center font-bold text-white
-                              ${idx === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600' :
-                                idx === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500' :
-                                'bg-gradient-to-br from-orange-400 to-orange-600'}
-                            `}>
-                              {idx + 1}
-                            </div>
-                          </div>
-
-                          {/* Image */}
-                          <div className="relative h-48">
-                            <img
-                              src={item.image}
-                              alt={item.name}
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                          </div>
-
-                          {/* Content */}
-                          <div className="p-6">
-                            <h3 className="font-bold text-lg mb-2">{item.name}</h3>
-                            <div className="flex items-center gap-2 text-terracotta">
-                              <TrendingUp className="w-4 h-4" />
-                              <span className="text-sm font-semibold">
-                                Ordered {item.count} time{item.count > 1 ? 's' : ''}
-                              </span>
-                            </div>
-                            <div className="mt-4 flex gap-2">
-                              {idx === 0 && (
-                                <Badge className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white">
-                                  🏆 Top Choice
-                                </Badge>
-                              )}
-                              {item.count >= 5 && (
-                                <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white">
-                                  🔥 Hot Streak
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ART & WORKSHOPS TAB */}
-          <TabsContent value="purchases" className="space-y-6">
-            {/* Art Purchases */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Art Collection ({artPurchases.length})</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {dataLoading ? (
-                  <p className="text-sm text-muted-foreground">Loading...</p>
-                ) : artPurchases.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-sm text-muted-foreground">No artworks purchased yet.</p>
-                    <Button asChild className="mt-4" variant="outline">
-                      <Link to="/gallery">Explore Gallery</Link>
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {artPurchases.map((purchase) => (
-                      <motion.div
-                        key={purchase._id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="border rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
-                      >
-                        <img
-                          src={purchase.art.imageUrl}
-                          alt={purchase.art.title}
-                          className="w-full h-48 object-cover"
-                        />
-                        <div className="p-4">
-                          <h3 className="font-bold">{purchase.art.title}</h3>
-                          <p className="text-sm text-muted-foreground">by {purchase.art.artist}</p>
-                          <div className="mt-2 flex items-center justify-between">
-                            <Badge variant="outline">{purchase.purchaseNumber}</Badge>
-                            <p className="font-semibold text-terracotta">₹{purchase.purchasePrice}</p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Workshops */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Workshop Enrollments ({workshops.length})</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {dataLoading ? (
-                  <p className="text-sm text-muted-foreground">Loading...</p>
-                ) : workshops.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-sm text-muted-foreground">No workshops enrolled yet.</p>
-                    <Button asChild className="mt-4" variant="outline">
-                      <Link to="/workshops">Browse Workshops</Link>
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {workshops.map((workshop) => (
-                      <div key={workshop._id} className="border rounded-xl p-4 hover:shadow-md transition-shadow">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-semibold">{workshop.workshop.title}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              {new Date(workshop.workshop.date).toLocaleDateString('en-US', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })}
-                            </p>
-                            <Badge variant="outline" className="mt-2">{workshop.registrationNumber}</Badge>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm text-muted-foreground">Seats: {workshop.numberOfSeats}</p>
-                            <p className="font-bold text-terracotta text-lg">₹{workshop.totalAmount}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </motion.div>
+          </div>
+        </div>
 
       </div>
     </div>
