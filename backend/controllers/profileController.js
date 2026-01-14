@@ -9,6 +9,8 @@ import Workshop from '../models/Workshop.js';
 export const getUserProfileData = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
+  console.log('Fetching profile data for user:', userId);
+
   const [orders, artPurchases, workshops] = await Promise.all([
     Order.find({ user: userId })
       .populate('items.menuItem')
@@ -22,6 +24,12 @@ export const getUserProfileData = asyncHandler(async (req, res) => {
       .populate('workshop')
       .sort({ createdAt: -1 })
   ]);
+
+  console.log('Profile data found:', {
+    orders: orders.length,
+    artPurchases: artPurchases.length,
+    workshops: workshops.length
+  });
 
   res.json({
     orders,

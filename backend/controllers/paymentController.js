@@ -175,16 +175,21 @@ export const verifyPayment = asyncHandler(async (req, res) => {
       const { orderData } = req.body;
       
       console.log('Order data received:', orderData); // Add debug log
+      console.log('User authenticated:', !!req.user, req.user?._id); // Debug log
       
       if (orderData) {
-        // Get user ID if authenticated, otherwise use null/guest
+        // Get user ID - REQUIRE authentication for orders to show in profile
         const userId = req.user ? req.user._id : null;
+        
+        if (!userId) {
+          console.warn('Warning: Order created without user authentication - will not appear in profile');
+        }
         
         // Create order records based on type
         if (orderData.type === 'ART' && orderData.itemId) {
           const artPurchaseData = {
             art: orderData.itemId,
-            purchasePrice: orderData.amount / 100, // Convert from paise to rupees
+            purchasePrice: orderData.amount, // Amount is already in rupees from frontend
             paymentStatus: 'completed',
             paymentId: paymentId,
             status: 'confirmed'
@@ -197,7 +202,13 @@ export const verifyPayment = asyncHandler(async (req, res) => {
           
           const artPurchase = new ArtPurchase(artPurchaseData);
           await artPurchase.save();
-          console.log('Art purchase saved:', artPurchase._id);
+          console.log('Art purchase saved successfully:', {
+            _id: artPurchase._id,
+            user: artPurchase.user,
+            art: artPurchase.art,
+            purchasePrice: artPurchase.purchasePrice,
+            hasUser: !!artPurchase.user
+          });
           
           // Mark art as sold
           await Art.findByIdAndUpdate(orderData.itemId, { status: 'Sold' });
@@ -209,7 +220,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
               quantity: item.quantity || 1,
               price: item.price
             })),
-            totalAmount: orderData.amount / 100, // Convert from paise to rupees
+            totalAmount: orderData.amount, // Amount is already in rupees from frontend
             paymentStatus: 'completed',
             paymentId: paymentId,
             status: 'confirmed'

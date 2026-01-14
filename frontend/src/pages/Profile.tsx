@@ -47,7 +47,7 @@ interface ArtPurchase {
     _id: string;
     title: string;
     artist: string;
-    imageUrl: string;
+    image: string; // Changed from imageUrl to match backend
     price: number;
   };
   purchasePrice: number;
@@ -142,12 +142,22 @@ const Profile = () => {
         setArtPurchases(res.data.artPurchases || []);
         setWorkshops(res.data.workshops || []);
 
+        console.log('Profile data loaded:', {
+          orders: res.data.orders?.length || 0,
+          artPurchases: res.data.artPurchases?.length || 0,
+          workshops: res.data.workshops?.length || 0
+        });
+        console.log('Art purchases data:', res.data.artPurchases);
+
         // Calculate analytics
         const ordersData = res.data.orders || [];
+        const artPurchasesData = res.data.artPurchases || [];
         
-        // Total spent
-        const spent = ordersData.reduce((sum: number, order: Order) => sum + order.totalAmount, 0);
-        setTotalSpent(spent);
+        // Total spent (menu orders + art purchases)
+        const menuSpent = ordersData.reduce((sum: number, order: Order) => sum + order.totalAmount, 0);
+        const artSpent = artPurchasesData.reduce((sum: number, purchase: ArtPurchase) => sum + purchase.purchasePrice, 0);
+        const totalSpentAmount = Math.round((menuSpent + artSpent) * 100) / 100; // Fix floating point precision
+        setTotalSpent(totalSpentAmount);
         setTotalOrders(ordersData.length);
 
         // Calculate favorite items (most ordered)
@@ -335,7 +345,7 @@ const Profile = () => {
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm text-white/50 font-medium uppercase tracking-wider">Total Spent</p>
-                  <p className="text-3xl md:text-4xl font-bold text-white">₹{totalSpent}</p>
+                  <p className="text-3xl md:text-4xl font-bold text-white">₹{totalSpent.toFixed(2)}</p>
                   <p className="text-xs text-white/40">Lifetime purchases</p>
                 </div>
               </CardContent>
@@ -699,7 +709,7 @@ const Profile = () => {
                               className="border border-white/10 rounded-xl overflow-hidden hover:shadow-lg transition-all"
                             >
                               <img
-                                src={purchase.art.imageUrl}
+                                src={purchase.art.image}
                                 alt={purchase.art.title}
                                 className="w-full h-40 object-cover"
                               />

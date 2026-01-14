@@ -21,6 +21,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import adminStatsRoutes from './routes/adminStatsRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
+import workshopInquiryRoutes from './routes/workshopInquiryRoutes.js';
 
 // firebase
 
@@ -87,6 +88,7 @@ app.use('/api/payment', paymentRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin/stats', adminStatsRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/workshop-inquiries', workshopInquiryRoutes);
 // Basic route
 app.get('/', (req, res) => {
   res.send('Rabuste Coffee API is running...');

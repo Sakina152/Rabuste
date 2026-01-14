@@ -14,7 +14,8 @@ import {
   Coffee,
   Calendar,
   Clock,
-  ChevronRight
+  ChevronRight,
+  MessageSquare
 } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 const navItems = [
   { title: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard", active: true },
   { title: "Orders", icon: ShoppingBag, href: "/admin/dashboard/orders" },
+  { title: "Event Inquiries", icon: MessageSquare, href: "/admin/dashboard/inquiries" },
   { title: "Applications", icon: FileText, href: "/admin/applications" },
   { title: "Users", icon: Users, href: "/admin/users" },
 ];

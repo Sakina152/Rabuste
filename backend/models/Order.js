@@ -26,6 +26,57 @@ const orderItemSchema = new mongoose.Schema({
 });
 
 const orderSchema = new mongoose.Schema({
+  // Link to user (for authenticated orders)
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false // Optional to support guest orders
+  },
+  
+  // NEW SCHEMA: items array with menuItem references
+  items: [{
+    menuItem: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'MenuItem',
+      required: true
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      default: 1
+    },
+    price: {
+      type: Number,
+      required: true
+    }
+  }],
+  
+  // Total amount (using this instead of totalPrice for consistency)
+  totalAmount: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+  
+  // Payment information
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'completed', 'failed', 'refunded'],
+    default: 'pending'
+  },
+  
+  paymentId: {
+    type: String // Razorpay payment ID
+  },
+  
+  // Order status
+  status: {
+    type: String,
+    enum: ['pending', 'confirmed', 'in progress', 'delivered', 'cancelled'],
+    default: 'pending'
+  },
+  
+  // OLD SCHEMA (keep for backward compatibility)
   orderItems: [orderItemSchema],
   
   // Order type: 'MENU' for menu orders, 'ART' for art purchases
@@ -44,13 +95,11 @@ const orderSchema = new mongoose.Schema({
   
   totalPrice: {
     type: Number,
-    required: true,
-    default: 0
+    required: false // Made optional since we use totalAmount now
   },
   
   paymentMethod: {
     type: String,
-    required: true,
     default: 'Razorpay'
   },
   
@@ -64,7 +113,6 @@ const orderSchema = new mongoose.Schema({
   
   isPaid: {
     type: Boolean,
-    required: true,
     default: false
   },
   
@@ -78,12 +126,6 @@ const orderSchema = new mongoose.Schema({
   },
   customerName: {
     type: String
-  },
-  
-  status: {
-    type: String,
-    enum: ['pending', 'in progress', 'delivered', 'cancelled'],
-    default: 'pending'
   }
 }, {
   timestamps: true

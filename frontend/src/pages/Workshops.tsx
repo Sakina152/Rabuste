@@ -19,6 +19,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
@@ -65,6 +67,19 @@ const Workshops = () => {
     phone: "",
     numberOfSeats: 1, // Added this as your backend requires it
   });
+
+  // Inquiry form state
+  const [inquiryForm, setInquiryForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    eventType: "",
+    numberOfGuests: 10,
+    preferredDate: "",
+    message: ""
+  });
+  const [inquiryDialogOpen, setInquiryDialogOpen] = useState(false);
+  const [submittingInquiry, setSubmittingInquiry] = useState(false);
 
   // 1. Fetch Workshops from Backend
   useEffect(() => {
@@ -885,12 +900,170 @@ END:VCALENDAR`;
                   </li>
                 ))}
               </ul>
-              <Button variant="hero" size="lg" asChild>
-                <Link to="/franchise">
-                  Inquire About Events
-                  <ArrowRight className="ml-2" />
-                </Link>
-              </Button>
+              <Dialog open={inquiryDialogOpen} onOpenChange={setInquiryDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="hero" size="lg">
+                    Inquire About Events
+                    <ArrowRight className="ml-2" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="text-2xl font-display">Event Inquiry</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    
+                    // Validate required fields
+                    if (!inquiryForm.eventType) {
+                      toast({
+                        title: "Error",
+                        description: "Please select an event type",
+                        variant: "destructive"
+                      });
+                      return;
+                    }
+                    
+                    setSubmittingInquiry(true);
+                    try {
+                      console.log('Submitting inquiry:', inquiryForm);
+                      console.log('API URL:', `${API_URL}/api/workshop-inquiries`);
+                      
+                      const response = await fetch(`${API_URL}/api/workshop-inquiries`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(inquiryForm)
+                      });
+                      
+                      if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ message: 'Server error' }));
+                        throw new Error(errorData.message || `Server returned ${response.status}`);
+                      }
+                      
+                      const data = await response.json();
+                      if (data.success) {
+                        toast({
+                          title: "Inquiry Submitted!",
+                          description: data.message || "We'll contact you soon.",
+                          className: "bg-green-600 text-white"
+                        });
+                        setInquiryDialogOpen(false);
+                        setInquiryForm({
+                          name: "",
+                          email: "",
+                          phone: "",
+                          eventType: "",
+                          numberOfGuests: 10,
+                          preferredDate: "",
+                          message: ""
+                        });
+                      } else {
+                        throw new Error(data.message || 'Submission failed');
+                      }
+                    } catch (error: any) {
+                      console.error('Inquiry submission error:', error);
+                      toast({
+                        title: "Error",
+                        description: error.message || "Failed to submit inquiry. Please ensure the backend server is running.",
+                        variant: "destructive"
+                      });
+                    } finally {
+                      setSubmittingInquiry(false);
+                    }
+                  }} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Name *</Label>
+                        <Input
+                          required
+                          value={inquiryForm.name}
+                          onChange={(e) => setInquiryForm({...inquiryForm, name: e.target.value})}
+                          placeholder="Your name"
+                        />
+                      </div>
+                      <div>
+                        <Label>Email *</Label>
+                        <Input
+                          required
+                          type="email"
+                          value={inquiryForm.email}
+                          onChange={(e) => setInquiryForm({...inquiryForm, email: e.target.value})}
+                          placeholder="your@email.com"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Phone *</Label>
+                        <Input
+                          required
+                          type="tel"
+                          value={inquiryForm.phone}
+                          onChange={(e) => setInquiryForm({...inquiryForm, phone: e.target.value})}
+                          placeholder="+91 XXXXX XXXXX"
+                        />
+                      </div>
+                      <div>
+                        <Label>Number of Guests *</Label>
+                        <Input
+                          required
+                          type="number"
+                          min="1"
+                          value={inquiryForm.numberOfGuests}
+                          onChange={(e) => setInquiryForm({...inquiryForm, numberOfGuests: parseInt(e.target.value)})}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Event Type *</Label>
+                      <Select
+                        required
+                        value={inquiryForm.eventType}
+                        onValueChange={(value) => setInquiryForm({...inquiryForm, eventType: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select event type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="private-tasting">Private Coffee Tasting</SelectItem>
+                          <SelectItem value="corporate-workshop">Corporate Team Workshop</SelectItem>
+                          <SelectItem value="art-exhibition">Art Exhibition Launch</SelectItem>
+                          <SelectItem value="community-gathering">Community Gathering</SelectItem>
+                          <SelectItem value="birthday">Birthday Celebration</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>Preferred Date (Optional)</Label>
+                      <Input
+                        type="date"
+                        value={inquiryForm.preferredDate}
+                        onChange={(e) => setInquiryForm({...inquiryForm, preferredDate: e.target.value})}
+                        min={new Date().toISOString().split('T')[0]}
+                      />
+                    </div>
+
+                    <div>
+                      <Label>Additional Message (Optional)</Label>
+                      <Textarea
+                        value={inquiryForm.message}
+                        onChange={(e) => setInquiryForm({...inquiryForm, message: e.target.value})}
+                        placeholder="Tell us more about your event requirements..."
+                        rows={4}
+                        maxLength={1000}
+                      />
+                    </div>
+
+                    <Button type="submit" variant="hero" className="w-full" disabled={submittingInquiry}>
+                      {submittingInquiry ? "Submitting..." : "Submit Inquiry"}
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </motion.div>
 
             <motion.div

@@ -11,6 +11,7 @@ import Register from "./pages/UserRegister";
 import Gallery from "./pages/Gallery";
 import Workshops from "./pages/Workshops";
 import WorkshopManager from "@/pages/admin/WorkshopManager";
+import InquiryManagement from "@/pages/admin/InquiryManagement";
 import Franchise from "./pages/Franchise";
 import Menu from "./pages/Menu";
 import MenuManagement from "./pages/admin/MenuManagement";
@@ -77,6 +78,7 @@ const App = () => (
               <Route path="/admin/dashboard/menu-management/new" element={<MenuItemForm />} />
               <Route path="/admin/dashboard/menu-management/edit/:id" element={<MenuItemForm />} />
               <Route path="/admin/dashboard/workshops" element={<WorkshopManager />} />
+              <Route path="/admin/dashboard/inquiries" element={<InquiryManagement />} />
               <Route path="/admin/dashboard/orders" element={<OrderManagement />} />
               <Route path="/admin/gallery" element={<GalleryManagement />} />
             </Route>
