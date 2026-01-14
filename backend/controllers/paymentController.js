@@ -177,31 +177,50 @@ export const verifyPayment = asyncHandler(async (req, res) => {
       console.log('Order data received:', orderData); // Add debug log
       
       if (orderData) {
+        // Get user ID if authenticated, otherwise use null/guest
+        const userId = req.user ? req.user._id : null;
+        
         // Create order records based on type
         if (orderData.type === 'ART' && orderData.itemId) {
-          const artPurchase = new ArtPurchase({
-            user: req.user._id,
+          const artPurchaseData = {
             art: orderData.itemId,
-            purchasePrice: orderData.amount,
+            purchasePrice: orderData.amount / 100, // Convert from paise to rupees
             paymentStatus: 'completed',
             paymentId: paymentId,
             status: 'confirmed'
-          });
+          };
+          
+          // Only add user if authenticated
+          if (userId) {
+            artPurchaseData.user = userId;
+          }
+          
+          const artPurchase = new ArtPurchase(artPurchaseData);
           await artPurchase.save();
           console.log('Art purchase saved:', artPurchase._id);
+          
+          // Mark art as sold
+          await Art.findByIdAndUpdate(orderData.itemId, { status: 'Sold' });
+          
         } else if (orderData.type === 'MENU' && orderData.cartItems) {
-          const order = new Order({
-            user: req.user._id,
+          const orderDocument = {
             items: orderData.cartItems.map(item => ({
               menuItem: item.id || item._id,
               quantity: item.quantity || 1,
               price: item.price
             })),
-            totalAmount: orderData.amount,
+            totalAmount: orderData.amount / 100, // Convert from paise to rupees
             paymentStatus: 'completed',
             paymentId: paymentId,
             status: 'confirmed'
-          });
+          };
+          
+          // Only add user if authenticated
+          if (userId) {
+            orderDocument.user = userId;
+          }
+          
+          const order = new Order(orderDocument);
           await order.save();
           console.log('Order saved:', order._id);
         }
@@ -217,8 +236,14 @@ export const verifyPayment = asyncHandler(async (req, res) => {
       });
     } catch (error) {
       console.error('Error creating order after payment:', error);
-      res.status(500);
-      throw new Error('Payment verified but failed to create order');
+      // Still return success for payment verification, but log the error
+      res.json({ 
+        status: "success", 
+        message: "Payment verified successfully (order creation pending)",
+        order_id: orderId,
+        payment_id: paymentId,
+        warning: "Order record creation failed"
+      });
     }
   } else {
     // Don't log full signatures in error (security)

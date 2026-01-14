@@ -4,7 +4,7 @@ const artPurchaseSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false // Made optional to allow guest purchases
   },
   art: {
     type: mongoose.Schema.Types.ObjectId,

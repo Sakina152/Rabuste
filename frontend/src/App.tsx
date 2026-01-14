@@ -18,9 +18,6 @@ import MenuItemForm from "./pages/admin/MenuItemForm";
 import Checkout from "./pages/Checkout";
 import Profile from "@/pages/Profile";
 
-import UserProtectedRoute from "./components/UserProtectedRoute";
-
-
 import { CartProvider } from "@/context/CartContext";
 import GalleryManagement from "@/pages/admin/GalleryManagement";
 import AiBaristaBot from "./components/aiBaristaBot";
@@ -46,7 +43,11 @@ const App = () => (
         <BrowserRouter>
           <ScrollToTop />
           <Routes>
-            {/* Public Routes */}
+            {/* 
+              PUBLIC ROUTES - Accessible to everyone (logged in or not)
+              "/" = Landing page with intro animation + full homepage
+              All main pages are public for browsing
+            */}
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -56,7 +57,7 @@ const App = () => (
             <Route path="/workshops" element={<Workshops />} />
             <Route path="/franchise" element={<Franchise />} />
 
-            {/* Checkout */}
+            {/* Checkout & Order Success - Works for both guests and logged-in users */}
             <Route path="/checkout" element={<Checkout />} />
 
             {/* Order Success */}
@@ -66,7 +67,10 @@ const App = () => (
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin/register" element={<AdminRegister />} />
 
-            {/* PROTECTED ADMIN ROUTES */}
+            {/* 
+              PROTECTED ADMIN ROUTES - Requires admin authentication
+              Uses ProtectedRoute component with Firebase/JWT verification
+            */}
             <Route element={<ProtectedRoute />}>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/admin/dashboard/menu-management" element={<MenuManagement />} />
@@ -77,8 +81,11 @@ const App = () => (
               <Route path="/admin/gallery" element={<GalleryManagement />} />
             </Route>
 
-            {/* Protected User Routes */}
-            <Route element={<UserProtectedRoute />}>
+            {/* 
+              PROTECTED USER ROUTES - Requires user authentication
+              Currently only /profile, but can add order history, saved items, etc.
+            */}
+            <Route element={<ProtectedRoute />}>
               <Route path="/profile" element={<Profile />} />
             </Route>
 

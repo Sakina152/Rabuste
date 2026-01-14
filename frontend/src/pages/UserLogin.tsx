@@ -51,7 +51,7 @@ export default function Login() {
     className: "bg-terracotta text-white",
   });
 
-  navigate("/profile");
+  navigate("/");
 } catch (err: any) {
   toast({
     title: "Login failed",

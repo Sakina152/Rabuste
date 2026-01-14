@@ -14,13 +14,13 @@ import icedAmericanoImg from "@/assets/menu/robusta-iced-americano.jpg";
 
 const Index = () => {
   const [showIntro, setShowIntro] = useState(() => {
-    // Check if user has already seen the intro
+    // Only show intro if user hasn't seen it before
     return !localStorage.getItem('introAnimationSeen');
   });
 
   useEffect(() => {
-    if (!showIntro) {
-      // Mark intro as seen
+    if (showIntro) {
+      // Mark intro as seen after it starts playing
       localStorage.setItem('introAnimationSeen', 'true');
     }
   }, [showIntro]);
