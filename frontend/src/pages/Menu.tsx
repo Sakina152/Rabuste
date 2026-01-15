@@ -5,6 +5,13 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button"; // Import Button
 import { useCart } from "@/context/CartContext"; // Import Cart Hook
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"; // Import Dialog components
 
 // Section images
 import espressoImg from "@/assets/menu/robusta-espresso.jpg";
@@ -61,7 +68,7 @@ const getCategoryConfig = (categoryName: string) => {
 };
 
 // Updated MenuItemCard to accept fallbackImage and include Add to Cart logic
-const MenuItemCard = ({ item, index, fallbackImage }: { item: MenuItem; index: number; fallbackImage?: string }) => {
+const MenuItemCard = ({ item, index, fallbackImage, onClick }: { item: MenuItem; index: number; fallbackImage?: string; onClick: () => void }) => {
   const { addToCart } = useCart(); // Use the hook
 
   const tag = item.isBestSeller ? "House Favourite" :
@@ -88,7 +95,8 @@ const MenuItemCard = ({ item, index, fallbackImage }: { item: MenuItem; index: n
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.4 }}
       viewport={{ once: true }}
-      className="group flex flex-col h-full rounded-xl bg-card/50 border border-border/30 hover:bg-card hover:border-accent/30 hover:shadow-lg transition-all duration-300 overflow-hidden"
+      className="group flex flex-col h-full rounded-xl bg-card/50 border border-border/30 hover:bg-card hover:border-accent/30 hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer"
+      onClick={onClick}
     >
       {/* Image Section */}
       <div className="w-full h-48 overflow-hidden relative">
@@ -159,7 +167,7 @@ const MenuItemCard = ({ item, index, fallbackImage }: { item: MenuItem; index: n
   );
 };
 
-const MenuSectionBlock = ({ section, sectionIndex }: { section: MenuSection; sectionIndex: number }) => (
+const MenuSectionBlock = ({ section, sectionIndex, onItemClick }: { section: MenuSection; sectionIndex: number; onItemClick: (item: MenuItem) => void }) => (
   <motion.div
     initial={{ opacity: 0, y: 30 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -183,6 +191,7 @@ const MenuSectionBlock = ({ section, sectionIndex }: { section: MenuSection; sec
           item={item}
           index={index}
           fallbackImage={section.image} // Pass image down as fallback
+          onClick={() => onItemClick(item)}
         />
       ))}
     </div>
@@ -193,6 +202,21 @@ const Menu = () => {
   const [menuSections, setMenuSections] = useState<MenuSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const { addToCart } = useCart();
+
+  const handleAddToCartFromModal = () => {
+    if (!selectedItem) return;
+
+    addToCart({
+      id: selectedItem._id,
+      name: selectedItem.name,
+      price: selectedItem.price,
+      image: selectedItem.image ? `${import.meta.env.VITE_API_BASE_URL}/${selectedItem.image.replace(/\\/g, "/")}` : "",
+    });
+    // Optional: Close modal after adding
+    // setSelectedItem(null);
+  };
 
   useEffect(() => {
     const fetchMenuItems = async () => {
@@ -324,12 +348,80 @@ const Menu = () => {
       <section className="px-6 pb-24">
         <div className="container-custom max-w-5xl">
           {menuSections.map((section, sectionIndex) => (
-            <MenuSectionBlock key={section.title} section={section} sectionIndex={sectionIndex} />
+            <MenuSectionBlock
+              key={section.title}
+              section={section}
+              sectionIndex={sectionIndex}
+              onItemClick={setSelectedItem}
+            />
           ))}
         </div>
       </section>
 
       <Footer />
+
+      {/* Item Detail Modal */}
+      <Dialog open={!!selectedItem} onOpenChange={(open) => !open && setSelectedItem(null)}>
+        <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden bg-background border-border">
+          {selectedItem && (
+            <div className="flex flex-col md:flex-row h-full">
+              {/* Image Side */}
+              <div className="w-full md:w-2/5 h-64 md:h-auto relative bg-accent/5">
+                {selectedItem.image ? (
+                  <img
+                    src={`${import.meta.env.VITE_API_BASE_URL}/${selectedItem.image.replace(/\\/g, "/")}`}
+                    alt={selectedItem.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-accent/20">
+                    <Coffee className="w-16 h-16" />
+                  </div>
+                )}
+                {selectedItem.isBestSeller && (
+                  <div className="absolute top-4 left-4">
+                    <span className="px-3 py-1 text-xs font-medium bg-accent text-white rounded-full shadow-lg">
+                      House Favourite
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Content Side */}
+              <div className="flex-1 p-6 flex flex-col">
+                <DialogHeader className="mb-4 text-left">
+                  <div className="flex justify-between items-start gap-2">
+                    <DialogTitle className="text-2xl font-display text-foreground">
+                      {selectedItem.name}
+                    </DialogTitle>
+                    {selectedItem.isVegetarian && (
+                      <span className="flex-shrink-0 text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-full mt-1">
+                        Veg
+                      </span>
+                    )}
+                  </div>
+                  <DialogDescription className="text-muted-foreground/80 mt-2 text-base">
+                    {selectedItem.description || "No description available for this item."}
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="mt-auto pt-6 border-t border-border/30 flex items-center justify-between">
+                  <span className="font-display text-3xl text-accent">
+                    ₹{selectedItem.price}
+                  </span>
+                  <Button
+                    onClick={handleAddToCartFromModal}
+                    className="bg-accent hover:bg-accent/90 text-white gap-2"
+                  >
+                    <ShoppingBag className="w-4 h-4" />
+                    Add to Cart
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
