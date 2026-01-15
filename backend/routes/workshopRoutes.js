@@ -44,8 +44,8 @@ const storage = multer.diskStorage({
     cb(
       null,
       'workshop-' +
-        uniqueSuffix +
-        path.extname(file.originalname).toLowerCase()
+      uniqueSuffix +
+      path.extname(file.originalname).toLowerCase()
     );
   }
 });

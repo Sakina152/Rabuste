@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { User, Mail, Phone, MapPin, Lock, ArrowLeft, TrendingUp, Heart, Coffee, Calendar, Package, Star, Award, Flame } from "lucide-react";
+import { User, Mail, Phone, MapPin, ArrowLeft, TrendingUp, Heart, Coffee, Calendar, Package, Star, Award, Flame, Edit2, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,16 +26,18 @@ interface ProfileUser {
 
 interface Order {
   _id: string;
-  items: Array<{
-    menuItem: {
+  orderItems: Array<{
+    product: {
       _id: string;
       name: string;
       image: string;
     };
-    quantity: number;
+    name: string;
+    image: string;
+    qty: number;
     price: number;
   }>;
-  totalAmount: number;
+  totalPrice: number;
   status: string;
   createdAt: string;
   orderNumber: string;
@@ -77,9 +79,14 @@ const Profile = () => {
 
   const [user, setUser] = useState<ProfileUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
+
   const [saving, setSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    phoneNumber: "",
+    address: ""
+  });
   const [orders, setOrders] = useState<Order[]>([]);
   const [artPurchases, setArtPurchases] = useState<ArtPurchase[]>([]);
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
@@ -111,6 +118,11 @@ const Profile = () => {
         );
 
         setUser(res.data);
+        setEditForm({
+          name: res.data.name,
+          phoneNumber: res.data.phoneNumber || "",
+          address: res.data.address || ""
+        });
       } catch (err) {
         toast({
           title: "Error",
@@ -164,16 +176,19 @@ const Profile = () => {
         // Calculate favorite items (most ordered)
         const itemCount: { [key: string]: { count: number; name: string; image: string } } = {};
         ordersData.forEach((order: Order) => {
-          order.items.forEach(item => {
-            const id = item.menuItem._id;
-            if (!itemCount[id]) {
+          order.orderItems.forEach(item => {
+            const id = item.product?._id || item.product; // Handle populated or unpopulated
+            // Use item.name and item.image directly from order item if available
+            if (typeof id === 'string' && !itemCount[id]) {
               itemCount[id] = {
                 count: 0,
-                name: item.menuItem.name,
-                image: item.menuItem.image
+                name: item.name,
+                image: item.image
               };
             }
-            itemCount[id].count += item.quantity;
+            if (typeof id === 'string') {
+              itemCount[id].count += item.qty;
+            }
           });
         });
 
@@ -199,56 +214,34 @@ const Profile = () => {
     fetchProfileData();
   }, [toast]);
 
-  /* ================= CHANGE PASSWORD ================= */
-  const handleChangePassword = async () => {
-    const token = await getToken();
-    if (!token) {
-      toast({
-        title: "Not logged in",
-        description: "Please log in again",
-        variant: "destructive",
-      });
-      return;
-    }
 
-    if (!currentPassword || !newPassword) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill all password fields",
-        variant: "destructive",
-      });
-      return;
-    }
+
+  /* ================= UPDATE PROFILE ================= */
+  const handleUpdateProfile = async () => {
+    const token = await getToken();
+    if (!token) return;
 
     try {
       setSaving(true);
-      await axios.put(
-        `${API_URL}/api/auth/change-password`,
+      const res = await axios.put(
+        `${API_URL}/api/auth/profile`,
+        editForm,
         {
-          currentPassword,
-          newPassword,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` }
         }
       );
 
+      setUser(res.data);
+      setIsEditing(false);
       toast({
-        title: "Password Updated",
-        description: "Your password has been changed successfully",
+        title: "Profile Updated",
+        description: "Your profile details have been saved",
         className: "bg-[#5C3A21] text-white border-none",
       });
-
-      setCurrentPassword("");
-      setNewPassword("");
     } catch (err: any) {
       toast({
         title: "Update failed",
-        description:
-          err.response?.data?.message ||
-          "Failed to update password",
+        description: err.response?.data?.message || "Failed to update profile",
         variant: "destructive",
       });
     } finally {
@@ -287,7 +280,7 @@ const Profile = () => {
         </Button>
 
         {/* Profile Header Card */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-white/5 backdrop-blur-xl rounded-2xl p-8 md:p-10 border border-white/10 shadow-2xl"
@@ -311,15 +304,15 @@ const Profile = () => {
                 <Badge className={`
                   ${totalOrders >= 20 ? 'bg-gradient-to-r from-amber-600 to-amber-500' :
                     totalOrders >= 10 ? 'bg-gradient-to-r from-blue-600 to-blue-500' :
-                    totalOrders >= 5 ? 'bg-gradient-to-r from-emerald-600 to-emerald-500' :
-                    'bg-gradient-to-r from-slate-600 to-slate-500'}
+                      totalOrders >= 5 ? 'bg-gradient-to-r from-emerald-600 to-emerald-500' :
+                        'bg-gradient-to-r from-slate-600 to-slate-500'}
                   text-white border-none px-4 py-1.5 text-sm font-medium shadow-lg
                 `}>
                   <Coffee className="w-3.5 h-3.5 mr-1.5" />
-                  {totalOrders >= 20 ? "Coffee Master" : 
-                   totalOrders >= 10 ? "Regular Member" : 
-                   totalOrders >= 5 ? "Enthusiast" : 
-                   "Beginner"}
+                  {totalOrders >= 20 ? "Coffee Master" :
+                    totalOrders >= 10 ? "Regular Member" :
+                      totalOrders >= 5 ? "Enthusiast" :
+                        "Beginner"}
                 </Badge>
                 <Badge variant="outline" className="border-white/30 text-white/90 px-4 py-1.5 text-sm font-medium bg-white/5">
                   <Calendar className="w-3.5 h-3.5 mr-1.5" />
@@ -441,65 +434,63 @@ const Profile = () => {
             >
               <Card className="bg-card/90 backdrop-blur-md border-white/10 shadow-xl">
                 <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-terracotta/20 rounded-xl flex items-center justify-center">
-                      <User className="w-5 h-5 text-terracotta" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-terracotta/20 rounded-xl flex items-center justify-center">
+                        <User className="w-5 h-5 text-terracotta" />
+                      </div>
+                      <CardTitle className="text-lg">Personal Info</CardTitle>
                     </div>
-                    <CardTitle className="text-lg">Personal Info</CardTitle>
+                    {!isEditing ? (
+                      <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="h-8 w-8 p-0 text-white/70 hover:text-white">
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)} className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-900/20">
+                          <X className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={handleUpdateProfile} disabled={saving} className="h-8 w-8 p-0 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-900/20">
+                          <Save className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                  <InfoField label="Full Name" icon={<User className="w-4 h-4" />} value={user.name} />
-                  <InfoField label="Email" icon={<Mail className="w-4 h-4" />} value={user.email} />
-                  <InfoField label="Phone" icon={<Phone className="w-4 h-4" />} value={user.phoneNumber} />
+                  <InfoField
+                    label="Full Name"
+                    icon={<User className="w-4 h-4" />}
+                    value={isEditing ? editForm.name : user.name}
+                    isEditing={isEditing}
+                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  />
+                  <InfoField label="Email" icon={<Mail className="w-4 h-4" />} value={user.email} disabled />
+                  <InfoField
+                    label="Phone"
+                    icon={<Phone className="w-4 h-4" />}
+                    value={isEditing ? editForm.phoneNumber : user.phoneNumber}
+                    isEditing={isEditing}
+                    onChange={(e) => setEditForm({ ...editForm, phoneNumber: e.target.value })}
+                  />
                   <InfoField
                     label="Address"
                     icon={<MapPin className="w-4 h-4" />}
-                    value={user.address || "Not provided"}
+                    value={isEditing ? editForm.address : (user.address || "Not provided")}
+                    isEditing={isEditing}
+                    onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
                   />
+                  {isEditing && (
+                    <Button className="w-full mt-4 bg-terracotta hover:bg-terracotta/90" onClick={handleUpdateProfile} disabled={saving}>
+                      {saving ? "Saving..." : "Save Changes"}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
 
-            {/* Security */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
-            >
-              <Card className="bg-card/90 backdrop-blur-md border-white/10 shadow-xl">
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center">
-                      <Lock className="w-5 h-5 text-red-500" />
-                    </div>
-                    <CardTitle className="text-lg">Security</CardTitle>
-                  </div>
-                </CardHeader>
 
-                <CardContent className="space-y-4">
-                  <PasswordField
-                    label="Current Password"
-                    value={currentPassword}
-                    onChange={setCurrentPassword}
-                  />
-                  <PasswordField
-                    label="New Password"
-                    value={newPassword}
-                    onChange={setNewPassword}
-                  />
-
-                  <Button
-                    className="w-full bg-gradient-to-r from-terracotta to-accent hover:from-terracotta/90 hover:to-accent/90 shadow-lg"
-                    onClick={handleChangePassword}
-                    disabled={saving}
-                  >
-                    {saving ? "Updating..." : "Change Password"}
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
           </div>
 
           {/* Right Main Content - Order History Tabs */}
@@ -560,7 +551,7 @@ const Profile = () => {
                                     </Badge>
                                     <Badge className={
                                       order.status === 'Completed' ? 'bg-green-500' :
-                                      order.status === 'Pending' ? 'bg-yellow-500' : 'bg-blue-500'
+                                        order.status === 'Pending' ? 'bg-yellow-500' : 'bg-blue-500'
                                     }>
                                       {order.status}
                                     </Badge>
@@ -576,23 +567,23 @@ const Profile = () => {
                                   </p>
                                 </div>
                                 <p className="text-xl md:text-2xl font-bold bg-gradient-to-r from-terracotta to-accent bg-clip-text text-transparent">
-                                  ₹{order.totalAmount}
+                                  ₹{order.totalPrice}
                                 </p>
                               </div>
 
                               <div className="space-y-2">
-                                {order.items.map((item, itemIdx) => (
+                                {order.orderItems.map((item, itemIdx) => (
                                   <div key={itemIdx} className="flex items-center gap-3 bg-background/50 rounded-lg p-2 border border-white/5">
                                     <img
-                                      src={item.menuItem.image}
-                                      alt={item.menuItem.name}
+                                      src={item.image}
+                                      alt={item.name}
                                       className="w-12 h-12 object-cover rounded-md"
                                     />
                                     <div className="flex-1 min-w-0">
-                                      <p className="font-medium text-sm truncate">{item.menuItem.name}</p>
-                                      <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                                      <p className="font-medium text-sm truncate">{item.name}</p>
+                                      <p className="text-xs text-muted-foreground">Qty: {item.qty}</p>
                                     </div>
-                                    <p className="font-semibold text-sm whitespace-nowrap">₹{item.price * item.quantity}</p>
+                                    <p className="font-semibold text-sm whitespace-nowrap">₹{item.price * item.qty}</p>
                                   </div>
                                 ))}
                               </div>
@@ -639,7 +630,7 @@ const Profile = () => {
                                     w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shadow-lg text-sm
                                     ${idx === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600' :
                                       idx === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500' :
-                                      'bg-gradient-to-br from-orange-400 to-orange-600'}
+                                        'bg-gradient-to-br from-orange-400 to-orange-600'}
                                   `}>
                                     #{idx + 1}
                                   </div>
@@ -794,10 +785,16 @@ const InfoField = ({
   label,
   icon,
   value,
+  isEditing = false,
+  onChange,
+  disabled = false
 }: {
   label: string;
   icon: React.ReactNode;
   value: string;
+  isEditing?: boolean;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
 }) => (
   <div className="space-y-2">
     <Label>{label}</Label>
@@ -805,29 +802,11 @@ const InfoField = ({
       <span className="absolute left-3 top-3 w-4 h-4 text-muted-foreground">
         {icon}
       </span>
-      <Input className="pl-10" value={value} disabled />
-    </div>
-  </div>
-);
-
-const PasswordField = ({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) => (
-  <div className="space-y-2">
-    <Label>{label}</Label>
-    <div className="relative">
-      <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
       <Input
-        type="password"
-        className="pl-10"
+        className={`pl-10 ${isEditing && !disabled ? 'bg-white/10 border-white/20 text-white' : ''}`}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        disabled={!isEditing || disabled}
+        onChange={onChange}
       />
     </div>
   </div>

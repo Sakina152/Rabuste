@@ -33,7 +33,6 @@ const navItems = [
   { title: "Orders", icon: ShoppingBag, href: "/admin/dashboard/orders" },
   { title: "Event Inquiries", icon: MessageSquare, href: "/admin/dashboard/inquiries" },
   { title: "Applications", icon: FileText, href: "/admin/applications" },
-  { title: "Users", icon: Users, href: "/admin/users" },
 ];
 
 // Stats will be loaded from API

@@ -119,39 +119,34 @@ const updateUserRole = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Change user password
-// @route   PUT /api/auth/change-password
+// @desc    Update user profile (Name, Phone, Address)
+// @route   PUT /api/auth/profile
 // @access  Private
-const changePassword = asyncHandler(async (req, res) => {
-  const { currentPassword, newPassword } = req.body;
+const updateUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
 
-  if (!currentPassword || !newPassword) {
-    res.status(400);
-    throw new Error("Please provide current and new password");
-  }
+  if (user) {
+    user.name = req.body.name || user.name;
+    user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
+    user.address = req.body.address || user.address;
 
-  // Explicitly fetch password
-  const user = await User.findById(req.user._id).select("+password");
+    const updatedUser = await user.save();
 
-  if (!user) {
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      phoneNumber: updatedUser.phoneNumber,
+      address: updatedUser.address,
+      role: updatedUser.role,
+    });
+  } else {
     res.status(404);
-    throw new Error("User not found");
+    throw new Error('User not found');
   }
-
-  // Verify current password
-  const isMatch = await user.matchPassword(currentPassword);
-
-  if (!isMatch) {
-    res.status(401);
-    throw new Error("Current password is incorrect");
-  }
-
-  // Set new password (will be hashed by pre-save hook)
-  user.password = newPassword;
-  await user.save();
-
-  res.json({ message: "Password updated successfully" });
 });
+
+
 
 // @desc    Register/Login user with Firebase
 // @route   POST /api/auth/firebase-login
@@ -208,4 +203,4 @@ const firebaseAuth = asyncHandler(async (req, res) => {
   }
 });
 
-export { registerUser, loginUser, getMe, getAllUsers, updateUserRole, changePassword, firebaseAuth};
+export { registerUser, loginUser, getMe, getAllUsers, updateUserRole, firebaseAuth, updateUserProfile };

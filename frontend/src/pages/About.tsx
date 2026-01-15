@@ -494,7 +494,7 @@ const About = () => {
             <div className="flex flex-wrap justify-center gap-4">
               <Button variant="hero" size="xl" asChild>
                 <Link to="/workshops">
-                  Join a Tasting Workshop
+                  Join a Workshop
                   <ArrowRight className="ml-2" />
                 </Link>
               </Button>

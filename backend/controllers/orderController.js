@@ -16,7 +16,8 @@ export const createOrder = asyncHandler(async (req, res) => {
     isPaid = false,
     paidAt,
     customerEmail,
-    customerName
+    customerName,
+    user // Add user to destructuring
   } = req.body;
 
   // Validate required fields
@@ -37,6 +38,7 @@ export const createOrder = asyncHandler(async (req, res) => {
 
   // Create order
   const order = await Order.create({
+    user, // Save user ID
     orderItems: orderItems || [],
     orderType,
     artItem: orderType === 'ART' ? artItem : undefined,
@@ -73,17 +75,17 @@ export const createOrder = asyncHandler(async (req, res) => {
 // @access  Public (no auth required yet, add later)
 export const getOrders = asyncHandler(async (req, res) => {
   const { orderType, status, startDate, endDate } = req.query;
-  
+
   const query = {};
-  
+
   if (orderType) {
     query.orderType = orderType;
   }
-  
+
   if (status) {
     query.status = status;
   }
-  
+
   if (startDate || endDate) {
     query.createdAt = {};
     if (startDate) {
@@ -93,12 +95,12 @@ export const getOrders = asyncHandler(async (req, res) => {
       query.createdAt.$lte = new Date(endDate);
     }
   }
-  
+
   const orders = await Order.find(query)
     .populate('artItem', 'title artist price imageUrl')
     .sort({ createdAt: -1 })
     .limit(100);
-  
+
   res.json(orders);
 });
 
@@ -108,12 +110,12 @@ export const getOrders = asyncHandler(async (req, res) => {
 export const getOrderById = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id)
     .populate('artItem', 'title artist price imageUrl');
-  
+
   if (!order) {
     res.status(404);
     throw new Error('Order not found');
   }
-  
+
   res.json(order);
 });
 
@@ -122,23 +124,23 @@ export const getOrderById = asyncHandler(async (req, res) => {
 // @access  Public (add auth later)
 export const updateOrderStatus = asyncHandler(async (req, res) => {
   const { status } = req.body;
-  
+
   const validStatuses = ['pending', 'in progress', 'delivered', 'cancelled'];
   if (!validStatuses.includes(status)) {
     res.status(400);
     throw new Error('Invalid status');
   }
-  
+
   const order = await Order.findById(req.params.id);
-  
+
   if (!order) {
     res.status(404);
     throw new Error('Order not found');
   }
-  
+
   order.status = status;
   await order.save();
-  
+
   res.json(order);
 });
 
@@ -147,17 +149,17 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 // @access  Public (add auth later)
 export const getOrdersByUser = asyncHandler(async (req, res) => {
   const { email } = req.params;
-  
+
   if (!email) {
     res.status(400);
     throw new Error('Email is required');
   }
-  
+
   const orders = await Order.find({ customerEmail: email })
     .populate('artItem', 'title artist price imageUrl')
     .populate('orderItems.product', 'name price image')
     .sort({ createdAt: -1 })
     .limit(50);
-  
+
   res.json(orders);
 });

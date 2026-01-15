@@ -78,31 +78,31 @@ const orderSchema = new mongoose.Schema({
   
   // OLD SCHEMA (keep for backward compatibility)
   orderItems: [orderItemSchema],
-  
+
   // Order type: 'MENU' for menu orders, 'ART' for art purchases
   orderType: {
     type: String,
     enum: ['MENU', 'ART'],
     default: 'MENU'
   },
-  
+
   // For art purchases, store the art ID
   artItem: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Art',
     required: false
   },
-  
+
   totalPrice: {
     type: Number,
     required: false // Made optional since we use totalAmount now
   },
-  
+
   paymentMethod: {
     type: String,
     default: 'Razorpay'
   },
-  
+
   paymentResult: {
     id: String,
     status: String,
@@ -110,16 +110,16 @@ const orderSchema = new mongoose.Schema({
     razorpay_order_id: String,
     razorpay_payment_id: String
   },
-  
+
   isPaid: {
     type: Boolean,
     default: false
   },
-  
+
   paidAt: {
     type: Date
   },
-  
+
   // Customer information (optional for now, can be linked to User later)
   customerEmail: {
     type: String
