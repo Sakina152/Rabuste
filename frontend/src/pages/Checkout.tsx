@@ -4,29 +4,108 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
-import { 
-  ShoppingBag, 
-  Trash2, 
-  Lock, 
-  CreditCard, 
+import {
+  ShoppingBag,
+  Trash2,
+  Lock,
+  CreditCard,
   Package,
   Minus,
   Plus,
   ShieldCheck,
-  ArrowLeft
+  ArrowLeft,
+  Store
 } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import axios from "axios";
+import { useToast } from "@/hooks/use-toast";
+import { getToken } from "@/utils/getToken";
 
 const Checkout = () => {
   const { cartItems, cartTotal, removeFromCart, updateQuantity, clearCart } = useCart();
-  const { handlePayment, isProcessing } = useRazorpay();
+  const { handlePayment, isProcessing: isRazorpayProcessing } = useRazorpay();
+  const [paymentMethod, setPaymentMethod] = useState<'razorpay' | 'counter'>('razorpay');
+  const [isCounterProcessing, setIsCounterProcessing] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const subtotal = cartTotal;
   const tax = cartTotal * 0.05; // 5% GST
   const total = subtotal + tax;
+
+  const isProcessing = isRazorpayProcessing || isCounterProcessing;
+
+  const handlePlaceOrder = async () => {
+    if (paymentMethod === 'razorpay') {
+      handlePayment('MENU');
+    } else {
+      setIsCounterProcessing(true);
+      try {
+        const userInfoString = localStorage.getItem("userInfo");
+        if (!userInfoString) {
+          toast({
+            title: "Authentication Required",
+            description: "Please login to place an order.",
+            variant: "destructive"
+          });
+          setIsCounterProcessing(false);
+          return;
+        }
+
+        const userInfo = JSON.parse(userInfoString);
+        const token = await getToken();
+        const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        };
+
+        const orderData = {
+          user: userInfo._id || userInfo.id,
+          orderType: 'MENU',
+          orderItems: cartItems.map(item => ({
+            product: item.id,
+            name: item.name,
+            price: item.price,
+            qty: item.quantity,
+            image: item.image
+          })),
+          totalPrice: total,
+          paymentMethod: 'Pay at Counter',
+          isPaid: false,
+          paymentResult: { status: 'pending_payment' },
+          customerEmail: userInfo.email,
+          customerName: userInfo.name
+        };
+
+        await axios.post(`${API_BASE}/api/orders`, orderData, config);
+
+        toast({
+          title: "Order Placed!",
+          description: "Please pay at the counter to confirm your order.",
+          className: "bg-green-600 text-white"
+        });
+
+        clearCart();
+        navigate("/order-success");
+
+      } catch (error: any) {
+        console.error("Order placement failed:", error);
+        toast({
+          title: "Order Failed",
+          description: error.response?.data?.message || "Failed to place order. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsCounterProcessing(false);
+      }
+    }
+  };
 
   if (cartItems.length === 0) {
     return (
@@ -60,7 +139,7 @@ const Checkout = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="relative pt-32 pb-12 overflow-hidden bg-hero-gradient">
         <div className="container-custom relative z-10 px-6">
@@ -87,7 +166,7 @@ const Checkout = () => {
       <section className="section-padding bg-background">
         <div className="container-custom max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-3 gap-8">
-            
+
             {/* Left: Shopping Cart Items */}
             <div className="lg:col-span-2 space-y-6">
               <div className="flex items-center justify-between mb-6">
@@ -104,7 +183,7 @@ const Checkout = () => {
                     </p>
                   </div>
                 </div>
-                
+
                 <Button
                   variant="subtle"
                   size="sm"
@@ -128,9 +207,9 @@ const Checkout = () => {
                     <div className="flex gap-6">
                       {/* Image */}
                       <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 bg-coffee-dark">
-                        <img 
-                          src={item.image} 
-                          alt={item.name} 
+                        <img
+                          src={item.image}
+                          alt={item.name}
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -150,7 +229,7 @@ const Checkout = () => {
                           {/* Quantity Controls */}
                           <div className="flex items-center gap-3 bg-coffee-dark/50 rounded-lg p-1">
                             <button
-                              onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                              onClick={() => updateQuantity(item.id, -1)}
                               className="p-2 hover:bg-accent/10 rounded-md transition-colors"
                             >
                               <Minus className="w-4 h-4 text-accent" />
@@ -159,7 +238,7 @@ const Checkout = () => {
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              onClick={() => updateQuantity(item.id, 1)}
                               className="p-2 hover:bg-accent/10 rounded-md transition-colors"
                             >
                               <Plus className="w-4 h-4 text-accent" />
@@ -197,7 +276,7 @@ const Checkout = () => {
             {/* Right: Order Summary */}
             <div className="lg:col-span-1">
               <div className="sticky top-24 space-y-6">
-                
+
                 {/* Order Summary Card */}
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
@@ -223,10 +302,14 @@ const Checkout = () => {
                         <span>Subtotal</span>
                         <span className="font-medium">₹{subtotal.toFixed(2)}</span>
                       </div>
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Tax (5% GST)</span>
+                        <span className="font-medium">₹{tax.toFixed(2)}</span>
+                      </div>
                       <div className="text-xs text-muted-foreground italic">
                         All prices are inclusive of taxes
                       </div>
-                      
+
                       {/* Total */}
                       <div className="pt-4 border-t border-border">
                         <div className="flex justify-between items-center">
@@ -240,9 +323,36 @@ const Checkout = () => {
                       </div>
                     </div>
 
+                    {/* Payment Method Selection */}
+                    <div className="space-y-3 pt-2">
+                      <p className="text-sm font-medium text-foreground">Select Payment Method</p>
+
+                      <div
+                        className={`flex items-center p-3 rounded-xl border cursor-pointer transition-all ${paymentMethod === 'razorpay' ? 'border-accent bg-accent/10' : 'border-border bg-card hover:bg-muted/50'}`}
+                        onClick={() => setPaymentMethod('razorpay')}
+                      >
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center mr-3 ${paymentMethod === 'razorpay' ? 'border-accent' : 'border-muted-foreground'}`}>
+                          {paymentMethod === 'razorpay' && <div className="w-2 h-2 rounded-full bg-accent" />}
+                        </div>
+                        <CreditCard className="w-5 h-5 mr-3 text-accent" />
+                        <span className="font-medium">Pay Online</span>
+                      </div>
+
+                      <div
+                        className={`flex items-center p-3 rounded-xl border cursor-pointer transition-all ${paymentMethod === 'counter' ? 'border-accent bg-accent/10' : 'border-border bg-card hover:bg-muted/50'}`}
+                        onClick={() => setPaymentMethod('counter')}
+                      >
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center mr-3 ${paymentMethod === 'counter' ? 'border-accent' : 'border-muted-foreground'}`}>
+                          {paymentMethod === 'counter' && <div className="w-2 h-2 rounded-full bg-accent" />}
+                        </div>
+                        <Store className="w-5 h-5 mr-3 text-accent" />
+                        <span className="font-medium">Pay at Counter</span>
+                      </div>
+                    </div>
+
                     {/* Payment Button */}
                     <Button
-                      onClick={() => handlePayment('MENU')}
+                      onClick={handlePlaceOrder}
                       disabled={isProcessing}
                       variant="hero"
                       size="lg"
@@ -255,8 +365,8 @@ const Checkout = () => {
                         </>
                       ) : (
                         <>
-                          <CreditCard className="w-5 h-5 mr-2" />
-                          Pay ₹{total.toFixed(2)}
+                          {paymentMethod === 'razorpay' ? <CreditCard className="w-5 h-5 mr-2" /> : <Store className="w-5 h-5 mr-2" />}
+                          {paymentMethod === 'razorpay' ? `Pay ₹${total.toFixed(2)}` : 'Place Order'}
                         </>
                       )}
                     </Button>
@@ -285,7 +395,10 @@ const Checkout = () => {
                     </h4>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Secure payment powered by Razorpay. Your payment information is encrypted and safe.
+                    {paymentMethod === 'razorpay'
+                      ? "Secure payment powered by Razorpay. Your payment information is encrypted and safe."
+                      : "Order now and pay when you collect your items at the counter. Perfect for cash payments."
+                    }
                   </p>
                 </motion.div>
               </div>

@@ -57,6 +57,7 @@ const loginUser = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      avatar: user.avatar,
       role: user.role,
       token: generateToken(user._id),
     });
@@ -83,6 +84,7 @@ const getMe = asyncHandler(async (req, res) => {
     email: user.email,
     phoneNumber: user.phoneNumber,
     address: user.address,
+    avatar: user.avatar,
     role: user.role,
   });
 });
@@ -129,6 +131,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     user.name = req.body.name || user.name;
     user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
     user.address = req.body.address || user.address;
+    user.avatar = req.body.avatar || user.avatar;
 
     const updatedUser = await user.save();
 
@@ -136,8 +139,10 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       _id: updatedUser._id,
       name: updatedUser.name,
       email: updatedUser.email,
+      email: updatedUser.email,
       phoneNumber: updatedUser.phoneNumber,
       address: updatedUser.address,
+      avatar: updatedUser.avatar,
       role: updatedUser.role,
     });
   } else {
