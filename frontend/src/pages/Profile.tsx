@@ -26,16 +26,18 @@ interface ProfileUser {
 
 interface Order {
   _id: string;
-  items: Array<{
-    menuItem: {
+  orderItems: Array<{
+    product: {
       _id: string;
       name: string;
       image: string;
     };
-    quantity: number;
+    name: string;
+    image: string;
+    qty: number;
     price: number;
   }>;
-  totalAmount: number;
+  totalPrice: number;
   status: string;
   createdAt: string;
   orderNumber: string;
@@ -157,23 +159,26 @@ const Profile = () => {
         const ordersData = res.data.orders || [];
 
         // Total spent
-        const spent = ordersData.reduce((sum: number, order: Order) => sum + order.totalAmount, 0);
+        const spent = ordersData.reduce((sum: number, order: Order) => sum + order.totalPrice, 0);
         setTotalSpent(spent);
         setTotalOrders(ordersData.length);
 
         // Calculate favorite items (most ordered)
         const itemCount: { [key: string]: { count: number; name: string; image: string } } = {};
         ordersData.forEach((order: Order) => {
-          order.items.forEach(item => {
-            const id = item.menuItem._id;
-            if (!itemCount[id]) {
+          order.orderItems.forEach(item => {
+            const id = item.product?._id || item.product; // Handle populated or unpopulated
+            // Use item.name and item.image directly from order item if available
+            if (typeof id === 'string' && !itemCount[id]) {
               itemCount[id] = {
                 count: 0,
-                name: item.menuItem.name,
-                image: item.menuItem.image
+                name: item.name,
+                image: item.image
               };
             }
-            itemCount[id].count += item.quantity;
+            if (typeof id === 'string') {
+              itemCount[id].count += item.qty;
+            }
           });
         });
 
@@ -641,23 +646,23 @@ const Profile = () => {
                                   </p>
                                 </div>
                                 <p className="text-xl md:text-2xl font-bold bg-gradient-to-r from-terracotta to-accent bg-clip-text text-transparent">
-                                  ₹{order.totalAmount}
+                                  ₹{order.totalPrice}
                                 </p>
                               </div>
 
                               <div className="space-y-2">
-                                {order.items.map((item, itemIdx) => (
+                                {order.orderItems.map((item, itemIdx) => (
                                   <div key={itemIdx} className="flex items-center gap-3 bg-background/50 rounded-lg p-2 border border-white/5">
                                     <img
-                                      src={item.menuItem.image}
-                                      alt={item.menuItem.name}
+                                      src={item.image}
+                                      alt={item.name}
                                       className="w-12 h-12 object-cover rounded-md"
                                     />
                                     <div className="flex-1 min-w-0">
-                                      <p className="font-medium text-sm truncate">{item.menuItem.name}</p>
-                                      <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                                      <p className="font-medium text-sm truncate">{item.name}</p>
+                                      <p className="text-xs text-muted-foreground">Qty: {item.qty}</p>
                                     </div>
-                                    <p className="font-semibold text-sm whitespace-nowrap">₹{item.price * item.quantity}</p>
+                                    <p className="font-semibold text-sm whitespace-nowrap">₹{item.price * item.qty}</p>
                                   </div>
                                 ))}
                               </div>

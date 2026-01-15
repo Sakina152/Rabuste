@@ -11,13 +11,13 @@ export const getUserProfileData = asyncHandler(async (req, res) => {
 
   const [orders, artPurchases, workshops] = await Promise.all([
     Order.find({ user: userId })
-      .populate('items.menuItem')
+      .populate('orderItems.product')
       .sort({ createdAt: -1 }),
-    
+
     ArtPurchase.find({ user: userId })
       .populate('art')
       .sort({ createdAt: -1 }),
-    
+
     Booking.find({ user: userId })
       .populate('workshop')
       .sort({ createdAt: -1 })
