@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { 
-  ShoppingBag, 
-  Package, 
-  CheckCircle2, 
-  Clock, 
+import {
+  ShoppingBag,
+  Package,
+  CheckCircle2,
+  Clock,
   XCircle,
   ArrowLeft,
   RefreshCw
@@ -89,12 +89,12 @@ export default function OrderManagement() {
         `${API_BASE}/api/orders/${orderId}/status`,
         { status: newStatus }
       );
-      
+
       // Update local state
-      setOrders(orders.map(order => 
+      setOrders(orders.map(order =>
         order._id === orderId ? { ...order, status: newStatus as Order['status'] } : order
       ));
-      
+
       toast({
         title: "Status Updated",
         description: `Order status changed to ${newStatus}`,
@@ -137,8 +137,8 @@ export default function OrderManagement() {
     }
   };
 
-  const filteredOrders = filterStatus === 'all' 
-    ? orders 
+  const filteredOrders = filterStatus === 'all'
+    ? orders
     : orders.filter(order => order.status === filterStatus);
 
   return (
@@ -204,7 +204,7 @@ export default function OrderManagement() {
               <Package className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
               <p className="text-lg font-medium">No orders found</p>
               <p className="text-sm text-muted-foreground mt-2">
-                {filterStatus === 'all' 
+                {filterStatus === 'all'
                   ? 'No orders have been placed yet.'
                   : `No orders with status "${filterStatus}".`}
               </p>
@@ -272,9 +272,9 @@ export default function OrderManagement() {
                               {order.orderItems.map((item, idx) => (
                                 <div key={idx} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
                                   {item.image && (
-                                    <img 
-                                      src={item.image} 
-                                      alt={item.name} 
+                                    <img
+                                      src={item.image}
+                                      alt={item.name}
                                       className="w-12 h-12 object-cover rounded"
                                     />
                                   )}
@@ -294,9 +294,9 @@ export default function OrderManagement() {
                           <div className="mt-4 border-t pt-4">
                             <h4 className="font-medium mb-3">Art Purchase:</h4>
                             <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
-                              <img 
-                                src={order.artItem.imageUrl} 
-                                alt={order.artItem.title} 
+                              <img
+                                src={order.artItem.imageUrl}
+                                alt={order.artItem.title}
                                 className="w-20 h-20 object-cover rounded"
                               />
                               <div>
@@ -310,7 +310,7 @@ export default function OrderManagement() {
 
                         <div className="mt-4 pt-4 border-t">
                           <p className="text-xl font-bold">
-                            Total: ₹{order.totalPrice.toFixed(2)}
+                            Total: ₹{(order.totalPrice || 0).toFixed(2)}
                           </p>
                         </div>
                       </div>
