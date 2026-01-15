@@ -59,7 +59,9 @@ export default function WorkshopManager() {
   const fetchWorkshops = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/workshops`);
+      const res = await fetch(`${API_URL}/api/workshops`, {
+        headers: await auth(),
+      });
       const data = await res.json();
       if (data.success) {
         setWorkshops(data.data || []);
@@ -89,8 +91,8 @@ export default function WorkshopManager() {
     setFilteredWorkshops(filtered);
   }, [searchQuery, workshops]);
 
-  const auth = () => ({
-    Authorization: `Bearer ${getToken()}`,
+  const auth = async () => ({
+    Authorization: `Bearer ${await getToken()}`,
   });
 
   /* ================= ACTIONS ================= */
@@ -99,9 +101,9 @@ export default function WorkshopManager() {
     if (!confirm(`Are you sure you want to cancel "${title}"? This will cancel all bookings.`)) return;
 
     try {
-      const res = await fetch(`${API_URL}/workshops/${id}/cancel`, {
+      const res = await fetch(`${API_URL}/api/workshops/${id}/cancel`, {
         method: "PUT",
-        headers: auth(),
+        headers: await auth(),
       });
 
       if (res.ok) {
@@ -119,9 +121,9 @@ export default function WorkshopManager() {
     if (!confirm(`PERMANENTLY DELETE "${title}"? This cannot be undone and deletes all booking history.`)) return;
 
     try {
-      const res = await fetch(`${API_URL}/workshops/${id}/force`, {
+      const res = await fetch(`${API_URL}/api/workshops/${id}/force`, {
         method: "DELETE",
-        headers: auth(),
+        headers: await auth(),
       });
 
       if (res.ok) {

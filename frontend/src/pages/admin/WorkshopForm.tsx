@@ -89,7 +89,7 @@ export default function WorkshopForm({
 
     if (workshop.image) {
       // If image path doesn't start with http, assume it's relative
-      setImagePreview(workshop.image.startsWith('http') ? workshop.image : `${API_URL}${workshop.image}`);
+      setImagePreview(workshop.image.startsWith('http') ? workshop.image : `${API_URL}${workshop.image.startsWith('/uploads') ? '' : '/uploads/workshops/'}${workshop.image.replace('uploads/workshops/', '')}`);
     }
   }, [workshop]);
 
@@ -115,7 +115,7 @@ export default function WorkshopForm({
     e.preventDefault();
     setLoading(true);
 
-    const token = getToken();
+    const token = await getToken();
     if (!token) {
       toast({
         variant: "destructive",
@@ -147,7 +147,7 @@ export default function WorkshopForm({
     }
 
     try {
-      const url = isEdit ? `${API_URL}/workshops/${workshop._id}` : `${API_URL}/workshops`;
+      const url = isEdit ? `${API_URL}/api/workshops/${workshop._id}` : `${API_URL}/api/workshops`;
       const method = isEdit ? "PUT" : "POST";
 
       const res = await fetch(url, {

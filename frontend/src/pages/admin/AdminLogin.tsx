@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import logo from "@/assets/rabuste-logo.png";
 import axios from 'axios';
+import { auth } from "../../firebase";
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
@@ -55,6 +56,9 @@ const AdminLogin = () => {
       }
 
       localStorage.setItem('userInfo', JSON.stringify(response.data));
+
+      // Sign out of Firebase to ensure getToken() uses the local JWT
+      await auth.signOut();
 
 
       toast({
