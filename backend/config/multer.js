@@ -1,12 +1,13 @@
-const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("./cloudinary");
+import multer from 'multer';
+import cloudinaryStoragePkg from 'multer-storage-cloudinary';
+const CloudinaryStorage = cloudinaryStoragePkg;
+import cloudinary from './cloudinary.js';
 
 const storage = new CloudinaryStorage({
-  cloudinary,
+  cloudinary: { v2: cloudinary },
   params: {
-    folder: "website-assets",
-    allowed_formats: ["jpg", "png", "jpeg", "webp"],
+    folder: "rabuste-portfolio", // Changed folder name to be more specific
+    allowed_formats: ["png"],    // Restricted to PNG as requested
     transformation: [
       { quality: "auto", fetch_format: "auto" },
     ],
@@ -15,4 +16,4 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage });
 
-module.exports = upload;
+export default upload;
