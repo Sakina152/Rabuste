@@ -26,16 +26,18 @@ interface ProfileUser {
 
 interface Order {
   _id: string;
-  items: Array<{
-    menuItem: {
+  orderItems: Array<{
+    product: {
       _id: string;
       name: string;
       image: string;
     };
-    quantity: number;
+    name: string;
+    image: string;
+    qty: number;
     price: number;
   }>;
-  totalAmount: number;
+  totalPrice: number;
   status: string;
   createdAt: string;
   orderNumber: string;
@@ -144,25 +146,28 @@ const Profile = () => {
 
         // Calculate analytics
         const ordersData = res.data.orders || [];
-        
+
         // Total spent
-        const spent = ordersData.reduce((sum: number, order: Order) => sum + order.totalAmount, 0);
+        const spent = ordersData.reduce((sum: number, order: Order) => sum + order.totalPrice, 0);
         setTotalSpent(spent);
         setTotalOrders(ordersData.length);
 
         // Calculate favorite items (most ordered)
         const itemCount: { [key: string]: { count: number; name: string; image: string } } = {};
         ordersData.forEach((order: Order) => {
-          order.items.forEach(item => {
-            const id = item.menuItem._id;
-            if (!itemCount[id]) {
+          order.orderItems.forEach(item => {
+            const id = item.product?._id || item.product; // Handle populated or unpopulated
+            // Use item.name and item.image directly from order item if available
+            if (typeof id === 'string' && !itemCount[id]) {
               itemCount[id] = {
                 count: 0,
-                name: item.menuItem.name,
-                image: item.menuItem.image
+                name: item.name,
+                image: item.image
               };
             }
-            itemCount[id].count += item.quantity;
+            if (typeof id === 'string') {
+              itemCount[id].count += item.qty;
+            }
           });
         });
 
@@ -273,7 +278,7 @@ const Profile = () => {
         </Button>
 
         {/* Profile Header Card */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-white/5 backdrop-blur-xl rounded-2xl p-8 md:p-10 border border-white/10 shadow-2xl"
@@ -297,15 +302,15 @@ const Profile = () => {
                 <Badge className={`
                   ${totalOrders >= 20 ? 'bg-gradient-to-r from-amber-600 to-amber-500' :
                     totalOrders >= 10 ? 'bg-gradient-to-r from-blue-600 to-blue-500' :
-                    totalOrders >= 5 ? 'bg-gradient-to-r from-emerald-600 to-emerald-500' :
-                    'bg-gradient-to-r from-slate-600 to-slate-500'}
+                      totalOrders >= 5 ? 'bg-gradient-to-r from-emerald-600 to-emerald-500' :
+                        'bg-gradient-to-r from-slate-600 to-slate-500'}
                   text-white border-none px-4 py-1.5 text-sm font-medium shadow-lg
                 `}>
                   <Coffee className="w-3.5 h-3.5 mr-1.5" />
-                  {totalOrders >= 20 ? "Coffee Master" : 
-                   totalOrders >= 10 ? "Regular Member" : 
-                   totalOrders >= 5 ? "Enthusiast" : 
-                   "Beginner"}
+                  {totalOrders >= 20 ? "Coffee Master" :
+                    totalOrders >= 10 ? "Regular Member" :
+                      totalOrders >= 5 ? "Enthusiast" :
+                        "Beginner"}
                 </Badge>
                 <Badge variant="outline" className="border-white/30 text-white/90 px-4 py-1.5 text-sm font-medium bg-white/5">
                   <Calendar className="w-3.5 h-3.5 mr-1.5" />
@@ -546,7 +551,7 @@ const Profile = () => {
                                     </Badge>
                                     <Badge className={
                                       order.status === 'Completed' ? 'bg-green-500' :
-                                      order.status === 'Pending' ? 'bg-yellow-500' : 'bg-blue-500'
+                                        order.status === 'Pending' ? 'bg-yellow-500' : 'bg-blue-500'
                                     }>
                                       {order.status}
                                     </Badge>
@@ -562,23 +567,23 @@ const Profile = () => {
                                   </p>
                                 </div>
                                 <p className="text-xl md:text-2xl font-bold bg-gradient-to-r from-terracotta to-accent bg-clip-text text-transparent">
-                                  ₹{order.totalAmount}
+                                  ₹{order.totalPrice}
                                 </p>
                               </div>
 
                               <div className="space-y-2">
-                                {order.items.map((item, itemIdx) => (
+                                {order.orderItems.map((item, itemIdx) => (
                                   <div key={itemIdx} className="flex items-center gap-3 bg-background/50 rounded-lg p-2 border border-white/5">
                                     <img
-                                      src={item.menuItem.image}
-                                      alt={item.menuItem.name}
+                                      src={item.image}
+                                      alt={item.name}
                                       className="w-12 h-12 object-cover rounded-md"
                                     />
                                     <div className="flex-1 min-w-0">
-                                      <p className="font-medium text-sm truncate">{item.menuItem.name}</p>
-                                      <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                                      <p className="font-medium text-sm truncate">{item.name}</p>
+                                      <p className="text-xs text-muted-foreground">Qty: {item.qty}</p>
                                     </div>
-                                    <p className="font-semibold text-sm whitespace-nowrap">₹{item.price * item.quantity}</p>
+                                    <p className="font-semibold text-sm whitespace-nowrap">₹{item.price * item.qty}</p>
                                   </div>
                                 ))}
                               </div>
@@ -625,7 +630,7 @@ const Profile = () => {
                                     w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shadow-lg text-sm
                                     ${idx === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600' :
                                       idx === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500' :
-                                      'bg-gradient-to-br from-orange-400 to-orange-600'}
+                                        'bg-gradient-to-br from-orange-400 to-orange-600'}
                                   `}>
                                     #{idx + 1}
                                   </div>

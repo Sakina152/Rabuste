@@ -26,34 +26,39 @@ const orderItemSchema = new mongoose.Schema({
 });
 
 const orderSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false
+  },
   orderItems: [orderItemSchema],
-  
+
   // Order type: 'MENU' for menu orders, 'ART' for art purchases
   orderType: {
     type: String,
     enum: ['MENU', 'ART'],
     default: 'MENU'
   },
-  
+
   // For art purchases, store the art ID
   artItem: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Art',
     required: false
   },
-  
+
   totalPrice: {
     type: Number,
     required: true,
     default: 0
   },
-  
+
   paymentMethod: {
     type: String,
     required: true,
     default: 'Razorpay'
   },
-  
+
   paymentResult: {
     id: String,
     status: String,
@@ -61,17 +66,17 @@ const orderSchema = new mongoose.Schema({
     razorpay_order_id: String,
     razorpay_payment_id: String
   },
-  
+
   isPaid: {
     type: Boolean,
     required: true,
     default: false
   },
-  
+
   paidAt: {
     type: Date
   },
-  
+
   // Customer information (optional for now, can be linked to User later)
   customerEmail: {
     type: String
@@ -79,7 +84,7 @@ const orderSchema = new mongoose.Schema({
   customerName: {
     type: String
   },
-  
+
   status: {
     type: String,
     enum: ['pending', 'in progress', 'delivered', 'cancelled'],
