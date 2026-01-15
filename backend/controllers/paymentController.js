@@ -3,8 +3,10 @@ import crypto from 'crypto';
 import asyncHandler from 'express-async-handler';
 import MenuItem from '../models/MenuItem.js';
 import Art from '../models/Art.js';
-import Order from '../models/Order.js'; 
+import Order from '../models/Order.js';
 import ArtPurchase from '../models/ArtPurchase.js';
+import Workshop from '../models/Workshop.js';
+import Booking from '../models/Booking.js';
 
 // Validate Razorpay credentials
 if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
@@ -25,14 +27,14 @@ export const createOrder = asyncHandler(async (req, res) => {
   }
 
   // We now accept 'type' and 'itemId' for Art purchases
-  const { cartItems, type, itemId } = req.body; 
+  const { cartItems, type, itemId } = req.body;
 
   let totalAmount = 0;
 
   // SCENARIO A: Art Purchase (Single Item)
   if (type === 'ART' && itemId) {
     const artPiece = await Art.findById(itemId);
-    
+
     if (!artPiece) {
       res.status(404);
       throw new Error('Art piece not found');
@@ -43,12 +45,12 @@ export const createOrder = asyncHandler(async (req, res) => {
     }
 
     totalAmount = artPiece.price;
-  } 
+  }
   // SCENARIO B: Menu Purchase (Cart)
   else if (type === 'MENU' && cartItems && cartItems.length > 0) {
     // Fetch menu items from database to validate prices
     const menuItemIds = cartItems.map(item => item.id || item.product || item._id).filter(Boolean);
-    
+
     if (menuItemIds.length === 0) {
       res.status(400);
       throw new Error('Invalid cart items: no valid item IDs found');
@@ -56,16 +58,16 @@ export const createOrder = asyncHandler(async (req, res) => {
 
     try {
       const menuItems = await MenuItem.find({ _id: { $in: menuItemIds }, isAvailable: true });
-      
+
       // Calculate total from database prices (validate against actual prices)
       totalAmount = cartItems.reduce((acc, cartItem) => {
         const itemId = cartItem.id || cartItem.product || cartItem._id;
         const menuItem = menuItems.find(m => m._id.toString() === itemId);
-        
+
         if (!menuItem) {
           throw new Error(`Menu item ${itemId} not found or not available`);
         }
-        
+
         const quantity = cartItem.quantity || 1;
         return acc + (menuItem.price * quantity);
       }, 0);
@@ -79,9 +81,34 @@ export const createOrder = asyncHandler(async (req, res) => {
         return acc + (item.price * (item.quantity || 1));
       }, 0);
     }
+  }
+  // SCENARIO C: Workshop Registration
+  else if (type === 'WORKSHOP' && itemId) {
+    const workshop = await Workshop.findById(itemId);
+
+    if (!workshop) {
+      res.status(404);
+      throw new Error('Workshop not found');
+    }
+
+    if (workshop.status !== 'published') {
+      res.status(400);
+      throw new Error('Workshop is not available for booking');
+    }
+
+    const requestedSeats = req.body.quantity || 1;
+
+    // Check if enough seats are available
+    // Note: This is an optimistic check. The real reservation happens at verify/save.
+    if (workshop.currentParticipants + requestedSeats > workshop.maxParticipants) {
+      res.status(400);
+      throw new Error(`Not enough seats available. Only ${workshop.maxParticipants - workshop.currentParticipants} seats left.`);
+    }
+
+    totalAmount = workshop.price * requestedSeats;
   } else {
     res.status(400);
-    throw new Error('Invalid purchase request. Please provide either cartItems for menu order or itemId for art purchase.');
+    throw new Error('Invalid purchase request. Please provide either cartItems for menu order, itemId for art, or itemId for workshop purchase.');
   }
 
   // Validate amount
@@ -142,7 +169,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
 
   // Razorpay signature verification format: order_id|payment_id (exact format)
   const signatureBody = `${orderId}|${paymentId}`;
-  
+
   // Generate expected signature using HMAC SHA256
   const expectedSignature = crypto
     .createHmac("sha256", secretKey)
@@ -151,8 +178,8 @@ export const verifyPayment = asyncHandler(async (req, res) => {
 
   // Razorpay signatures should match exactly (case-sensitive)
   // But we'll try both exact and case-insensitive comparison
-  const signatureMatch = 
-    receivedSignature === expectedSignature || 
+  const signatureMatch =
+    receivedSignature === expectedSignature ||
     receivedSignature.toLowerCase() === expectedSignature.toLowerCase();
 
   // Debug logging (remove sensitive data in production)
@@ -173,18 +200,18 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     try {
       // Get order data from request body
       const { orderData } = req.body;
-      
+
       console.log('Order data received:', orderData); // Add debug log
       console.log('User authenticated:', !!req.user, req.user?._id); // Debug log
-      
+
       if (orderData) {
         // Get user ID - REQUIRE authentication for orders to show in profile
         const userId = req.user ? req.user._id : null;
-        
+
         if (!userId) {
           console.warn('Warning: Order created without user authentication - will not appear in profile');
         }
-        
+
         // Create order records based on type
         if (orderData.type === 'ART' && orderData.itemId) {
           const artPurchaseData = {
@@ -194,12 +221,12 @@ export const verifyPayment = asyncHandler(async (req, res) => {
             paymentId: paymentId,
             status: 'confirmed'
           };
-          
+
           // Only add user if authenticated
           if (userId) {
             artPurchaseData.user = userId;
           }
-          
+
           const artPurchase = new ArtPurchase(artPurchaseData);
           await artPurchase.save();
           console.log('Art purchase saved successfully:', {
@@ -209,10 +236,10 @@ export const verifyPayment = asyncHandler(async (req, res) => {
             purchasePrice: artPurchase.purchasePrice,
             hasUser: !!artPurchase.user
           });
-          
+
           // Mark art as sold
           await Art.findByIdAndUpdate(orderData.itemId, { status: 'Sold' });
-          
+
         } else if (orderData.type === 'MENU' && orderData.cartItems) {
           const orderDocument = {
             items: orderData.cartItems.map(item => ({
@@ -225,22 +252,58 @@ export const verifyPayment = asyncHandler(async (req, res) => {
             paymentId: paymentId,
             status: 'confirmed'
           };
-          
+
           // Only add user if authenticated
           if (userId) {
             orderDocument.user = userId;
           }
-          
+
           const order = new Order(orderDocument);
           await order.save();
           console.log('Order saved:', order._id);
+        } else if (orderData.type === 'WORKSHOP' && orderData.itemId) {
+          // WORKSHOP BOOKING
+          const workshop = await Workshop.findById(orderData.itemId);
+
+          if (!workshop) {
+            throw new Error('Workshop not found during verification');
+          }
+
+          // Create Booking
+          const bookingData = {
+            workshop: orderData.itemId,
+            participantDetails: orderData.participantDetails, // Passed from frontend
+            numberOfSeats: orderData.quantity || 1,
+            totalAmount: orderData.amount, // Verified amount
+            paymentStatus: 'completed',
+            paymentId: paymentId,
+            status: 'confirmed',
+            source: 'website'
+          };
+
+          if (userId) {
+            bookingData.user = userId;
+          }
+
+          const booking = new Booking(bookingData);
+          await booking.save();
+
+          // Update workshop participant count
+          workshop.currentParticipants += (orderData.quantity || 1);
+          await workshop.save();
+
+          console.log('Workshop booking saved:', booking.registrationNumber);
+
+          // You might want to return the registration number to the frontend
+          // We can attach it to the response via a side-channel or just let the frontend separate query
+          // But verifyPayment returns specific fields. Let's rely on standard success.
         }
       } else {
         console.log('No orderData received in payment verification');
       }
 
-      res.json({ 
-        status: "success", 
+      res.json({
+        status: "success",
         message: "Payment verified successfully",
         order_id: orderId,
         payment_id: paymentId
@@ -248,8 +311,8 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     } catch (error) {
       console.error('Error creating order after payment:', error);
       // Still return success for payment verification, but log the error
-      res.json({ 
-        status: "success", 
+      res.json({
+        status: "success",
         message: "Payment verified successfully (order creation pending)",
         order_id: orderId,
         payment_id: paymentId,
@@ -266,7 +329,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
       secret_key_length: secretKey.length,
       secret_key_preview: secretKey.substring(0, 10) + '...' // For debugging config issues
     });
-    
+
     res.status(400);
     throw new Error(`Payment verification failed: Invalid signature. Please ensure:
       1. RAZORPAY_KEY_SECRET matches your Razorpay dashboard
