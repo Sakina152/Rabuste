@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { User, Mail, Phone, MapPin, ArrowLeft, TrendingUp, Heart, Coffee, Calendar, Package, Star, Award, Flame, Edit2, Save, X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,11 +26,36 @@ import axios from "axios";
 import { getToken } from "@/utils/getToken";
 import { useToast } from "@/hooks/use-toast";
 
+// AVATAR OPTIONS
+const AVATAR_OPTIONS = [
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Felix",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Aneka",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Willow",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Midnight",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Oliver",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Bella",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Jack",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Sofia",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Milo",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Luna",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Buster",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Daisy",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Leo",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Misty",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Rocky",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Toby",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Ginger",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Zoe",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Coco",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Lola",
+];
+
 interface ProfileUser {
   name: string;
   email: string;
   phoneNumber: string;
   address?: string;
+  avatar?: string;
 }
 
 interface Order {
@@ -85,12 +119,14 @@ const Profile = () => {
   const [editForm, setEditForm] = useState({
     name: "",
     phoneNumber: "",
-    address: ""
+    address: "",
+    avatar: ""
   });
   const [orders, setOrders] = useState<Order[]>([]);
   const [artPurchases, setArtPurchases] = useState<ArtPurchase[]>([]);
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
+  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
 
   // Analytics State
   const [favoriteItems, setFavoriteItems] = useState<Array<{ name: string; count: number; image: string }>>([]);
@@ -121,7 +157,8 @@ const Profile = () => {
         setEditForm({
           name: res.data.name,
           phoneNumber: res.data.phoneNumber || "",
-          address: res.data.address || ""
+          address: res.data.address || "",
+          avatar: res.data.avatar || ""
         });
       } catch (err) {
         toast({
@@ -145,7 +182,7 @@ const Profile = () => {
         setDataLoading(false);
         return;
       }
-      
+
       try {
         const res = await axios.get(`${API_URL}/api/profile/data`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -165,9 +202,9 @@ const Profile = () => {
         // Calculate analytics
         const ordersData = res.data.orders || [];
         const artPurchasesData = res.data.artPurchases || [];
-        
+
         // Total spent (menu orders + art purchases)
-        const menuSpent = ordersData.reduce((sum: number, order: Order) => sum + order.totalAmount, 0);
+        const menuSpent = ordersData.reduce((sum: number, order: Order) => sum + order.totalPrice, 0);
         const artSpent = artPurchasesData.reduce((sum: number, purchase: ArtPurchase) => sum + purchase.purchasePrice, 0);
         const totalSpentAmount = Math.round((menuSpent + artSpent) * 100) / 100; // Fix floating point precision
         setTotalSpent(totalSpentAmount);
@@ -194,7 +231,7 @@ const Profile = () => {
 
         // Get top 3 favorites
         const favorites = Object.values(itemCount)
-          .sort((a, b) => b.count - a.sort)
+          .sort((a, b) => b.count - a.count)
           .slice(0, 3);
         setFavoriteItems(favorites);
       } catch (err: any) {
@@ -217,21 +254,26 @@ const Profile = () => {
 
 
   /* ================= UPDATE PROFILE ================= */
-  const handleUpdateProfile = async () => {
+  const handleUpdateProfile = async (updatedData?: Partial<ProfileUser>) => {
     const token = await getToken();
     if (!token) return;
 
     try {
       setSaving(true);
+      const dataToSend = updatedData ? { ...editForm, ...updatedData } : editForm;
+
       const res = await axios.put(
         `${API_URL}/api/auth/profile`,
-        editForm,
+        dataToSend,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
 
       setUser(res.data);
+      if (updatedData?.avatar) {
+        setEditForm(prev => ({ ...prev, avatar: updatedData.avatar! }));
+      }
       setIsEditing(false);
       toast({
         title: "Profile Updated",
@@ -248,6 +290,12 @@ const Profile = () => {
       setSaving(false);
     }
   };
+
+  const handleAvatarSelect = async (avatarUrl: string) => {
+    setAvatarDialogOpen(false);
+    await handleUpdateProfile({ avatar: avatarUrl });
+  };
+
 
   /* ================= STATES ================= */
   if (loading) {
@@ -288,10 +336,50 @@ const Profile = () => {
           <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-terracotta/30 to-accent/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-terracotta/90 to-accent/90 flex items-center justify-center text-white shadow-2xl ring-2 ring-white/20">
-                <User className="w-12 h-12 md:w-14 md:h-14" />
+              <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-terracotta/90 to-accent/90 flex items-center justify-center text-white shadow-2xl ring-2 ring-white/20 overflow-hidden">
+                {user.avatar ? (
+                  <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-12 h-12 md:w-14 md:h-14" />
+                )}
               </div>
-              <div className="absolute -bottom-1 -right-1 bg-emerald-500 w-8 h-8 rounded-full border-4 border-background flex items-center justify-center shadow-lg">
+
+              {/* Avatar Edit Button */}
+              <Dialog open={avatarDialogOpen} onOpenChange={setAvatarDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    size="icon"
+                    className="absolute -bottom-1 -right-1 rounded-full w-8 h-8 bg-terracotta hover:bg-terracotta/90 border-2 border-background shadow-lg"
+                  >
+                    <Camera className="w-4 h-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-xl border-white/10">
+                  <DialogHeader>
+                    <DialogTitle>Choose your Avatar</DialogTitle>
+                  </DialogHeader>
+                  <ScrollArea className="h-[300px] mt-4 pr-4">
+                    <div className="grid grid-cols-3 gap-4">
+                      {AVATAR_OPTIONS.map((avatar, idx) => (
+                        <button
+                          key={idx}
+                          className="relative group rounded-xl overflow-hidden border-2 border-transparent hover:border-terracotta transition-all aspect-square"
+                          onClick={() => handleAvatarSelect(avatar)}
+                        >
+                          <img
+                            src={avatar}
+                            alt={`Avatar ${idx + 1}`}
+                            className="w-full h-full object-cover bg-white/5"
+                          />
+                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </DialogContent>
+              </Dialog>
+
+              <div className="absolute -bottom-1 -left-1 bg-emerald-500 w-8 h-8 rounded-full border-4 border-background flex items-center justify-center shadow-lg pointer-events-none">
                 <Award className="w-4 h-4 text-white" />
               </div>
             </div>
@@ -450,7 +538,7 @@ const Profile = () => {
                         <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)} className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-900/20">
                           <X className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={handleUpdateProfile} disabled={saving} className="h-8 w-8 p-0 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-900/20">
+                        <Button variant="ghost" size="sm" onClick={() => handleUpdateProfile()} disabled={saving} className="h-8 w-8 p-0 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-900/20">
                           <Save className="w-4 h-4" />
                         </Button>
                       </div>
@@ -482,7 +570,7 @@ const Profile = () => {
                     onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
                   />
                   {isEditing && (
-                    <Button className="w-full mt-4 bg-terracotta hover:bg-terracotta/90" onClick={handleUpdateProfile} disabled={saving}>
+                    <Button className="w-full mt-4 bg-terracotta hover:bg-terracotta/90" onClick={() => handleUpdateProfile()} disabled={saving}>
                       {saving ? "Saving..." : "Save Changes"}
                     </Button>
                   )}

@@ -15,11 +15,11 @@ const userSchema = new mongoose.Schema(
     },
     phoneNumber: {
       type: String,
-      required: function() {
+      required: function () {
         return !this.firebaseUid; // Phone number required only if not using Firebase
       },
       trim: true,
-      default: function() {
+      default: function () {
         return this.firebaseUid ? '' : undefined;
       },
     },
@@ -27,6 +27,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: false,
       trim: true,
+    },
+    avatar: {
+      type: String,
+      required: false,
+      default: '',
     },
     email: {
       type: String,
@@ -41,15 +46,15 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: function() {
+      required: function () {
         return !this.firebaseUid; // Password required only if not using Firebase
       },
       minlength: [6, 'Password must be at least 6 characters'],
-      select: false, 
+      select: false,
     },
     role: {
       type: String,
-      enum: ['admin', 'user', 'super_admin'], 
+      enum: ['admin', 'user', 'super_admin'],
       default: 'user',
     },
     isActive: {
