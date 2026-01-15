@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog"; // Import Dialog components
+import { cn } from "@/lib/utils"; // Import cn utility
 
 // Section images
 import espressoImg from "@/assets/menu/robusta-espresso.jpg";
@@ -203,7 +204,13 @@ const Menu = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const [activeCategory, setActiveCategory] = useState("All");
   const { addToCart } = useCart();
+
+  const categories = ["All", ...menuSections.map((s) => s.title)];
+  const filteredSections = activeCategory === "All"
+    ? menuSections
+    : menuSections.filter((s) => s.title === activeCategory);
 
   const handleAddToCartFromModal = () => {
     if (!selectedItem) return;
@@ -347,7 +354,27 @@ const Menu = () => {
       {/* Menu Sections */}
       <section className="px-6 pb-24">
         <div className="container-custom max-w-5xl">
-          {menuSections.map((section, sectionIndex) => (
+          {/* Category Filter */}
+          {/* Category Filter */}
+          <div className="flex flex-wrap justify-center gap-3 mb-10">
+            {categories.map((category) => (
+              <Button
+                key={category}
+                variant="ghost"
+                onClick={() => setActiveCategory(category)}
+                className={cn(
+                  "rounded-full px-6 py-2 h-auto text-base transition-all duration-300",
+                  activeCategory === category
+                    ? "bg-accent text-white shadow-md hover:bg-accent/90 hover:text-white"
+                    : "bg-accent/5 text-muted-foreground hover:bg-accent/10 hover:text-accent border border-transparent hover:border-accent/20"
+                )}
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
+
+          {filteredSections.map((section, sectionIndex) => (
             <MenuSectionBlock
               key={section.title}
               section={section}
