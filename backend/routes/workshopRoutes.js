@@ -92,7 +92,7 @@ router.get('/:identifier', getWorkshop);
 ====================================================== */
 
 router.use(protect);
-router.use(authorize('WorkshopAdmin', 'SuperAdmin', 'admin'));
+router.use(authorize('admin', 'super_admin'));
 
 // Admin stats
 router.get('/admin/stats', getWorkshopStats);
