@@ -18,6 +18,7 @@ declare global {
             'a-text': any;
             'a-plane': any;
             'a-animation': any;
+            'a-assets': any;
         }
     }
 }
