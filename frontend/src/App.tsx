@@ -14,6 +14,7 @@ import WorkshopManager from "@/pages/admin/WorkshopManager";
 import InquiryManagement from "@/pages/admin/InquiryManagement";
 import Franchise from "./pages/Franchise";
 import Menu from "./pages/Menu";
+import VirtualTour from "./pages/VirtualTour";
 import MenuManagement from "./pages/admin/MenuManagement";
 import MenuItemForm from "./pages/admin/MenuItemForm";
 import Checkout from "./pages/Checkout";
@@ -57,6 +58,7 @@ const App = () => (
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/workshops" element={<Workshops />} />
             <Route path="/franchise" element={<Franchise />} />
+            <Route path="/virtual-tour" element={<VirtualTour />} />
 
             {/* Checkout & Order Success - Works for both guests and logged-in users */}
             <Route path="/checkout" element={<Checkout />} />

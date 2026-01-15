@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Coffee, Palette, Users, Sparkles, MapPin, Phone, Mail } from "lucide-react";
+import { ArrowRight, Coffee, Palette, Users, Sparkles, MapPin, Phone, Mail, View } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -11,6 +11,7 @@ import IntroAnimation from "@/components/IntroAnimation";
 import frappeImg from "@/assets/menu/robusta-frappe.jpg";
 import cappuccinoImg from "@/assets/menu/robusta-cappuccino.jpg";
 import icedAmericanoImg from "@/assets/menu/robusta-iced-americano.jpg";
+import vrImage from "@/assets/vr-cafe.jpg";
 
 const Index = () => {
   const [showIntro, setShowIntro] = useState(() => {
@@ -53,38 +54,31 @@ const Index = () => {
   ];
 
   const rabusteSpecials = [
-    { 
-      name: "Robusta Frappe", 
+    {
+      name: "Robusta Frappe",
       desc: "Our signature cold blend with creamy froth and bold Robusta kick",
       price: "₹240",
       image: frappeImg
     },
-    { 
-      name: "Robusta Cappuccino", 
+    {
+      name: "Robusta Cappuccino",
       desc: "Velvety foam meets intense espresso perfection",
       price: "₹180",
       image: cappuccinoImg
     },
-    { 
-      name: "Robusta Iced Americano", 
+    {
+      name: "Robusta Iced Americano",
       desc: "Smooth, refreshing, and powerfully bold",
       price: "₹150",
       image: icedAmericanoImg
     },
   ];
 
-  // const menuHighlights = [
-  //   { name: "Espresso Forte", desc: "Double shot, pure intensity", price: "₹110" },
-  //   { name: "Robusta Latte", desc: "Smooth, creamy, bold", price: "₹190" },
-  //   { name: "Classic Matcha", desc: "Premium green tea perfection", price: "₹250" },
-  //   { name: "Belgium Chocolate Cake", desc: "Rich, decadent indulgence", price: "₹280" },
-  // ];
-
   return (
     <>
       {showIntro && <IntroAnimation onComplete={() => setShowIntro(false)} />}
-      
-      <motion.div 
+
+      <motion.div
         className="min-h-screen bg-background"
         initial={{ opacity: 0 }}
         animate={{ opacity: showIntro ? 0 : 1 }}
@@ -187,7 +181,7 @@ const Index = () => {
                 <div className="relative">
                   {/* Glowing background */}
                   <div className="absolute inset-0 bg-accent/20 blur-[100px] rounded-full" />
-                  
+
                   {/* Main Cup Illustration */}
                   <div className="relative float">
                     {/* Steam */}
@@ -355,19 +349,19 @@ const Index = () => {
                 >
                   {/* Image Container */}
                   <div className="relative h-48 overflow-hidden">
-                    <img 
-                      src={item.image} 
+                    <img
+                      src={item.image}
                       alt={item.name}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
-                    
+
                     {/* Price Badge */}
                     <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-accent text-background font-display font-bold text-sm">
                       {item.price}
                     </div>
                   </div>
-                  
+
                   {/* Content */}
                   <div className="p-6">
                     <h3 className="font-display text-xl font-semibold text-foreground mb-2 group-hover:text-accent transition-colors duration-300">
@@ -377,7 +371,7 @@ const Index = () => {
                       {item.desc}
                     </p>
                   </div>
-                  
+
                   {/* Hover Overlay */}
                   <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 </motion.div>
@@ -401,65 +395,90 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Menu Preview Section */}
-        {/* <section className="section-padding bg-coffee-dark">
-          <div className="container-custom">
+        {/* Virtual Reality Tour Feature Section */}
+        <section className="section-padding overflow-hidden relative bg-black">
+          {/* Background with parallax effect */}
+          <div className="absolute inset-0 opacity-40">
+            <img
+              src={vrImage}
+              alt="VR Background"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
+
+          <div className="container-custom relative z-10">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
+                transition={{ duration: 0.8 }}
+                className="space-y-8"
               >
-                <span className="text-accent text-sm tracking-[0.3em] uppercase font-body">
-                  Our Menu
-                </span>
-                <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mt-4 mb-6">
-                  Signature Brews
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/20 border border-accent/30 text-accent backdrop-blur-md">
+                  <View className="w-4 h-4 animate-pulse" />
+                  <span className="text-sm font-semibold tracking-wider uppercase">Immersive Experience</span>
+                </div>
+
+                <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                  Step Inside <br />
+                  <span className="text-accent">Rabuste</span>
                 </h2>
-                <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-                  A curated selection of Robusta-only coffee, each crafted to
-                  deliver maximum flavor and bold character. Perfect for grab-and-go.
+
+                <p className="text-gray-300 text-lg leading-relaxed max-w-xl">
+                  Can't make it to the café? Immerse yourself in our space from anywhere.
+                  Explore our art gallery, check the menu at the counter, and find your favorite
+                  corner in full 360° virtual reality.
                 </p>
-                <Button variant="hero" asChild>
-                  <Link to="/menu">
-                    View Full Menu
-                    <ArrowRight className="ml-2" />
-                  </Link>
-                </Button>
+
+                <div className="flex flex-wrap gap-4 pt-4">
+                  <Button variant="hero" size="xl" className="h-16 px-8 text-lg" asChild>
+                    <Link to="/virtual-tour">
+                      Enter Virtual Tour
+                      <ArrowRight className="ml-2 w-5 h-5" />
+                    </Link>
+                  </Button>
+                </div>
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="space-y-4"
+                transition={{ duration: 0.8 }}
+                className="relative hidden lg:block"
               >
-                {menuHighlights.map((item, index) => (
-                  <motion.div
-                    key={item.name}
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    className="flex items-center justify-between p-6 rounded-xl bg-card border border-border hover:border-accent/30 transition-all group"
-                  >
-                    <div>
-                      <h4 className="font-display text-lg font-semibold text-foreground group-hover:text-accent transition-colors">
-                        {item.name}
-                      </h4>
-                      <p className="text-muted-foreground text-sm">{item.desc}</p>
+                {/* 360 Preview Circle */}
+                <div className="relative w-[500px] h-[500px] mx-auto">
+                  <div className="absolute inset-0 rounded-full border-2 border-accent/30 animate-[spin_10s_linear_infinite]" />
+                  <div className="absolute inset-4 rounded-full border border-accent/20 animate-[spin_15s_linear_infinite_reverse]" />
+
+                  <div className="absolute inset-8 rounded-full overflow-hidden shadow-2xl border-4 border-accent/20">
+                    <img
+                      src={vrImage}
+                      alt="VR Preview"
+                      className="w-full h-full object-cover animate-[pulse_4s_ease-in-out_infinite]"
+                    />
+                    <div className="absolute inset-0 bg-accent/10 flex items-center justify-center group cursor-pointer">
+                      <div className="w-20 h-20 bg-accent/90 rounded-full flex items-center justify-center shadow-glow group-hover:scale-110 transition-transform duration-300">
+                        <View className="w-10 h-10 text-white" />
+                      </div>
                     </div>
-                    <span className="font-display text-2xl font-bold text-accent">
-                      {item.price}
-                    </span>
-                  </motion.div>
-                ))}
+                  </div>
+
+                  {/* Floating Elements */}
+                  <div className="absolute top-20 right-0 bg-card/90 backdrop-blur px-4 py-2 rounded-lg border border-accent/30 shadow-lg text-sm font-semibold text-accent animate-bounce">
+                    360° View
+                  </div>
+                  <div className="absolute bottom-20 left-10 bg-card/90 backdrop-blur px-4 py-2 rounded-lg border border-accent/30 shadow-lg text-sm font-semibold text-accent animate-bounce delay-700">
+                    Interactive Hotspots
+                  </div>
+                </div>
               </motion.div>
             </div>
           </div>
-        </section> */}
+        </section>
 
         {/* Visit Section */}
         <section className="section-padding bg-coffee-dark">
