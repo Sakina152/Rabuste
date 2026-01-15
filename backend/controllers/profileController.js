@@ -20,7 +20,12 @@ export const getUserProfileData = asyncHandler(async (req, res) => {
       .populate('art')
       .sort({ createdAt: -1 }),
 
-    Booking.find({ user: userId })
+    Booking.find({
+      $or: [
+        { user: userId },
+        { 'participantDetails.email': req.user.email }
+      ]
+    })
       .populate('workshop')
       .sort({ createdAt: -1 })
   ]);

@@ -739,28 +739,48 @@ const Profile = () => {
                           </Button>
                         </div>
                       ) : (
-                        <div className="space-y-3">
-                          {workshops.map((workshop) => (
-                            <div key={workshop._id} className="border border-white/10 rounded-xl p-4 hover:shadow-md transition-all bg-card/50">
-                              <div className="flex justify-between items-start gap-3">
-                                <div className="flex-1">
-                                  <h3 className="font-semibold text-sm mb-1">{workshop.workshop.title}</h3>
-                                  <p className="text-xs text-muted-foreground mb-2">
-                                    {new Date(workshop.workshop.date).toLocaleDateString('en-US', {
-                                      weekday: 'short',
-                                      month: 'short',
-                                      day: 'numeric',
-                                      year: 'numeric'
-                                    })}
-                                  </p>
-                                  <Badge variant="outline" className="text-xs">{workshop.registrationNumber}</Badge>
+                        <div className="space-y-4">
+                          {workshops.map((item) => (
+                            <motion.div
+                              key={item._id}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="border border-white/10 rounded-xl p-4 md:p-5 hover:shadow-lg transition-all bg-gradient-to-r from-card/60 to-card/40 backdrop-blur-sm"
+                            >
+                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+                                <div>
+                                  <h3 className="text-lg font-bold text-white">{item.workshop?.title || "Workshop"}</h3>
+                                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                                    <Calendar className="w-4 h-4" />
+                                    <span>
+                                      {item.workshop?.date ? new Date(item.workshop.date).toLocaleDateString('en-US', {
+                                        weekday: 'long',
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                      }) : "Date TBD"}
+                                    </span>
+                                  </div>
                                 </div>
-                                <div className="text-right">
-                                  <p className="text-xs text-muted-foreground mb-1">{workshop.numberOfSeats} seats</p>
-                                  <p className="font-bold text-terracotta">₹{workshop.totalAmount}</p>
+                                <div className="flex items-center gap-3">
+                                  <Badge variant="outline" className="font-mono text-xs border-white/20">
+                                    {item.registrationNumber}
+                                  </Badge>
+                                  <Badge className={
+                                    item.status === 'Confirmed' ? 'bg-green-500' :
+                                      item.status === 'Pending' ? 'bg-yellow-500' : 'bg-blue-500'
+                                  }>
+                                    {item.status}
+                                  </Badge>
                                 </div>
                               </div>
-                            </div>
+                              <div className="flex justify-between items-center bg-background/50 rounded-lg p-3 border border-white/5">
+                                <span className="text-sm text-muted-foreground">
+                                  {item.numberOfSeats} seat{item.numberOfSeats > 1 ? 's' : ''} reserved
+                                </span>
+                                <span className="font-bold text-terracotta">₹{item.totalAmount}</span>
+                              </div>
+                            </motion.div>
                           ))}
                         </div>
                       )}
