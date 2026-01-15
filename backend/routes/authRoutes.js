@@ -5,7 +5,6 @@ import {
   getMe,
   getAllUsers,
   updateUserRole,
-  changePassword,
   firebaseAuth,
   updateUserProfile
 } from '../controllers/authController.js';
@@ -22,7 +21,6 @@ router.post('/login', loginUser);
 
 // Protected routes
 router.get('/me', protect, getMe);
-router.put('/change-password', protect, changePassword);
 router.put('/profile', protect, updateUserProfile);
 
 // Admin routes

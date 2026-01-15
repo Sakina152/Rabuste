@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { User, Mail, Phone, MapPin, Lock, ArrowLeft, TrendingUp, Heart, Coffee, Calendar, Package, Star, Award, Flame, Edit2, Save, X } from "lucide-react";
+import { User, Mail, Phone, MapPin, ArrowLeft, TrendingUp, Heart, Coffee, Calendar, Package, Star, Award, Flame, Edit2, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -79,8 +79,7 @@ const Profile = () => {
 
   const [user, setUser] = useState<ProfileUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
+
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -201,62 +200,7 @@ const Profile = () => {
     fetchProfileData();
   }, [toast]);
 
-  /* ================= CHANGE PASSWORD ================= */
-  const handleChangePassword = async () => {
-    const token = await getToken();
-    if (!token) {
-      toast({
-        title: "Not logged in",
-        description: "Please log in again",
-        variant: "destructive",
-      });
-      return;
-    }
 
-    if (!currentPassword || !newPassword) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill all password fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setSaving(true);
-      await axios.put(
-        `${API_URL}/api/auth/change-password`,
-        {
-          currentPassword,
-          newPassword,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      toast({
-        title: "Password Updated",
-        description: "Your password has been changed successfully",
-        className: "bg-[#5C3A21] text-white border-none",
-      });
-
-      setCurrentPassword("");
-      setNewPassword("");
-    } catch (err: any) {
-      toast({
-        title: "Update failed",
-        description:
-          err.response?.data?.message ||
-          "Failed to update password",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
 
   /* ================= UPDATE PROFILE ================= */
   const handleUpdateProfile = async () => {
@@ -532,44 +476,7 @@ const Profile = () => {
               </Card>
             </motion.div>
 
-            {/* Security */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
-            >
-              <Card className="bg-card/90 backdrop-blur-md border-white/10 shadow-xl">
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center">
-                      <Lock className="w-5 h-5 text-red-500" />
-                    </div>
-                    <CardTitle className="text-lg">Security</CardTitle>
-                  </div>
-                </CardHeader>
 
-                <CardContent className="space-y-4">
-                  <PasswordField
-                    label="Current Password"
-                    value={currentPassword}
-                    onChange={setCurrentPassword}
-                  />
-                  <PasswordField
-                    label="New Password"
-                    value={newPassword}
-                    onChange={setNewPassword}
-                  />
-
-                  <Button
-                    className="w-full bg-gradient-to-r from-terracotta to-accent hover:from-terracotta/90 hover:to-accent/90 shadow-lg"
-                    onClick={handleChangePassword}
-                    disabled={saving}
-                  >
-                    {saving ? "Updating..." : "Change Password"}
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
           </div>
 
           {/* Right Main Content - Order History Tabs */}
@@ -886,29 +793,6 @@ const InfoField = ({
         value={value}
         disabled={!isEditing || disabled}
         onChange={onChange}
-      />
-    </div>
-  </div>
-);
-
-const PasswordField = ({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) => (
-  <div className="space-y-2">
-    <Label>{label}</Label>
-    <div className="relative">
-      <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-      <Input
-        type="password"
-        className="pl-10"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
       />
     </div>
   </div>
