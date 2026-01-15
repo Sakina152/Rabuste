@@ -29,6 +29,7 @@ const Checkout = () => {
   const tax = cartTotal * 0.05; // 5% GST
   const total = subtotal + tax;
 
+
   if (cartItems.length === 0) {
     return (
       <div className="min-h-screen bg-background">

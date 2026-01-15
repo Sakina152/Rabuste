@@ -3,6 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface CartItem {
   id: string;
+  _id?: string;
   name: string;
   price: number;
   image: string;
@@ -69,17 +70,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const updateQuantity = (id: string, delta: number) => {
-    setCartItems((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          const newQty = Math.max(1, item.quantity + delta);
-          return { ...item, quantity: newQty };
-        }
-        return item;
-      })
-    );
-  };
+const updateQuantity = (id: string, delta: number) => {
+  setCartItems((prev) =>
+    prev.map((item) => {
+      // Match by either id or _id
+      if (item.id === id || item._id === id) {
+        const currentQty = item.quantity || 0;
+        const newQty = Math.max(1, currentQty + delta);
+        return { ...item, quantity: newQty };
+      }
+      return item;
+    })
+  );
+};
 
   const clearCart = () => {
     setCartItems([]);
