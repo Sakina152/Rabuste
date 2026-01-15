@@ -48,13 +48,12 @@ const workshopInquirySchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Auto-generate inquiry number
-workshopInquirySchema.pre('save', async function (next) {
+workshopInquirySchema.pre('save', async function () {
   if (!this.inquiryNumber) {
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const random = Math.floor(1000 + Math.random() * 9000);
     this.inquiryNumber = `INQ${date}${random}`;
   }
-  next();
 });
 
 const WorkshopInquiry = mongoose.model('WorkshopInquiry', workshopInquirySchema);

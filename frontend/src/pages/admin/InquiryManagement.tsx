@@ -68,6 +68,16 @@ const InquiryManagement = () => {
   const fetchInquiries = async () => {
     try {
       const token = await getToken();
+      if (!token) {
+        toast({
+          title: "Authentication Error",
+          description: "Please log in as admin",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
       const url = filterStatus === "all" 
         ? `${API_URL}/api/workshop-inquiries`
         : `${API_URL}/api/workshop-inquiries?status=${filterStatus}`;
@@ -78,15 +88,21 @@ const InquiryManagement = () => {
         },
       });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server returned ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log('Inquiries fetched:', data);
       if (data.success) {
         setInquiries(data.data);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching inquiries:", error);
       toast({
         title: "Error",
-        description: "Failed to load inquiries",
+        description: error.message || "Failed to load inquiries",
         variant: "destructive",
       });
     } finally {
@@ -254,7 +270,7 @@ const InquiryManagement = () => {
                         <SelectTrigger className="w-36">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="z-50">
                           <SelectItem value="pending">Pending</SelectItem>
                           <SelectItem value="contacted">Contacted</SelectItem>
                           <SelectItem value="confirmed">Confirmed</SelectItem>

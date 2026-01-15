@@ -913,7 +913,7 @@ END:VCALENDAR`;
                   </DialogHeader>
                   <form onSubmit={async (e) => {
                     e.preventDefault();
-                    
+
                     // Validate required fields
                     if (!inquiryForm.eventType) {
                       toast({
@@ -929,10 +929,17 @@ END:VCALENDAR`;
                       console.log('Submitting inquiry:', inquiryForm);
                       console.log('API URL:', `${API_URL}/api/workshop-inquiries`);
                       
+                      // Prepare data - convert empty strings to undefined
+                      const submissionData = {
+                        ...inquiryForm,
+                        preferredDate: inquiryForm.preferredDate || undefined,
+                        message: inquiryForm.message || undefined
+                      };
+                      
                       const response = await fetch(`${API_URL}/api/workshop-inquiries`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(inquiryForm)
+                        body: JSON.stringify(submissionData)
                       });
                       
                       if (!response.ok) {

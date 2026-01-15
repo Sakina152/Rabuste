@@ -135,10 +135,18 @@ export default function AdminDashboard() {
   const [dashboardStats, setDashboardStats] = useState<any>(null);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+  useEffect(() => {
+    const userInfo = localStorage.getItem("userInfo");
+    if (userInfo) {
+      setUser(JSON.parse(userInfo));
+    }
+  }, []);
 
   // Update active nav based on current route
   useEffect(() => {
@@ -180,6 +188,7 @@ export default function AdminDashboard() {
   }, [API_BASE, toast]);
 
   const handleSignOut = () => {
+    localStorage.removeItem("userInfo");
     toast({
       title: "Signed out",
       description: "You have been successfully signed out.",
@@ -268,7 +277,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="font-display text-3xl font-semibold text-foreground">
-                  Welcome back, <span className="text-accent">Jeet</span>
+                  Welcome back, <span className="text-accent">{user?.name || 'Admin'}</span>
                 </h1>
                 <p className="text-muted-foreground mt-1 flex items-center gap-2">
                   <Clock className="w-4 h-4" />

@@ -1,6 +1,6 @@
 import express from 'express';
 import { protect } from '../middleware/authMiddleware.js';
-import { checkRole } from '../middleware/roleMiddleware.js';
+import { authorize } from '../middleware/roleMiddleware.js';
 import {
   submitInquiry,
   getAllInquiries,
@@ -14,8 +14,8 @@ const router = express.Router();
 router.post('/', submitInquiry);
 
 // Admin routes - require authentication and admin role
-router.get('/', protect, checkRole('admin'), getAllInquiries);
-router.put('/:id/status', protect, checkRole('admin'), updateInquiryStatus);
-router.delete('/:id', protect, checkRole('admin'), deleteInquiry);
+router.get('/', protect, authorize('admin'), getAllInquiries);
+router.put('/:id/status', protect, authorize('admin'), updateInquiryStatus);
+router.delete('/:id', protect, authorize('admin'), deleteInquiry);
 
 export default router;

@@ -133,6 +133,7 @@ const Profile = () => {
         setDataLoading(false);
         return;
       }
+      
       try {
         const res = await axios.get(`${API_URL}/api/profile/data`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -178,16 +179,19 @@ const Profile = () => {
 
         // Get top 3 favorites
         const favorites = Object.values(itemCount)
-          .sort((a, b) => b.count - a.count)
+          .sort((a, b) => b.count - a.sort)
           .slice(0, 3);
         setFavoriteItems(favorites);
       } catch (err: any) {
         console.error("Failed to load profile data", err);
-        toast({
-          title: "Error",
-          description: "Failed to load purchase history",
-          variant: "destructive",
-        });
+        // Only show error if it's an actual server error, not auth issue
+        if (err.response && err.response.status !== 401) {
+          toast({
+            title: "Error",
+            description: "Failed to load purchase history",
+            variant: "destructive",
+          });
+        }
       } finally {
         setDataLoading(false);
       }
