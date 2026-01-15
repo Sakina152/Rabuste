@@ -306,7 +306,7 @@ const Menu = () => {
                     Black Coffee at <span className="text-accent">₹99</span>
                   </h3>
                   <p className="font-body text-muted-foreground mt-1">
-                    Special Offer •  Available daily from 9:30 AM to 12:00 PM
+                    Special Offer • Available daily from 9:30 AM to 12:00 PM
                   </p>
                 </div>
               </div>
