@@ -229,8 +229,9 @@ const Checkout = () => {
                           {/* Quantity Controls */}
                           <div className="flex items-center gap-3 bg-coffee-dark/50 rounded-lg p-1">
                             <button
-                              onClick={() => updateQuantity(item.id, -1)}
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
                               className="p-2 hover:bg-accent/10 rounded-md transition-colors"
+                              disabled={item.quantity <= 1}
                             >
                               <Minus className="w-4 h-4 text-accent" />
                             </button>
@@ -238,7 +239,7 @@ const Checkout = () => {
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() => updateQuantity(item.id, 1)}
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
                               className="p-2 hover:bg-accent/10 rounded-md transition-colors"
                             >
                               <Plus className="w-4 h-4 text-accent" />
