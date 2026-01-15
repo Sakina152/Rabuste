@@ -5,7 +5,8 @@ import { ArrowRight, Eye, Heart, User, X, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useRazorpay } from "@/hooks/useRazorpay"; // <--- 1. Import Hook
+import { useRazorpay } from "@/hooks/useRazorpay";
+import ArtistSubmissionForm from "@/components/ArtistSubmissionForm"; // <--- Import New Component
 
 interface Artwork {
   _id: string;
@@ -26,6 +27,7 @@ const Gallery = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [showInquiryForm, setShowInquiryForm] = useState(false);
+  const [showSubmissionForm, setShowSubmissionForm] = useState(false); // <--- State for new form
   const [inquiryData, setInquiryData] = useState({
     customerName: "",
     email: "",
@@ -467,15 +469,19 @@ const Gallery = () => {
               in our café gallery. If you're interested in showcasing your work,
               we'd love to hear from you.
             </p>
-            <Button variant="hero" size="xl" asChild>
-              <Link to="/franchise">
-                Submit Your Portfolio
-                <ArrowRight className="ml-2" />
-              </Link>
+            <Button variant="hero" size="xl" onClick={() => setShowSubmissionForm(true)}> {/* <--- Updated Button Action */}
+              Submit Your Portfolio
+              <ArrowRight className="ml-2" />
             </Button>
           </motion.div>
         </div>
       </section>
+
+      {/* Artist Submission Modal */}
+      <ArtistSubmissionForm
+        isOpen={showSubmissionForm}
+        onClose={() => setShowSubmissionForm(false)}
+      />
 
       <Footer />
     </div>

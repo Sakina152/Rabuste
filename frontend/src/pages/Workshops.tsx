@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"; // Added useEffect
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useRazorpay } from "@/hooks/useRazorpay";
 import {
   ArrowRight,
   Calendar as CalendarIcon,
@@ -53,6 +54,7 @@ interface Workshop {
 
 const Workshops = () => {
   const { toast } = useToast();
+  const { handlePayment, isProcessing } = useRazorpay();
   const [workshops, setWorkshops] = useState<Workshop[]>([]); // Dynamic state
   const [loading, setLoading] = useState(true);
   const [selectedWorkshop, setSelectedWorkshop] = useState<Workshop | null>(null);
@@ -104,60 +106,53 @@ const Workshops = () => {
     e.preventDefault();
     if (!selectedWorkshop) return;
 
-    const workshopToRegister = selectedWorkshop; // Store reference before state changes
+    const workshopToRegister = selectedWorkshop; // Store reference
 
-    try {
-      const response = await fetch(`${API_URL}/api/workshops/${selectedWorkshop._id}/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          participantDetails: {
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-          },
-          numberOfSeats: formData.numberOfSeats,
-        }),
-      });
+    // Initiate Razorpay Payment Flow
+    await handlePayment('WORKSHOP', {
+      workshop: selectedWorkshop,
+      quantity: formData.numberOfSeats,
+      participantDetails: {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+      },
+      onSuccess: async (result: any) => {
+        // onSuccess callback from useRazorpay (after successful verification)
 
-      const json = await response.json();
-
-      if (json.success) {
-        // Use stored reference to avoid state timing issues
+        // Use stored reference
         setRegisteredWorkshop(workshopToRegister);
-        
+
+        // Note: success toast is already shown by useRazorpay, but we can show registration details
         toast({
-          title: "Registration Successful!",
-          description: `Booking ID: ${json.registrationNumber}. Check your email for confirmation.`,
+          title: "Registration Confirmed!",
+          description: `See you there! Check your email for details.`,
         });
-        
+
         // Clear form and close registration modal
         setFormData({ name: "", email: "", phone: "", numberOfSeats: 1 });
         setSelectedWorkshop(null);
-        
-        // Show calendar options after a brief delay to ensure smooth transition
+
+        // Show calendar options after a brief delay
         setTimeout(() => {
           setShowCalendarOptions(true);
         }, 300);
 
         // Refresh workshops to update seat count
-        const refreshRes = await fetch(`${API_URL}/api/workshops`);
-        const refreshJson = await refreshRes.json();
-        setWorkshops(refreshJson.data);
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Registration Failed",
-          description: json.message || "Something went wrong.",
-        });
+        try {
+          const refreshRes = await fetch(`${API_URL}/api/workshops`);
+          const refreshJson = await refreshRes.json();
+          if (refreshJson.success) {
+            setWorkshops(refreshJson.data);
+          }
+        } catch (err) {
+          console.error("Error refreshing workshop data:", err);
+        }
+      },
+      onError: (err: any) => {
+        // Error already handled in useRazorpay
       }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Could not connect to server.",
-      });
-    }
+    });
   };
 
   const getCategoryIcon = (category: string) => {
@@ -186,7 +181,7 @@ const Workshops = () => {
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
-    
+
     return { daysInMonth, startingDayOfWeek, year, month };
   };
 
@@ -210,12 +205,12 @@ const Workshops = () => {
       // Parse date and time more reliably
       const workshopDate = new Date(workshop.date);
       const [hours, minutes] = workshop.startTime.split(':').map(Number);
-      
+
       const startDate = new Date(workshopDate);
       startDate.setHours(hours, minutes, 0, 0);
-      
+
       const endDate = new Date(startDate.getTime() + workshop.duration * 60000);
-      
+
       const formatDate = (date: Date) => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -251,12 +246,12 @@ const Workshops = () => {
       // Parse date and time more reliably
       const workshopDate = new Date(workshop.date);
       const [hours, minutes] = workshop.startTime.split(':').map(Number);
-      
+
       const startDate = new Date(workshopDate);
       startDate.setHours(hours, minutes, 0, 0);
-      
+
       const endDate = new Date(startDate.getTime() + workshop.duration * 60000);
-      
+
       const formatICSDate = (date: Date) => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -293,7 +288,7 @@ END:VCALENDAR`;
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(link.href);
-      
+
       toast({
         title: "Calendar File Downloaded!",
         description: "Open the file to add this workshop to your calendar app.",
@@ -308,8 +303,8 @@ END:VCALENDAR`;
     }
   };
 
-  const filteredWorkshops = categoryFilter === "all" 
-    ? workshops 
+  const filteredWorkshops = categoryFilter === "all"
+    ? workshops
     : workshops.filter(w => w.type === categoryFilter);
 
   return (
@@ -349,22 +344,20 @@ END:VCALENDAR`;
             <div className="flex gap-2 bg-card border border-border rounded-lg p-1">
               <button
                 onClick={() => setViewMode("list")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${
-                  viewMode === "list" 
-                    ? "bg-background text-foreground shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${viewMode === "list"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 <List size={16} />
                 <span className="text-sm font-medium uppercase tracking-wide">List View</span>
               </button>
               <button
                 onClick={() => setViewMode("calendar")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${
-                  viewMode === "calendar" 
-                    ? "bg-accent text-background shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${viewMode === "calendar"
+                  ? "bg-accent text-background shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 <CalendarIcon size={16} />
                 <span className="text-sm font-medium uppercase tracking-wide">Calendar View</span>
@@ -425,23 +418,23 @@ END:VCALENDAR`;
                       {day}
                     </div>
                   ))}
-                  
+
                   {(() => {
                     const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(selectedDate);
                     const days = [];
-                    
+
                     // Empty cells before first day
                     for (let i = 0; i < startingDayOfWeek; i++) {
                       days.push(<div key={`empty-${i}`} className="aspect-square" />);
                     }
-                    
+
                     // Days of month
                     for (let day = 1; day <= daysInMonth; day++) {
                       const date = new Date(year, month, day);
                       const hasWorkshop = hasWorkshopOnDate(date);
                       const isSelected = date.toDateString() === selectedDate.toDateString();
                       const isToday = date.toDateString() === new Date().toDateString();
-                      
+
                       days.push(
                         <button
                           key={day}
@@ -458,7 +451,7 @@ END:VCALENDAR`;
                         </button>
                       );
                     }
-                    
+
                     return days;
                   })()}
                 </div>
@@ -663,92 +656,98 @@ END:VCALENDAR`;
               className="max-w-lg w-full bg-card rounded-2xl overflow-hidden border border-border"
               onClick={(e) => e.stopPropagation()}
             >
-            <div className="p-8">
-              <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-                Register for Workshop
-              </h2>
-              <p className="text-accent font-medium mb-6">
-                {selectedWorkshop.title}
-              </p>
+              <div className="p-8">
+                <h2 className="font-display text-2xl font-bold text-foreground mb-2">
+                  Register for Workshop
+                </h2>
+                <p className="text-accent font-medium mb-6">
+                  {selectedWorkshop.title}
+                </p>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Enter your name"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
+                    <Label htmlFor="name">Full Name</Label>
                     <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="your@email.com"
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="Enter your name"
                       required
                     />
                   </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email Address</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder="your@email.com"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="+1 (555) 000-0000"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Added Seats input as per model requirement */}
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
+                    <Label htmlFor="seats">Number of Seats (Max 5)</Label>
                     <Input
-                      id="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+1 (555) 000-0000"
+                      id="seats"
+                      type="number"
+                      min="1"
+                      max="5"
+                      value={formData.numberOfSeats}
+                      onChange={(e) => setFormData({ ...formData, numberOfSeats: parseInt(e.target.value) })}
                       required
                     />
                   </div>
-                </div>
 
-                {/* Added Seats input as per model requirement */}
-                <div className="space-y-2">
-                  <Label htmlFor="seats">Number of Seats (Max 5)</Label>
-                  <Input
-                    id="seats"
-                    type="number"
-                    min="1"
-                    max="5"
-                    value={formData.numberOfSeats}
-                    onChange={(e) => setFormData({ ...formData, numberOfSeats: parseInt(e.target.value) })}
-                    required
-                  />
-                </div>
+                  <div className="pt-4 border-t border-border">
+                    <div className="flex justify-between items-center mb-6">
+                      <span className="text-muted-foreground">Total</span>
+                      <span className="font-display text-2xl font-bold text-accent">
+                        {selectedWorkshop.price === 0 ? "Free" : `₹${selectedWorkshop.price * formData.numberOfSeats}`}
+                      </span>
+                    </div>
 
-                <div className="pt-4 border-t border-border">
-                  <div className="flex justify-between items-center mb-6">
-                    <span className="text-muted-foreground">Total</span>
-                    <span className="font-display text-2xl font-bold text-accent">
-                      {selectedWorkshop.price === 0 ? "Free" : `₹${selectedWorkshop.price * formData.numberOfSeats}`}
-                    </span>
+                    <div className="flex gap-4">
+                      <Button
+                        type="button"
+                        variant="subtle"
+                        className="flex-1"
+                        onClick={() => setSelectedWorkshop(null)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button type="submit" variant="hero" className="flex-1" disabled={isProcessing}>
+                        {isProcessing ? (
+                          <>Processing...</>
+                        ) : (
+                          <>
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Confirm & Pay
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
-
-                  <div className="flex gap-4">
-                    <Button
-                      type="button"
-                      variant="subtle"
-                      className="flex-1"
-                      onClick={() => setSelectedWorkshop(null)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit" variant="hero" className="flex-1">
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      Confirm
-                    </Button>
-                  </div>
-                </div>
-              </form>
-            </div>
+                </form>
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
         )}
       </AnimatePresence>
 
@@ -923,30 +922,30 @@ END:VCALENDAR`;
                       });
                       return;
                     }
-                    
+
                     setSubmittingInquiry(true);
                     try {
                       console.log('Submitting inquiry:', inquiryForm);
                       console.log('API URL:', `${API_URL}/api/workshop-inquiries`);
-                      
+
                       // Prepare data - convert empty strings to undefined
                       const submissionData = {
                         ...inquiryForm,
                         preferredDate: inquiryForm.preferredDate || undefined,
                         message: inquiryForm.message || undefined
                       };
-                      
+
                       const response = await fetch(`${API_URL}/api/workshop-inquiries`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(submissionData)
                       });
-                      
+
                       if (!response.ok) {
                         const errorData = await response.json().catch(() => ({ message: 'Server error' }));
                         throw new Error(errorData.message || `Server returned ${response.status}`);
                       }
-                      
+
                       const data = await response.json();
                       if (data.success) {
                         toast({
@@ -984,7 +983,7 @@ END:VCALENDAR`;
                         <Input
                           required
                           value={inquiryForm.name}
-                          onChange={(e) => setInquiryForm({...inquiryForm, name: e.target.value})}
+                          onChange={(e) => setInquiryForm({ ...inquiryForm, name: e.target.value })}
                           placeholder="Your name"
                         />
                       </div>
@@ -994,12 +993,12 @@ END:VCALENDAR`;
                           required
                           type="email"
                           value={inquiryForm.email}
-                          onChange={(e) => setInquiryForm({...inquiryForm, email: e.target.value})}
+                          onChange={(e) => setInquiryForm({ ...inquiryForm, email: e.target.value })}
                           placeholder="your@email.com"
                         />
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label>Phone *</Label>
@@ -1007,7 +1006,7 @@ END:VCALENDAR`;
                           required
                           type="tel"
                           value={inquiryForm.phone}
-                          onChange={(e) => setInquiryForm({...inquiryForm, phone: e.target.value})}
+                          onChange={(e) => setInquiryForm({ ...inquiryForm, phone: e.target.value })}
                           placeholder="+91 XXXXX XXXXX"
                         />
                       </div>
@@ -1018,7 +1017,7 @@ END:VCALENDAR`;
                           type="number"
                           min="1"
                           value={inquiryForm.numberOfGuests}
-                          onChange={(e) => setInquiryForm({...inquiryForm, numberOfGuests: parseInt(e.target.value)})}
+                          onChange={(e) => setInquiryForm({ ...inquiryForm, numberOfGuests: parseInt(e.target.value) })}
                         />
                       </div>
                     </div>
@@ -1028,7 +1027,7 @@ END:VCALENDAR`;
                       <Select
                         required
                         value={inquiryForm.eventType}
-                        onValueChange={(value) => setInquiryForm({...inquiryForm, eventType: value})}
+                        onValueChange={(value) => setInquiryForm({ ...inquiryForm, eventType: value })}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select event type" />
@@ -1049,7 +1048,7 @@ END:VCALENDAR`;
                       <Input
                         type="date"
                         value={inquiryForm.preferredDate}
-                        onChange={(e) => setInquiryForm({...inquiryForm, preferredDate: e.target.value})}
+                        onChange={(e) => setInquiryForm({ ...inquiryForm, preferredDate: e.target.value })}
                         min={new Date().toISOString().split('T')[0]}
                       />
                     </div>
@@ -1058,7 +1057,7 @@ END:VCALENDAR`;
                       <Label>Additional Message (Optional)</Label>
                       <Textarea
                         value={inquiryForm.message}
-                        onChange={(e) => setInquiryForm({...inquiryForm, message: e.target.value})}
+                        onChange={(e) => setInquiryForm({ ...inquiryForm, message: e.target.value })}
                         placeholder="Tell us more about your event requirements..."
                         rows={4}
                         maxLength={1000}

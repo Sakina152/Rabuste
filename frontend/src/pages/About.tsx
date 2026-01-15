@@ -502,7 +502,7 @@ const About = () => {
                 <Link to="/gallery">Explore Art</Link>
               </Button>
             </div>
-          </motion.div>
+          </motion.div> 
         </div>
       </section>
 

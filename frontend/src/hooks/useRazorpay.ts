@@ -39,13 +39,17 @@ export const useRazorpay = () => {
   const { cartItems, clearCart, cartTotal } = useCart();
 
   // Updated function accepts optional params
-  const handlePayment = async (requestType: 'MENU' | 'ART' = 'MENU', artItem?: any) => {
+  const handlePayment = async (requestType: 'MENU' | 'ART' | 'WORKSHOP' = 'MENU', data?: any) => {
     setIsProcessing(true);
-    const userInfo = localStorage.getItem("userInfo");
-    if (!userInfo) {
+    // Authentication check logic...
+    const userInfoStr = localStorage.getItem("userInfo");
+    // For workshops, we might allow guest checkout if we don't strictly require login, 
+    // but the backend payment controller requires userId for referencing if passed.
+    // However, existing logic enforces login. We'll stick to that for now.
+    if (!userInfoStr) {
       toast({
         title: "Authentication Required",
-        description: "Please login or signup to make a purchase",
+        description: "Please login to proceed with payment",
         variant: "destructive",
       });
       setIsProcessing(false);
@@ -64,8 +68,7 @@ export const useRazorpay = () => {
         return;
       }
 
-      // Get user info (optional - auth not set up yet)
-      const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+      const userInfo = JSON.parse(userInfoStr || "{}");
       const token = await getToken();
 
       // Validate inputs
@@ -75,17 +78,25 @@ export const useRazorpay = () => {
         return;
       }
 
-      if (requestType === 'ART' && (!artItem || !artItem._id)) {
+      if (requestType === 'ART' && (!data || !data._id)) {
         toast({ title: "Invalid Item", description: "Art item information is missing. Please try again.", variant: "destructive" });
         setIsProcessing(false);
         return;
       }
 
-      // Create config with optional auth header (not required since auth not set up)
+      if (requestType === 'WORKSHOP') {
+        if (!data || !data.workshop || !data.participantDetails) {
+          toast({ title: "Invalid Request", description: "Workshop details missing.", variant: "destructive" });
+          setIsProcessing(false);
+          return;
+        }
+      }
+
+      // Create config
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
       const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
-      // 1. Get Key ID (no auth required)
+      // 1. Get Key ID
       const { data: keyData } = await axios.get(`${API_BASE}/api/payment/config`, config);
 
       if (!keyData || !keyData.keyId) {
@@ -93,7 +104,6 @@ export const useRazorpay = () => {
       }
 
       // 2. Prepare Payload for Backend
-      // 3. Prepare Payload for Backend
       let payload: any;
       let orderAmount: number;
 
@@ -101,11 +111,20 @@ export const useRazorpay = () => {
         payload = { type: 'MENU', cartItems };
         orderAmount = cartTotal;
       } else if (requestType === 'ART') {
-        payload = { type: 'ART', itemId: artItem._id };
-        orderAmount = artItem.price || 0;
+        payload = { type: 'ART', itemId: data._id };
+        orderAmount = data.price || 0;
+      } else if (requestType === 'WORKSHOP') {
+        payload = {
+          type: 'WORKSHOP',
+          itemId: data.workshop._id,
+          quantity: data.quantity || 1
+        };
+        // Expect backend to calculate price, but we need it for verification payload potentially
+        // Actually backend verify uses the amount passed in orderData to record it, but trusts the signature.
+        orderAmount = (data.workshop.price || 0) * (data.quantity || 1);
       }
 
-      // 3. Create Order on Backend (no auth required)
+      // 3. Create Order on Backend
       const { data: orderData } = await axios.post(
         `${API_BASE}/api/payment/create-order`,
         payload,
@@ -119,159 +138,75 @@ export const useRazorpay = () => {
       // 4. Configure Razorpay
       const options: RazorpayOptions = {
         key: keyData.keyId,
-        amount: String(orderData.amount), // Razorpay requires amount as string
+        amount: String(orderData.amount),
         currency: orderData.currency || 'INR',
-        name: "Rabuste Art Gallery",
-        description: requestType === 'ART' ? `Purchase: ${artItem.title || 'Artwork'}` : "Food Order",
-        image: requestType === 'ART' ? (artItem.imageUrl || artItem.image || "https://cdn-icons-png.flaticon.com/512/924/924514.png") : "https://cdn-icons-png.flaticon.com/512/924/924514.png",
+        name: "Rabuste",
+        description: requestType === 'ART' ? `Art: ${data.title}` : (requestType === 'WORKSHOP' ? `Workshop: ${data.workshop.title}` : "Food Order"),
+        image: requestType === 'ART' ? (data.image || "https://cdn-icons-png.flaticon.com/512/924/924514.png") : "https://cdn-icons-png.flaticon.com/512/924/924514.png",
         order_id: orderData.id,
-
         handler: async (response: any) => {
           try {
-            const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-
-            // Log full payment response for debugging
-            console.log('Razorpay Payment Response (Full):', response);
-
-            // Extract fields - Razorpay response can have different field name formats
-            const orderId = response.razorpay_order_id || response.order_id;
-            const paymentId = response.razorpay_payment_id || response.payment_id;
-            const signature = response.razorpay_signature || response.signature;
-
-            // Validate response has all required fields
-            if (!orderId || !paymentId || !signature) {
-              console.error('Missing fields in Razorpay response:', {
-                has_order_id: !!orderId,
-                has_payment_id: !!paymentId,
-                has_signature: !!signature,
-                response_keys: Object.keys(response),
-                full_response: response
-              });
-              throw new Error('Incomplete payment response from Razorpay. Missing required fields.');
-            }
-
-            // Verify Signature with backend (no auth required)
-            console.log('Sending verification request:', {
-              order_id: orderId,
-              payment_id: paymentId,
-              signature_length: signature.length
-            });
+            // Verify Signature
+            const verifyPayload = {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              orderData: {
+                type: requestType,
+                cartItems: requestType === 'MENU' ? cartItems : undefined,
+                itemId: requestType === 'ART' ? data?._id : (requestType === 'WORKSHOP' ? data?.workshop._id : undefined),
+                amount: orderAmount,
+                // Additional fields for Workshop
+                participantDetails: requestType === 'WORKSHOP' ? data.participantDetails : undefined,
+                quantity: requestType === 'WORKSHOP' ? data.quantity : undefined
+              }
+            };
 
             const verifyResponse = await axios.post(
               `${API_BASE}/api/payment/verify`,
-              {
-                razorpay_order_id: orderId,
-                razorpay_payment_id: paymentId,
-                razorpay_signature: signature,
-                orderData: {
-                  type: requestType,
-                  cartItems: requestType === 'MENU' ? cartItems : undefined,
-                  itemId: requestType === 'ART' ? artItem?._id : undefined,
-                  amount: orderAmount  // Use the stored amount instead of orderData.amount
-                }
-              },
+              verifyPayload,
               config
             );
-
-            console.log('Verification response:', verifyResponse.data);
 
             if (verifyResponse.data.status !== 'success') {
               throw new Error(verifyResponse.data.message || 'Payment verification failed');
             }
 
-            // Payment verified successfully!
             toast({
               title: "Payment Successful!",
               description: "Your payment has been verified and processed.",
               className: "bg-green-600 text-white"
             });
 
-            // SAVE SUCCESSFUL ORDER
+            // Post-success actions
             if (requestType === 'MENU') {
-              // Save menu order to database
-              try {
-                await axios.post(`${API_BASE}/api/orders`, {
-                  user: userInfo._id || userInfo.id, // Pass user ID
-                  orderType: 'MENU',
-                  orderItems: cartItems.map(item => ({
-                    product: item.id,
-                    name: item.name,
-                    price: item.price,
-                    qty: item.quantity,
-                    image: item.image
-                  })),
-                  totalPrice: cartTotal,
-                  paymentMethod: "Razorpay",
-                  isPaid: true,
-                  paidAt: new Date(),
-                  paymentResult: {
-                    id: paymentId,
-                    status: "success",
-                    email_address: userInfo.email || "",
-                    razorpay_order_id: orderId,
-                    razorpay_payment_id: paymentId
-                  },
-                  customerEmail: userInfo.email || "",
-                  customerName: userInfo.name || ""
-                }, config);
-                console.log('Order saved successfully');
-              } catch (orderError: any) {
-                console.error('Error saving order:', orderError);
-                // Still show success since payment was verified
-              }
+              // Menu logic (clearing cart, navigating) handled by Payment Controller saving order?
+              // Checkout.tsx logic was: "SAVE SUCCESSFUL ORDER" separately?
+              // Wait, useRazorpay.ts ORIGINAL logic had a block "if (requestType === 'MENU') { save order... }"
+              // BUT verifyPayment in backend ALSO saves order now.
+              // We should avoid double saving.
+              // The backend verifyPayment now handles saving for MENU, ART, and WORKSHOP.
+              // So we just need to clean up UI.
+
               clearCart();
               navigate("/order-success");
-
             } else if (requestType === 'ART') {
-              // Save art purchase order and mark art as sold
-              try {
-                // First save the order
-                await axios.post(`${API_BASE}/api/orders`, {
-                  user: userInfo._id || userInfo.id, // Pass user ID
-                  orderType: 'ART',
-                  artItem: artItem._id,
-                  totalPrice: artItem.price,
-                  paymentMethod: "Razorpay",
-                  isPaid: true,
-                  paidAt: new Date(),
-                  paymentResult: {
-                    id: paymentId,
-                    status: "success",
-                    email_address: userInfo.email || "",
-                    razorpay_order_id: orderId,
-                    razorpay_payment_id: paymentId
-                  },
-                  customerEmail: userInfo.email || "",
-                  customerName: userInfo.name || ""
-                }, config);
-
-                // Also try to mark art as sold directly (if endpoint exists)
-                try {
-                  await axios.post(`${API_BASE}/api/art/purchase/${artItem._id}`, {}, config);
-                } catch (purchaseError) {
-                  console.warn('Art purchase endpoint not available, order saved anyway');
-                }
-
-                toast({ title: "Art Purchased!", description: "Congratulations on your new artwork.", className: "bg-green-600 text-white" });
-                // Reload page to show "Sold" status
-                setTimeout(() => window.location.reload(), 2000);
-              } catch (orderError: any) {
-                console.error('Error saving art order:', orderError);
-                toast({
-                  title: "Payment Successful!",
-                  description: "Payment verified. Please contact support to complete the purchase.",
-                  className: "bg-green-600 text-white"
-                });
-              }
+              setTimeout(() => window.location.reload(), 2000);
+            } else if (requestType === 'WORKSHOP') {
+              // Call optional success callback if passed in data, or just return true?
+              // Since this hook is void, we'll assume we need to trigger UI update.
+              // For workshops, we probably want to signal parent component.
+              if (data.onSuccess) data.onSuccess(verifyResponse.data);
             }
 
           } catch (error: any) {
             console.error('Payment verification error:', error);
             toast({
               title: "Verification Failed",
-              description: error.response?.data?.message || "Payment succeeded but verification failed. Please contact support.",
+              description: error.response?.data?.message || "Payment succeeded but verification failed.",
               variant: "destructive"
             });
+            if (data.onError) data.onError(error);
           }
         },
         prefill: {
@@ -291,10 +226,9 @@ export const useRazorpay = () => {
 
       const rzp1 = new (window as any).Razorpay(options);
       rzp1.on('payment.failed', (response: any) => {
-        console.error('Payment failed:', response);
         toast({
           title: "Payment Failed",
-          description: response.error?.description || "Your payment could not be processed. Please try again.",
+          description: response.error?.description || "Payment failed",
           variant: "destructive"
         });
         setIsProcessing(false);
@@ -304,10 +238,9 @@ export const useRazorpay = () => {
 
     } catch (error: any) {
       console.error('Payment initiation error:', error);
-      const errorMessage = error.response?.data?.message || error.message || "Could not initiate payment. Please try again.";
       toast({
         title: "Payment Error",
-        description: errorMessage,
+        description: error.response?.data?.message || error.message || "Could not initiate payment.",
         variant: "destructive"
       });
       setIsProcessing(false);
