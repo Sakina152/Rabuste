@@ -1,12 +1,13 @@
 import express from 'express';
-import { 
-  registerUser, 
-  loginUser, 
-  getMe, 
-  getAllUsers, 
-  updateUserRole, 
+import {
+  registerUser,
+  loginUser,
+  getMe,
+  getAllUsers,
+  updateUserRole,
   changePassword,
-  firebaseAuth 
+  firebaseAuth,
+  updateUserProfile
 } from '../controllers/authController.js';
 import { protect, authorize, adminOnly } from '../middleware/authMiddleware.js';
 
@@ -22,6 +23,7 @@ router.post('/login', loginUser);
 // Protected routes
 router.get('/me', protect, getMe);
 router.put('/change-password', protect, changePassword);
+router.put('/profile', protect, updateUserProfile);
 
 // Admin routes
 router.get('/users', protect, adminOnly, getAllUsers);

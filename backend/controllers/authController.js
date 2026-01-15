@@ -119,6 +119,33 @@ const updateUserRole = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Update user profile (Name, Phone, Address)
+// @route   PUT /api/auth/profile
+// @access  Private
+const updateUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (user) {
+    user.name = req.body.name || user.name;
+    user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
+    user.address = req.body.address || user.address;
+
+    const updatedUser = await user.save();
+
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      phoneNumber: updatedUser.phoneNumber,
+      address: updatedUser.address,
+      role: updatedUser.role,
+    });
+  } else {
+    res.status(404);
+    throw new Error('User not found');
+  }
+});
+
 // @desc    Change user password
 // @route   PUT /api/auth/change-password
 // @access  Private
@@ -208,4 +235,4 @@ const firebaseAuth = asyncHandler(async (req, res) => {
   }
 });
 
-export { registerUser, loginUser, getMe, getAllUsers, updateUserRole, changePassword, firebaseAuth};
+export { registerUser, loginUser, getMe, getAllUsers, updateUserRole, changePassword, firebaseAuth, updateUserProfile };
