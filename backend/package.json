@@ -14,6 +14,7 @@
   "description": "Rabuste Coffee Backend API",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@google/generative-ai": "^0.24.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^2.2.2",
     "cloudinary": "^2.8.0",

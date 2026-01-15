@@ -37,7 +37,6 @@ const Footer = () => {
             <nav className="flex flex-col gap-3">
               {[
                 { name: "About Us", path: "/about" },
-                { name: "Why Robusta", path: "/why-robusta" },
                 { name: "Art Gallery", path: "/gallery" },
                 { name: "Workshops", path: "/workshops" },
               ].map((link) => (
@@ -59,9 +58,7 @@ const Footer = () => {
             </h4>
             <nav className="flex flex-col gap-3">
               {[
-                { name: "Franchise", path: "/franchise" },
                 { name: "Partner With Us", path: "/franchise" },
-                { name: "Careers", path: "/franchise" },
               ].map((link, index) => (
                 <Link
                   key={index}
@@ -82,15 +79,15 @@ const Footer = () => {
             <div className="flex flex-col gap-4">
               <div className="flex items-start gap-3 text-muted-foreground text-sm">
                 <MapPin size={18} className="text-accent mt-0.5 flex-shrink-0" />
-                <span>123 Coffee Street, Art District, City 12345</span>
+                <span>Dimpal Row House, 15, Gymkhana Rd, Piplod, Surat, Gujarat 395007</span>
               </div>
               <div className="flex items-center gap-3 text-muted-foreground text-sm">
                 <Phone size={18} className="text-accent flex-shrink-0" />
-                <span>+1 (555) 123-4567</span>
+                <span>+91 9574006100</span>
               </div>
               <div className="flex items-center gap-3 text-muted-foreground text-sm">
                 <Mail size={18} className="text-accent flex-shrink-0" />
-                <span>hello@rabuste.coffee</span>
+                <span>rabustecoffee@gmail.com</span>
               </div>
             </div>
           </div>

@@ -24,17 +24,10 @@ import Footer from "@/components/Footer";
 const Checkout = () => {
   const { cartItems, cartTotal, removeFromCart, updateQuantity, clearCart } = useCart();
   const { handlePayment, isProcessing } = useRazorpay();
-  const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState(false);
 
   const subtotal = cartTotal;
   const tax = cartTotal * 0.05; // 5% GST
   const total = subtotal + tax;
-
-  const handleApplyCoupon = () => {
-    // Placeholder for coupon logic
-    setAppliedCoupon(true);
-  };
 
   if (cartItems.length === 0) {
     return (
@@ -225,28 +218,6 @@ const Checkout = () => {
                   </div>
 
                   <div className="p-6 space-y-6">
-                    {/* Coupon Section */}
-                    <div className="space-y-3">
-                      <Label className="flex items-center gap-2 text-accent text-sm tracking-wider uppercase">
-                        <Tag className="w-4 h-4" />
-                        Apply Coupon
-                      </Label>
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Enter coupon code"
-                          value={couponCode}
-                          onChange={(e) => setCouponCode(e.target.value)}
-                          className="bg-background border-border"
-                        />
-                        <Button
-                          variant="subtle"
-                          onClick={handleApplyCoupon}
-                          className="whitespace-nowrap"
-                        >
-                          Apply
-                        </Button>
-                      </div>
-                    </div>
 
                     {/* Price Breakdown */}
                     <div className="space-y-4 py-4">

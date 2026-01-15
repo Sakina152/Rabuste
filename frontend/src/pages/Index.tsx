@@ -496,13 +496,13 @@ const Index = () => {
                   <div className="p-2 rounded-lg bg-accent/10 text-accent">
                     <Phone className="w-5 h-5" />
                   </div>
-                  <p>+1 (555) 123-4567</p>
+                  <p>+91 9574006100</p>
                 </div>
                 <div className="flex items-center gap-3 text-muted-foreground">
                   <div className="p-2 rounded-lg bg-accent/10 text-accent">
                     <Mail className="w-5 h-5" />
                   </div>
-                  <p>hello@rabuste.coffee</p>
+                  <p>rabustecoffee@gmail.com</p>
                 </div>
               </div>
             </motion.div>

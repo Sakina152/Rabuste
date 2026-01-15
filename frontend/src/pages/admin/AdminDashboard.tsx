@@ -31,7 +31,6 @@ const navItems = [
   { title: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard", active: true },
   { title: "Orders", icon: ShoppingBag, href: "/admin/dashboard/orders" },
   { title: "Applications", icon: FileText, href: "/admin/applications" },
-  { title: "Users", icon: Users, href: "/admin/users" },
 ];
 
 // Stats will be loaded from API
