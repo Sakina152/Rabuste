@@ -15,6 +15,16 @@ const ScrollingGallery = () => {
     const targetRef = useRef<HTMLDivElement>(null);
     const [artworks, setArtworks] = useState<Artwork[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
+    }, []);
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
@@ -51,8 +61,8 @@ const ScrollingGallery = () => {
     const x = useTransform(smoothProgress, [0, 1], ["0%", "-75%"]);
 
     return (
-        <section ref={targetRef} className="relative h-[400vh] bg-zinc-950">
-            <div className="sticky top-0 flex h-screen items-center overflow-hidden">
+        <section ref={targetRef} className={`relative bg-zinc-950 ${isMobile ? 'h-auto py-20' : 'h-[400vh]'}`}>
+            <div className={isMobile ? "overflow-x-auto py-8 no-scrollbar" : "sticky top-0 flex h-screen items-center overflow-hidden"}>
 
                 {/* Dynamic Background */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-800/30 via-zinc-950 to-zinc-950 z-0 pointer-events-none" />
@@ -65,10 +75,13 @@ const ScrollingGallery = () => {
                 />
 
                 {/* Main Scrolling Track */}
-                <motion.div style={{ x }} className="flex gap-16 px-12 md:px-24 items-center z-10 w-max">
+                <motion.div
+                    style={{ x: isMobile ? 0 : x }}
+                    className={`flex items-center z-10 w-max ${isMobile ? 'gap-6 px-6' : 'gap-16 px-12 md:px-24'}`}
+                >
 
                     {/* Intro Card */}
-                    <div className="w-[80vw] md:w-[600px] flex-shrink-0 px-8">
+                    <div className={`flex-shrink-0 px-8 ${isMobile ? 'w-[85vw]' : 'w-[80vw] md:w-[600px]'}`}>
                         <motion.div
                             initial={{ opacity: 0, scale: 0.8 }}
                             whileInView={{ opacity: 1, scale: 1 }}
@@ -98,8 +111,8 @@ const ScrollingGallery = () => {
 
                     {/* Gallery Items */}
                     {loading ? (
-                        <div className="w-[400px] flex items-center justify-center text-white/50 gap-2">
-                            <Loader2 className="animate-spin" /> Loading Artworks...
+                        <div className="w-[300px] flex items-center justify-center text-white/50 gap-2">
+                            <Loader2 className="animate-spin" /> Loading...
                         </div>
                     ) : artworks.length > 0 ? (
                         artworks.map((item, index) => (
@@ -111,7 +124,7 @@ const ScrollingGallery = () => {
                     )}
 
                     {/* Final Call to Action */}
-                    <div className="w-[600px] flex-shrink-0 flex items-center justify-center ml-12">
+                    <div className={`flex-shrink-0 flex items-center justify-center ${isMobile ? 'w-[300px] ml-6' : 'w-[600px] ml-12'}`}>
                         <Link to="/gallery" className="group relative flex flex-col items-center justify-center text-center">
                             <motion.div
                                 className="w-40 h-40 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center group-hover:border-accent group-hover:bg-accent/10 transition-all duration-500"
