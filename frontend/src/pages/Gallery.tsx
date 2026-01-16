@@ -121,21 +121,24 @@ const Gallery = () => {
     }
   };
 
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
+      <section className="relative pt-32 pb-20 overflow-hidden min-h-[400px]">
         {/* Background Image with smooth fade */}
-        <div
-          className="absolute inset-0 z-0"
-          style={{
-            backgroundImage: "url('/images/gallery-hero.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/images/gallery-hero.jpg"
+            alt="Gallery Hero"
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              console.error("Hero image failed to load");
+              e.currentTarget.src = ""; // Fallback or handle accordingly
+            }}
+          />
           {/* Top overlay for navbar contrast and bottom overlay for smooth page transition */}
           <div className="absolute inset-0 bg-black/40" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-background" />
