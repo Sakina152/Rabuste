@@ -1,106 +1,125 @@
 import { Link } from "react-router-dom";
-import { Coffee, Instagram, Mail, MapPin, Phone } from "lucide-react";
+import { Instagram, Mail, MapPin, Phone } from "lucide-react";
 
 const Footer = () => {
+  const exploreLinks = [
+    { name: "Home", path: "/" },
+    { name: "Menu", path: "/menu" },
+    { name: "About", path: "/about" },
+    { name: "Art Gallery", path: "/gallery" },
+    { name: "Workshops", path: "/workshops" },
+    { name: "Franchise", path: "/franchise" },
+  ];
+
   return (
-    <footer className="bg-espresso border-t border-border">
-      <div className="container-custom section-padding">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* Brand */}
-          <div className="space-y-6">
-            <Link to="/" className="flex items-center gap-3">
-              <Coffee className="w-8 h-8 text-accent" />
-              <span className="font-display text-2xl font-bold text-foreground">
-                Rabuste
-              </span>
+    <footer style={{ backgroundColor: "#110F0D" }}>
+      <div className="container-custom py-12 px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start">
+          
+          {/* Left Section - Logo, Description & Instagram */}
+          <div className="flex flex-col items-center md:items-start space-y-5 md:ml-12 lg:ml-20">
+            <Link to="/">
+              <img 
+                src="/rabuste-logo.png" 
+                alt="Rabuste Coffee" 
+                className="h-20 w-auto"
+              />
             </Link>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              The boldest Robusta coffee experience. Where coffee culture meets
-              fine arts in a cozy, grab-and-go café.
+            <p 
+              className="text-sm leading-relaxed text-center md:text-left max-w-xs"
+              style={{ color: "#F5F5DC", fontFamily: "'Inter', 'Segoe UI', sans-serif" }}
+            >
+              The boldest Robusta coffee experience. Where coffee culture meets fine arts in a cozy, grab-and-go café.
             </p>
             <a
               href="https://www.instagram.com/rabuste.coffee/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-accent hover:text-terracotta-dark transition-colors"
+              className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity"
+              style={{ color: "#F5F5DC" }}
             >
-              <Instagram size={20} />
-              <span className="text-sm">@rabuste.coffee</span>
+              <Instagram size={22} />
+              <span className="text-sm" style={{ fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
+                @rabuste.coffee
+              </span>
             </a>
           </div>
 
-          {/* Quick Links */}
-          <div className="space-y-6">
-            <h4 className="font-display text-lg font-semibold text-foreground">
-              Explore
-            </h4>
-            <nav className="flex flex-col gap-3">
-              {[
-                { name: "About Us", path: "/about" },
-                { name: "Art Gallery", path: "/gallery" },
-                { name: "Workshops", path: "/workshops" },
-              ].map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className="text-muted-foreground text-sm hover:text-accent transition-colors"
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </nav>
-          </div>
+          {/* Middle Section - Explore & Contact */}
+          <div className="flex flex-col md:flex-row justify-center gap-12 md:gap-16">
+            {/* Explore */}
+            <div className="space-y-4">
+              <h4 
+                className="text-lg font-semibold tracking-wide"
+                style={{ color: "#BC653B", fontFamily: "'Inter', 'Segoe UI', sans-serif" }}
+              >
+                Explore
+              </h4>
+              <nav className="flex flex-col gap-2">
+                {exploreLinks.map((link) => (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className="text-sm hover:opacity-80 transition-opacity"
+                    style={{ color: "#F5F5DC", fontFamily: "'Inter', 'Segoe UI', sans-serif" }}
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+              </nav>
+            </div>
 
-          {/* Business */}
-          <div className="space-y-6">
-            <h4 className="font-display text-lg font-semibold text-foreground">
-              Business
-            </h4>
-            <nav className="flex flex-col gap-3">
-              {[
-                { name: "Partner With Us", path: "/franchise" },
-              ].map((link, index) => (
-                <Link
-                  key={index}
-                  to={link.path}
-                  className="text-muted-foreground text-sm hover:text-accent transition-colors"
+            {/* Contact */}
+            <div className="space-y-4">
+              <h4 
+                className="text-lg font-semibold tracking-wide"
+                style={{ color: "#BC653B", fontFamily: "'Inter', 'Segoe UI', sans-serif" }}
+              >
+                Contact
+              </h4>
+              <div className="flex flex-col gap-3">
+                <div 
+                  className="flex items-start gap-3 text-sm"
+                  style={{ color: "#F5F5DC", fontFamily: "'Inter', 'Segoe UI', sans-serif" }}
                 >
-                  {link.name}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          {/* Contact */}
-          <div className="space-y-6">
-            <h4 className="font-display text-lg font-semibold text-foreground">
-              Contact
-            </h4>
-            <div className="flex flex-col gap-4">
-              <div className="flex items-start gap-3 text-muted-foreground text-sm">
-                <MapPin size={18} className="text-accent mt-0.5 flex-shrink-0" />
-                <span>Dimpal Row House, 15, Gymkhana Rd, Piplod, Surat, Gujarat 395007</span>
-              </div>
-              <div className="flex items-center gap-3 text-muted-foreground text-sm">
-                <Phone size={18} className="text-accent flex-shrink-0" />
-                <span>+91 9574006100</span>
-              </div>
-              <div className="flex items-center gap-3 text-muted-foreground text-sm">
-                <Mail size={18} className="text-accent flex-shrink-0" />
-                <span>rabustecoffee@gmail.com</span>
+                  <MapPin size={18} className="mt-0.5 flex-shrink-0" style={{ color: "#BC653B" }} />
+                  <span className="max-w-[180px]">Dimpal Row House, 15, Gymkhana Rd, Piplod, Surat, Gujarat 395007</span>
+                </div>
+                <div 
+                  className="flex items-center gap-3 text-sm"
+                  style={{ color: "#F5F5DC", fontFamily: "'Inter', 'Segoe UI', sans-serif" }}
+                >
+                  <Phone size={18} className="flex-shrink-0" style={{ color: "#BC653B" }} />
+                  <span>+91 9574006100</span>
+                </div>
+                <div 
+                  className="flex items-center gap-3 text-sm"
+                  style={{ color: "#F5F5DC", fontFamily: "'Inter', 'Segoe UI', sans-serif" }}
+                >
+                  <Mail size={18} className="flex-shrink-0" style={{ color: "#BC653B" }} />
+                  <span>rabustecoffee@gmail.com</span>
+                </div>
               </div>
             </div>
+          </div>
+
+          {/* Right Section - Decorative Image (Symmetrical to Left) */}
+          <div className="flex flex-col items-center md:items-end md:mr-12 lg:mr-20">
+            <img 
+              src="/futer-removebg-preview.png" 
+              alt="Rabuste Coffee Art" 
+              className="h-40 w-auto object-contain"
+            />
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-16 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-muted-foreground text-sm">
-            {/* Change 2024 to {new Date().getFullYear()} */}
-            © {new Date().getFullYear()} Rabuste Coffee. All rights reserved.
-          </p>
-          <p className="text-muted-foreground text-xs">
-            Crafted with ☕ and passion for bold coffee
+        <div className="mt-10 pt-6 border-t border-white/20 flex justify-center">
+          <p 
+            className="text-sm"
+            style={{ color: "#F5F5DC", fontFamily: "'Inter', 'Segoe UI', sans-serif" }}
+          >
+            © 2026 Rabuste Coffee. All rights reserved.
           </p>
         </div>
       </div>
