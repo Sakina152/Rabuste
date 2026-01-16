@@ -121,26 +121,13 @@ const Gallery = () => {
     }
   };
 
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
-        {/* Background Image with smooth fade */}
-        <div
-          className="absolute inset-0 z-0"
-          style={{
-            backgroundImage: "url('/images/gallery-hero.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          {/* Top overlay for navbar contrast and bottom overlay for smooth page transition */}
-          <div className="absolute inset-0 bg-black/40" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-background" />
-        </div>
-
+      <section className="relative pt-32 pb-20 overflow-hidden bg-hero-gradient">
         <div className="container-custom relative z-10 px-6">
 
           {loading && (
@@ -181,61 +168,53 @@ const Gallery = () => {
         <div className="container-custom">
           <motion.div
             layout
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-16"
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
             <AnimatePresence mode="popLayout">
               {artworks.map((artwork, index) => (
                 <motion.div
                   key={artwork._id}
                   layout
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.5, delay: (index % 3) * 0.1 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
                   className="group relative"
                 >
-                  {/* Heavy Ornate Frame Container */}
                   <div
-                    className="relative p-[14px] bg-gradient-to-br from-[#1A0F0A] via-[#8D6E63] to-[#F5F5DC] rounded-sm transform transition-all duration-500 group-hover:shadow-[0_60px_120px_-30px_rgba(0,0,0,0.9)] cursor-pointer shadow-[20px_20px_60px_rgba(0,0,0,0.6),_inset_0_2px_15px_rgba(255,255,255,0.1)] overflow-visible"
+                    className="aspect-[4/5] rounded-2xl bg-gradient-to-br from-coffee-medium to-espresso overflow-hidden cursor-pointer border border-border hover:border-accent/50 transition-all duration-500"
                     onClick={() => setSelectedArt(artwork)}
                   >
-                    {/* Frame Interior Edge (Bevel) */}
-                    <div className="absolute inset-[10px] border border-black/30 pointer-events-none" />
-
-                    {/* Artwork Container (No matting) */}
-                    <div className="relative aspect-[4/5] overflow-hidden shadow-[inset_0_4px_20px_rgba(0,0,0,0.6)] bg-espresso">
+                    {/* Placeholder Art Pattern */}
+                    <div className="aspect-[4/5] rounded-2xl overflow-hidden border border-border hover:border-accent/50 transition-all duration-500 cursor-pointer">
                       {artwork.image ? (
                         <img
                           src={`${API_URL}/${artwork.image.replace(/\\/g, "/")}`}
                           alt={artwork.title}
-                          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                          className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-espresso/40">
-                          No Image
+                        <div className="w-full h-full bg-gradient-to-br from-coffee-medium to-espresso flex items-center justify-center">
+                          <span className="text-muted-foreground text-sm">
+                            No Image
+                          </span>
                         </div>
                       )}
 
-                      {/* Hover glaze effect */}
-                      <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                    </div>
-
-                    {/* SOLD Gold Plaque (Bottom Center) */}
-                    {artwork.status === "Sold" && (
-                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-20">
-                        <div className="bg-gradient-to-b from-[#91672C] via-[#B8860B] to-[#705206] px-6 py-1.5 rounded-sm border border-[#F5F5DC]/20 shadow-2xl scale-110">
-                          <p className="text-[#FDFCF0] text-[12px] font-display font-black uppercase tracking-[0.4em] drop-shadow-md">
-                            SOLD
-                          </p>
-                        </div>
-                        {/* Shadow for plate */}
-                        <div className="absolute -bottom-1 left-[10%] right-[10%] h-2 bg-black/40 blur-md -z-10" />
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-espresso/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <Eye className="w-12 h-12 text-accent" />
                       </div>
-                    )}
 
-                    {/* Frame Highlights/Texture details */}
-                    <div className="absolute inset-0 border-t border-white/10 pointer-events-none" />
-                    <div className="absolute inset-x-0 bottom-0 h-[3px] bg-black/20 pointer-events-none" />
+                      {/* Status badge */}
+                      {artwork.status === "Sold" && (
+                        <div
+                          key={`${artwork._id}-sold`}
+                          className="absolute top-4 right-4 bg-destructive text-destructive-foreground px-3 py-1 rounded-full text-xs font-medium">
+                          Sold
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Info */}
@@ -471,7 +450,7 @@ const Gallery = () => {
 
 
       {/* Artist Feature */}
-      <section className="section-padding bg-gradient-to-b from-background to-coffee-medium">
+      <section className="section-padding bg-coffee-dark">
         <div className="container-custom text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
