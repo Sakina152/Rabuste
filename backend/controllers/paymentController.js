@@ -247,6 +247,15 @@ export const verifyPayment = asyncHandler(async (req, res) => {
               quantity: item.quantity || 1,
               price: item.price
             })),
+            // Populate legacy fields for frontend compatibility
+            orderItems: orderData.cartItems.map(item => ({
+              product: item.id || item._id,
+              name: item.name,
+              price: item.price,
+              qty: item.quantity || 1,
+              image: item.image
+            })),
+            totalPrice: orderData.amount,
             totalAmount: orderData.amount, // Amount is already in rupees from frontend
             paymentStatus: 'completed',
             paymentId: paymentId,
