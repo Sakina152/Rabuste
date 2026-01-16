@@ -1,57 +1,37 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { ArrowRight, Coffee, Palette, Users, Sparkles, MapPin, Phone, Mail, View } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { motion, useScroll, useSpring } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import IntroAnimation from "@/components/IntroAnimation";
+import HeroParallax from "@/components/HeroParallax";
+import ScrollingGallery from "@/components/ScrollingGallery";
+import FloatingFeatures from "@/components/FloatingFeatures";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { ArrowRight, MapPin, Phone, Mail } from "lucide-react";
 
 // Menu images
 import frappeImg from "@/assets/menu/robusta-frappe.jpg";
 import cappuccinoImg from "@/assets/menu/robusta-cappuccino.jpg";
 import icedAmericanoImg from "@/assets/menu/robusta-iced-americano.jpg";
-import vrImage from "@/assets/vr-cafe.jpg";
 
 const Index = () => {
   const [showIntro, setShowIntro] = useState(() => {
-    // Only show intro if user hasn't seen it before
     return !localStorage.getItem('introAnimationSeen');
+  });
+
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
   });
 
   useEffect(() => {
     if (showIntro) {
-      // Mark intro as seen after it starts playing
       localStorage.setItem('introAnimationSeen', 'true');
     }
   }, [showIntro]);
-
-  const features = [
-    {
-      icon: Coffee,
-      title: "Bold Robusta",
-      description:
-        "Experience the intense, full-bodied flavor of premium Robusta coffee, crafted for the true coffee enthusiast.",
-    },
-    {
-      icon: Palette,
-      title: "Art Gallery",
-      description:
-        "A micro gallery showcasing fine arts, turning your coffee break into a cultural experience.",
-    },
-    {
-      icon: Users,
-      title: "Workshops",
-      description:
-        "Join our coffee and art workshops to learn, create, and connect with like-minded individuals.",
-    },
-    {
-      icon: Sparkles,
-      title: "AI Innovation",
-      description:
-        "Where coffee culture meets technology, enhancing your café experience with smart solutions.",
-    },
-  ];
 
   const rabusteSpecials = [
     {
@@ -78,6 +58,12 @@ const Index = () => {
     <>
       {showIntro && <IntroAnimation onComplete={() => setShowIntro(false)} />}
 
+      {/* Progress Bar */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-1 bg-accent origin-left z-[100]"
+        style={{ scaleX }}
+      />
+
       <motion.div
         className="min-h-screen bg-background"
         initial={{ opacity: 0 }}
@@ -86,403 +72,57 @@ const Index = () => {
       >
         <Navbar />
 
-        {/* Hero Section */}
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-hero-gradient">
-          {/* Animated Background Elements */}
-          <div className="absolute inset-0 overflow-hidden">
-            {[...Array(6)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute rounded-full bg-accent/5"
-                style={{
-                  width: `${200 + i * 100}px`,
-                  height: `${200 + i * 100}px`,
-                  left: `${10 + i * 15}%`,
-                  top: `${20 + i * 10}%`,
-                }}
-                animate={{
-                  scale: [1, 1.1, 1],
-                  opacity: [0.1, 0.2, 0.1],
-                }}
-                transition={{
-                  duration: 4 + i,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-            ))}
-          </div>
+        {/* 1. Hero Parallax */}
+        <HeroParallax />
 
-          <div className="container-custom relative z-10 px-6 pt-32 pb-20">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              {/* Text Content */}
-              <motion.div
-                initial={{ opacity: 0, x: -60 }}
-                animate={{ opacity: showIntro ? 0 : 1, x: showIntro ? -60 : 0 }}
-                transition={{ duration: 0.9, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-                className="space-y-8"
-              >
-                <div className="space-y-4">
-                  <motion.span
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: showIntro ? 0 : 1, y: showIntro ? 20 : 0 }}
-                    transition={{ delay: 0.4, duration: 0.6 }}
-                    className="inline-block text-accent font-body text-sm tracking-[0.3em] uppercase"
-                  >
-                    Specialty Coffee Experience
-                  </motion.span>
-                  <motion.h1
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: showIntro ? 0 : 1, y: showIntro ? 30 : 0 }}
-                    transition={{ delay: 0.5, duration: 0.7 }}
-                    className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight"
-                  >
-                    Where{" "}
-                    <span className="text-gradient">Bold Coffee</span>{" "}
-                    Meets Fine Art
-                  </motion.h1>
-                  <motion.p
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: showIntro ? 0 : 1, y: showIntro ? 30 : 0 }}
-                    transition={{ delay: 0.6, duration: 0.7 }}
-                    className="text-muted-foreground text-lg md:text-xl leading-relaxed max-w-xl"
-                  >
-                    Discover the intense, full-bodied taste of premium Robusta coffee
-                    in a cozy café that doubles as an art gallery. Bold flavors,
-                    creative inspiration, grab-and-go convenience.
-                  </motion.p>
-                </div>
+        {/* 2. Floating Features (Asymmetrical Grid) */}
+        <FloatingFeatures />
 
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: showIntro ? 0 : 1, y: showIntro ? 30 : 0 }}
-                  transition={{ delay: 0.7, duration: 0.7 }}
-                  className="flex flex-wrap gap-4"
-                >
-                  <Button variant="hero" size="xl" asChild>
-                    <Link to="/about">
-                      Explore Our Story
-                      <ArrowRight className="ml-2" />
-                    </Link>
-                  </Button>
-                  <Button variant="accent" size="xl" asChild>
-                    <Link to="/gallery">View Gallery</Link>
-                  </Button>
-                </motion.div>
-              </motion.div>
+        {/* 3. Horizontal Scrolling Gallery */}
+        <ScrollingGallery />
 
-              {/* Hero Visual - Coffee Cup */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, x: 50 }}
-                animate={{ opacity: showIntro ? 0 : 1, scale: showIntro ? 0.9 : 1, x: showIntro ? 50 : 0 }}
-                transition={{ duration: 1, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-                className="relative flex justify-center"
-              >
-                <div className="relative">
-                  {/* Glowing background */}
-                  <div className="absolute inset-0 bg-accent/20 blur-[100px] rounded-full" />
-
-                  {/* Main Cup Illustration */}
-                  <div className="relative float">
-                    {/* Steam */}
-                    <div className="absolute -top-16 left-1/2 transform -translate-x-1/2">
-                      {[...Array(3)].map((_, i) => (
-                        <motion.div
-                          key={i}
-                          className="absolute w-2 bg-gradient-to-t from-cream/60 to-transparent rounded-full"
-                          style={{
-                            left: `${i * 20 - 20}px`,
-                            height: "50px",
-                          }}
-                          animate={{
-                            y: [-10, -40, -10],
-                            opacity: [0.4, 0.8, 0.4],
-                            scaleY: [1, 1.5, 1],
-                          }}
-                          transition={{
-                            duration: 2.5,
-                            repeat: Infinity,
-                            delay: i * 0.4,
-                          }}
-                        />
-                      ))}
-                    </div>
-
-                    {/* Cup */}
-                    <div className="w-48 h-40 md:w-64 md:h-52 bg-gradient-to-b from-cream to-cream-dark rounded-b-[45%] relative overflow-hidden shadow-2xl">
-                      {/* Coffee */}
-                      <motion.div
-                        className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-espresso via-coffee-dark to-coffee-medium rounded-b-[45%]"
-                        initial={{ height: "0%" }}
-                        animate={{ height: showIntro ? "0%" : "70%" }}
-                        transition={{ duration: 1.5, delay: 0.6 }}
-                      />
-                      {/* Rim */}
-                      <div className="absolute top-0 left-0 right-0 h-3 bg-cream-dark" />
-                      {/* Highlight */}
-                      <div className="absolute top-4 left-4 w-8 h-16 bg-white/10 rounded-full blur-sm" />
-                    </div>
-
-                    {/* Handle */}
-                    <div className="absolute right-[-30px] top-8 w-10 h-20 md:w-12 md:h-24 border-[6px] border-cream-dark rounded-r-full bg-transparent" />
-
-                    {/* Saucer */}
-                    <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-60 md:w-80 h-4 bg-gradient-to-r from-cream-dark via-cream to-cream-dark rounded-full shadow-xl" />
-                  </div>
-
-                  {/* Decorative beans */}
-                  {[...Array(5)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      className="absolute text-coffee-light"
-                      style={{
-                        left: `${-20 + i * 80}px`,
-                        top: `${180 + Math.sin(i) * 30}px`,
-                      }}
-                      animate={{
-                        y: [-5, 5, -5],
-                        rotate: [0, 10, 0],
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        delay: i * 0.3,
-                      }}
-                    >
-                      <Coffee size={24} />
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
+        {/* 4. Interactive Menu Spotlight */}
+        <section className="py-32 bg-zinc-950 text-white relative">
+          <div className="container-custom px-6 relative z-10">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-20">
+              <div>
+                <span className="text-accent uppercase tracking-widest text-sm font-semibold mb-2 block">Our Menu</span>
+                <h2 className="text-5xl md:text-7xl font-bold font-display">House Specials</h2>
+              </div>
+              <Button variant="hero" size="lg" asChild className="mt-8 md:mt-0">
+                <Link to="/menu">View Full Menu <ArrowRight className="ml-2" /></Link>
+              </Button>
             </div>
-          </div>
 
-          {/* Scroll Indicator */}
-          <motion.div
-            className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <div className="w-6 h-10 border-2 border-muted-foreground rounded-full flex justify-center pt-2">
-              <motion.div
-                className="w-1.5 h-3 bg-accent rounded-full"
-                animate={{ y: [0, 10, 0], opacity: [1, 0.3, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-            </div>
-          </motion.div>
-        </section>
-
-        {/* Features Section */}
-        <section className="section-padding bg-background">
-          <div className="container-custom">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <span className="text-accent text-sm tracking-[0.3em] uppercase font-body">
-                The Experience
-              </span>
-              <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mt-4">
-                More Than Just Coffee
-              </h2>
-            </motion.div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {features.map((feature, index) => (
-                <motion.div
-                  key={feature.title}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="group p-8 rounded-2xl bg-card border border-border hover:border-accent/50 transition-all duration-500 hover:shadow-glow"
-                >
-                  <div className="w-14 h-14 rounded-xl bg-accent/10 flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
-                    <feature.icon className="w-7 h-7 text-accent" />
-                  </div>
-                  <h3 className="font-display text-xl font-semibold text-foreground mb-3">
-                    {feature.title}
-                  </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {feature.description}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Rabuste Specials Section */}
-        <section className="section-padding bg-gradient-to-b from-background to-coffee-dark/30">
-          <div className="container-custom">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-12"
-            >
-              <span className="text-accent text-sm tracking-[0.3em] uppercase font-body">
-                House Favourites
-              </span>
-              <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mt-4">
-                Rabuste Specials
-              </h2>
-              <p className="text-muted-foreground text-lg mt-4 max-w-2xl mx-auto">
-                Our most loved creations, crafted with premium Robusta for the ultimate café experience
-              </p>
-            </motion.div>
-
-            <div className="grid md:grid-cols-3 gap-8 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {rabusteSpecials.map((item, index) => (
                 <motion.div
-                  key={item.name}
-                  initial={{ opacity: 0, y: 30 }}
+                  key={index}
+                  initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.15 }}
-                  className="group relative rounded-2xl bg-card border border-border overflow-hidden hover:border-accent/50 transition-all duration-500 hover:shadow-glow cursor-pointer"
+                  transition={{ delay: index * 0.2 }}
+                  className="group relative h-[500px] rounded-3xl overflow-hidden cursor-pointer"
                 >
-                  {/* Image Container */}
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
+                  <img src={item.image} alt={item.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
 
-                    {/* Price Badge */}
-                    <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-accent text-background font-display font-bold text-sm">
-                      {item.price}
+                  <div className="absolute bottom-0 left-0 p-8 w-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-3xl font-bold">{item.name}</h3>
+                      <span className="bg-accent px-3 py-1 rounded-full text-sm font-bold">{item.price}</span>
                     </div>
+                    <p className="text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">{item.desc}</p>
                   </div>
-
-                  {/* Content */}
-                  <div className="p-6">
-                    <h3 className="font-display text-xl font-semibold text-foreground mb-2 group-hover:text-accent transition-colors duration-300">
-                      {item.name}
-                    </h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      {item.desc}
-                    </p>
-                  </div>
-
-                  {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 </motion.div>
               ))}
             </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-center"
-            >
-              <Button variant="hero" size="lg" asChild>
-                <Link to="/menu">
-                  View Full Menu
-                  <ArrowRight className="ml-2" />
-                </Link>
-              </Button>
-            </motion.div>
           </div>
         </section>
 
-        {/* Virtual Reality Tour Feature Section */}
-        <section className="section-padding overflow-hidden relative bg-black">
-          {/* Background with parallax effect */}
-          <div className="absolute inset-0 opacity-40">
-            <img
-              src={vrImage}
-              alt="VR Background"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
-
-          <div className="container-custom relative z-10">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                className="space-y-8"
-              >
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/20 border border-accent/30 text-accent backdrop-blur-md">
-                  <View className="w-4 h-4 animate-pulse" />
-                  <span className="text-sm font-semibold tracking-wider uppercase">Immersive Experience</span>
-                </div>
-
-                <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
-                  Step Inside <br />
-                  <span className="text-accent">Rabuste</span>
-                </h2>
-
-                <p className="text-gray-300 text-lg leading-relaxed max-w-xl">
-                  Can't make it to the café? Immerse yourself in our space from anywhere.
-                  Explore our art gallery, check the menu at the counter, and find your favorite
-                  corner in full 360° virtual reality.
-                </p>
-
-                <div className="flex flex-wrap gap-4 pt-4">
-                  <Button variant="hero" size="xl" className="h-16 px-8 text-lg" asChild>
-                    <Link to="/virtual-tour">
-                      Enter Virtual Tour
-                      <ArrowRight className="ml-2 w-5 h-5" />
-                    </Link>
-                  </Button>
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                className="relative hidden lg:block"
-              >
-                {/* 360 Preview Circle */}
-                <div className="relative w-[500px] h-[500px] mx-auto">
-                  <div className="absolute inset-0 rounded-full border-2 border-accent/30 animate-[spin_10s_linear_infinite]" />
-                  <div className="absolute inset-4 rounded-full border border-accent/20 animate-[spin_15s_linear_infinite_reverse]" />
-
-                  <div className="absolute inset-8 rounded-full overflow-hidden shadow-2xl border-4 border-accent/20">
-                    <img
-                      src={vrImage}
-                      alt="VR Preview"
-                      className="w-full h-full object-cover animate-[pulse_4s_ease-in-out_infinite]"
-                    />
-                    <div className="absolute inset-0 bg-accent/10 flex items-center justify-center group cursor-pointer">
-                      <div className="w-20 h-20 bg-accent/90 rounded-full flex items-center justify-center shadow-glow group-hover:scale-110 transition-transform duration-300">
-                        <View className="w-10 h-10 text-white" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Floating Elements */}
-                  <div className="absolute top-20 right-0 bg-card/90 backdrop-blur px-4 py-2 rounded-lg border border-accent/30 shadow-lg text-sm font-semibold text-accent animate-bounce">
-                    360° View
-                  </div>
-                  <div className="absolute bottom-20 left-10 bg-card/90 backdrop-blur px-4 py-2 rounded-lg border border-accent/30 shadow-lg text-sm font-semibold text-accent animate-bounce delay-700">
-                    Interactive Hotspots
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* Visit Section */}
-        <section className="section-padding bg-coffee-dark">
-          <div className="container-custom grid lg:grid-cols-2 gap-12 items-start">
+        {/* 5. Visit Us Section (Map Restored) */}
+        <section className="section-padding bg-coffee-dark relative">
+          <div className="container-custom grid lg:grid-cols-2 gap-12 items-start relative z-10">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -494,34 +134,34 @@ const Index = () => {
                 Visit Us
               </span>
               <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground">
-                Experience Rabuste in Person
+                Experience Rabuste <span className="text-gradient">In Person</span>
               </h2>
               <p className="text-muted-foreground text-lg max-w-2xl">
                 Drop by our Surat flagship to enjoy bold Robusta brews, browse the micro
                 art gallery, and connect with the community.
               </p>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3 text-muted-foreground">
-                  <div className="p-2 rounded-lg bg-accent/10 text-accent">
-                    <MapPin className="w-5 h-5" />
+              <div className="space-y-4 mt-8">
+                <div className="flex items-start gap-4 text-muted-foreground group">
+                  <div className="p-3 rounded-lg bg-accent/10 text-accent group-hover:bg-accent group-hover:text-white transition-colors">
+                    <MapPin className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="font-semibold text-foreground">Rabuste Coffee</p>
+                    <p className="font-bold text-foreground text-lg">Rabuste Coffee</p>
                     <p>Dimpal Row House, 15, Gymkhana Rd, Piplod</p>
                     <p>Surat, Gujarat 395007</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 text-muted-foreground">
-                  <div className="p-2 rounded-lg bg-accent/10 text-accent">
-                    <Phone className="w-5 h-5" />
+                <div className="flex items-center gap-4 text-muted-foreground group">
+                  <div className="p-3 rounded-lg bg-accent/10 text-accent group-hover:bg-accent group-hover:text-white transition-colors">
+                    <Phone className="w-6 h-6" />
                   </div>
-                  <p>+91 9574006100</p>
+                  <p className="text-lg">+91 9574006100</p>
                 </div>
-                <div className="flex items-center gap-3 text-muted-foreground">
-                  <div className="p-2 rounded-lg bg-accent/10 text-accent">
-                    <Mail className="w-5 h-5" />
+                <div className="flex items-center gap-4 text-muted-foreground group">
+                  <div className="p-3 rounded-lg bg-accent/10 text-accent group-hover:bg-accent group-hover:text-white transition-colors">
+                    <Mail className="w-6 h-6" />
                   </div>
-                  <p>rabustecoffee@gmail.com</p>
+                  <p className="text-lg">rabustecoffee@gmail.com</p>
                 </div>
               </div>
             </motion.div>
@@ -531,13 +171,13 @@ const Index = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="space-y-4"
+              className="space-y-6"
             >
-              <div className="relative rounded-2xl overflow-hidden border border-border shadow-xl bg-background">
+              <div className="relative rounded-2xl overflow-hidden border border-border shadow-2xl bg-background group h-[400px]">
                 <iframe
                   title="Rabuste Coffee Location"
                   src="https://www.google.com/maps?q=21.1614147,72.7711702&z=17&output=embed"
-                  className="w-full h-[320px]"
+                  className="w-full h-full grayscale hover:grayscale-0 transition-all duration-700"
                   loading="lazy"
                   allowFullScreen
                   referrerPolicy="no-referrer-when-downgrade"
@@ -548,10 +188,14 @@ const Index = () => {
                 href="https://www.google.com/maps/place/RABUSTE/@21.1614147,72.7711702,17z/data=!3m1!4b1!4m6!3m5!1s0x3be04d00111b19b5:0xba45eb84da00c79f!8m2!3d21.1614147!4d72.7711702!16s%2Fg%2F11w4td8150?entry=ttu"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative rounded-2xl overflow-hidden border border-border shadow-xl bg-card p-6 block hover:shadow-2xl hover:border-accent/50 transition-all duration-500"
+                className="group relative rounded-2xl overflow-hidden border border-border shadow-soft bg-card/80 backdrop-blur p-6 block hover:shadow-glow hover:border-accent/50 transition-all duration-500"
               >
                 <div className="space-y-3">
-                  <h3 className="font-display text-2xl font-bold text-foreground">RABUSTE</h3>
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-display text-2xl font-bold text-foreground">RABUSTE</h3>
+                    <div className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs font-bold uppercase tracking-wider">Open Now</div>
+                  </div>
+
                   <p className="text-muted-foreground text-sm leading-relaxed">
                     Dimpal Row House, 15, Gymkhana Rd, Piplod, Surat, Gujarat 395007
                   </p>
@@ -559,54 +203,13 @@ const Index = () => {
                     <span className="font-semibold text-lg">4.8</span>
                     <div className="flex">
                       {[...Array(5)].map((_, i) => (
-                        <span key={i} className="text-accent">★</span>
+                        <span key={i} className="text-accent fill-accent">★</span>
                       ))}
                     </div>
                     <span className="text-muted-foreground text-sm ml-2">41 reviews</span>
                   </div>
-                  <div className="flex gap-4 pt-4">
-                    <span className="text-accent text-sm font-semibold hover:underline">
-                      Directions
-                    </span>
-                    <span className="text-accent text-sm font-semibold hover:underline">
-                      View larger map
-                    </span>
-                  </div>
                 </div>
               </a>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="section-padding bg-gradient-to-br from-accent/20 via-background to-coffee-medium">
-          <div className="container-custom text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="max-w-3xl mx-auto space-y-8"
-            >
-              <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground">
-                Ready to Experience{" "}
-                <span className="text-gradient">Bold Coffee?</span>
-              </h2>
-              <p className="text-muted-foreground text-lg">
-                Visit us today or explore franchise opportunities to bring Rabuste
-                Coffee to your city.
-              </p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <Button variant="hero" size="xl" asChild>
-                  <Link to="/franchise">
-                    Franchise Inquiry
-                    <ArrowRight className="ml-2" />
-                  </Link>
-                </Button>
-                <Button variant="accent" size="xl" asChild>
-                  <Link to="/workshops">Join a Workshop</Link>
-                </Button>
-              </div>
             </motion.div>
           </div>
         </section>
