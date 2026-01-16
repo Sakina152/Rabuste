@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Coffee, Heart, Lightbulb, Target, Users, Award, Leaf, Zap, Globe } from "lucide-react";
+import { ArrowRight, Coffee, Target } from "lucide-react";
+import RobustaWheel from "@/components/RobustaWheel";
+import AnimatedCounter from "@/components/AnimatedCounter";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -33,33 +35,6 @@ const About = () => {
     },
   ];
 
-  const values = [
-    {
-      icon: Coffee,
-      title: "Bold Excellence",
-      description:
-        "We believe in the power of Robusta coffee to deliver intense, memorable experiences.",
-    },
-    {
-      icon: Heart,
-      title: "Artful Living",
-      description:
-        "Coffee and art are both forms of expression. We celebrate creativity in every cup and canvas.",
-    },
-    {
-      icon: Users,
-      title: "Community First",
-      description:
-        "Our café is a gathering place for coffee lovers, artists, and curious minds alike.",
-    },
-    {
-      icon: Lightbulb,
-      title: "Innovation",
-      description:
-        "We embrace technology and new ideas to enhance the café experience for everyone.",
-    },
-  ];
-
   const flavorNotes = [
     { name: "Dark Chocolate", percentage: 90 },
     { name: "Earthy & Woody", percentage: 85 },
@@ -67,88 +42,161 @@ const About = () => {
     { name: "Nutty", percentage: 75 },
   ];
 
-  const benefits = [
-    {
-      icon: Zap,
-      title: "Higher Caffeine",
-      description:
-        "Robusta contains nearly twice the caffeine of Arabica, delivering a powerful energy boost.",
-    },
-    {
-      icon: Award,
-      title: "Bold Flavor Profile",
-      description:
-        "Rich, earthy, and intense with notes of dark chocolate and nuts.",
-    },
-    {
-      icon: Leaf,
-      title: "Sustainable Crop",
-      description:
-        "More resilient to pests and diseases, requiring fewer chemicals to grow.",
-    },
-    {
-      icon: Globe,
-      title: "Diverse Origins",
-      description:
-        "Sourced from Vietnam, Uganda, India, and other renowned Robusta regions.",
-    },
-  ];
+  // Benefits are now managed inside the RobustaWheel component
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden bg-hero-gradient">
-        <div className="absolute inset-0 overflow-hidden">
-          {[...Array(4)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute rounded-full bg-accent/5"
-              style={{
-                width: `${300 + i * 150}px`,
-                height: `${300 + i * 150}px`,
-                right: `${-100 + i * 50}px`,
-                top: `${-50 + i * 100}px`,
-              }}
-              animate={{
-                scale: [1, 1.05, 1],
-                opacity: [0.1, 0.15, 0.1],
-              }}
-              transition={{
-                duration: 5 + i,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-          ))}
+      <section className="relative pt-32 pb-32 overflow-hidden bg-gradient-to-b from-coffee-dark via-background to-background">
+        {/* Background decorative "coffee" text */}
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none select-none hidden lg:block">
+          <div className="text-[180px] font-display font-bold text-accent/[0.07] leading-none tracking-tight">
+            <div>coffee</div>
+            <div>coffee</div>
+            <div>coffee</div>
+            <div>coffee</div>
+          </div>
         </div>
 
+        {/* Floating coffee beans decoration */}
+        <motion.div
+          className="absolute left-10 bottom-20 w-8 h-8 text-coffee-medium/30 hidden md:block"
+          animate={{ y: [-10, 10, -10], rotate: [0, 15, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <Coffee className="w-full h-full" />
+        </motion.div>
+        <motion.div
+          className="absolute right-1/3 bottom-10 w-6 h-6 text-coffee-medium/20 hidden md:block"
+          animate={{ y: [5, -5, 5], rotate: [0, -10, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+        >
+          <Coffee className="w-full h-full" />
+        </motion.div>
+
         <div className="container-custom relative z-10 px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-3xl"
-          >
-            <span className="text-accent text-sm tracking-[0.3em] uppercase font-body">
-              Our Story
-            </span>
-            <h1 className="font-display text-5xl md:text-6xl font-bold text-foreground mt-4 mb-6">
-              The Bold Journey of{" "}
-              <span className="text-gradient">Rabuste Coffee</span>
-            </h1>
-            <p className="text-muted-foreground text-xl leading-relaxed">
-              Born from a passion for bold flavors and creative expression, Rabuste
-              Coffee is more than a café—it's a movement celebrating the underrated
-              Robusta bean and the art that surrounds us.
-            </p>
-          </motion.div>
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6">
+                Discover The Art
+                <br />
+                <span className="text-gradient">Of Bold Coffee.</span>
+              </h1>
+              <p className="text-muted-foreground text-lg md:text-xl leading-relaxed mb-8 max-w-lg">
+                Experience the difference as we meticulously select and roast the finest
+                Robusta beans to create a truly unforgettable cup of coffee. Join us on a journey of
+                taste and awaken your senses, one sip at a time.
+              </p>
+
+              <Button variant="hero" size="xl" asChild className="group">
+                <Link to="/menu">
+                  Order Now
+                  <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </Button>
+
+              {/* Stats/Counters */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="flex gap-8 md:gap-12 mt-12"
+              >
+                <AnimatedCounter value={500} suffix="+" label="Reviews" />
+                <AnimatedCounter value={25} suffix="+" label="Coffee Blends" />
+                <AnimatedCounter value={10} suffix="K+" label="Happy Customers" />
+              </motion.div>
+            </motion.div>
+
+            {/* Right Content - Coffee Cup Visual */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="relative flex items-center justify-center"
+            >
+              {/* Main coffee cup circle */}
+              <div className="relative w-72 h-72 md:w-96 md:h-96">
+                {/* Outer decorative ring */}
+                <motion.div
+                  className="absolute inset-0 rounded-full border-4 border-accent/20"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+                />
+
+                {/* Inner gradient circle */}
+                <div className="absolute inset-4 rounded-full bg-gradient-to-br from-coffee-medium via-espresso to-coffee-dark flex items-center justify-center shadow-2xl">
+                  {/* Coffee cup icon */}
+                  <motion.div
+                    animate={{ y: [-5, 5, -5] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <Coffee className="w-24 h-24 md:w-32 md:h-32 text-cream" />
+                  </motion.div>
+                </div>
+
+                {/* Steam effect */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-8">
+                  {[0, 1, 2].map((i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute w-1 h-8 bg-gradient-to-t from-accent/40 to-transparent rounded-full"
+                      style={{ left: `${i * 12 - 12}px` }}
+                      animate={{
+                        y: [-10, -30],
+                        opacity: [0.6, 0],
+                        scale: [1, 0.5],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        delay: i * 0.3,
+                        ease: "easeOut",
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* Floating coffee beans around the cup */}
+                {[0, 1, 2, 3].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-4 h-4 rounded-full bg-coffee-dark"
+                    style={{
+                      top: `${20 + i * 20}%`,
+                      left: i % 2 === 0 ? "-10%" : "100%",
+                    }}
+                    animate={{
+                      y: [-10, 10, -10],
+                      x: i % 2 === 0 ? [-5, 5, -5] : [5, -5, 5],
+                      rotate: [0, 360],
+                    }}
+                    transition={{
+                      duration: 4 + i,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: i * 0.5,
+                    }}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          </div>
         </div>
+
+        {/* Gradient fade to next section */}
+        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
       </section>
 
       {/* Story Timeline */}
-      <section className="section-padding bg-background">
+      <section className="section-padding bg-background -mt-16 pt-8">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -185,8 +233,8 @@ const About = () => {
                   >
                     <div
                       className={`p-8 rounded-2xl bg-card border border-border ${index % 2 === 0
-                          ? "lg:mr-12"
-                          : "lg:ml-12 lg:col-start-2"
+                        ? "lg:mr-12"
+                        : "lg:ml-12 lg:col-start-2"
                         }`}
                     >
                       <span className="font-display text-3xl font-bold text-accent">
@@ -277,48 +325,6 @@ const About = () => {
         </div>
       </section>
 
-      {/* Values Section */}
-      <section className="section-padding bg-background">
-        <div className="container-custom">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <span className="text-accent text-sm tracking-[0.3em] uppercase font-body">
-              What We Stand For
-            </span>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mt-4">
-              Our Core Values
-            </h2>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {values.map((value, index) => (
-              <motion.div
-                key={value.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center p-8 rounded-2xl bg-card border border-border hover:border-accent/50 transition-all duration-500"
-              >
-                <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6">
-                  <value.icon className="w-8 h-8 text-accent" />
-                </div>
-                <h3 className="font-display text-xl font-semibold text-foreground mb-3">
-                  {value.title}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {value.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Why Robusta Section */}
       <section className="section-padding bg-coffee-dark">
         <div className="container-custom">
@@ -339,28 +345,7 @@ const About = () => {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {benefits.map((benefit, index) => (
-              <motion.div
-                key={benefit.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="group p-8 rounded-2xl bg-card border border-border hover:border-accent/50 transition-all duration-500 hover:shadow-glow"
-              >
-                <div className="w-14 h-14 rounded-xl bg-accent/10 flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
-                  <benefit.icon className="w-7 h-7 text-accent" />
-                </div>
-                <h3 className="font-display text-xl font-semibold text-foreground mb-3">
-                  {benefit.title}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {benefit.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
+          <RobustaWheel />
         </div>
       </section>
 
@@ -502,7 +487,7 @@ const About = () => {
                 <Link to="/gallery">Explore Art</Link>
               </Button>
             </div>
-          </motion.div> 
+          </motion.div>
         </div>
       </section>
 

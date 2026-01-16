@@ -311,33 +311,127 @@ END:VCALENDAR`;
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Hero Section - Preserved Design */}
-      <section className="relative pt-32 pb-20 overflow-hidden bg-hero-gradient">
-        <div className="container-custom relative z-10 px-6">
+      {/* Hero Section */}
+      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
+        {/* Background with gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-coffee-dark via-espresso to-coffee-medium">
+
+          {/* Simple Pour-over illustration - Right Side (static SVG, no heavy animations) */}
+          <div className="absolute right-10 md:right-20 top-1/2 -translate-y-1/2 opacity-15 md:opacity-20 hidden md:block">
+            <svg width="250" height="350" viewBox="0 0 250 350" fill="none" className="text-cream">
+              {/* Pour-over stand */}
+              <rect x="110" y="40" width="30" height="180" rx="4" fill="currentColor" />
+              {/* Pour-over dripper */}
+              <path d="M80 80 L170 80 L145 150 L105 150 Z" fill="currentColor" />
+              {/* Coffee carafe */}
+              <path d="M90 170 L90 280 Q90 300 110 300 L140 300 Q160 300 160 280 L160 170" fill="currentColor" />
+              {/* Coffee drip - simple CSS pulse */}
+              <circle cx="125" cy="155" r="3" fill="hsl(var(--accent))" className="animate-pulse" />
+              {/* Base */}
+              <rect x="65" y="300" width="120" height="15" rx="4" fill="currentColor" />
+            </svg>
+          </div>
+
+          {/* Simple Coffee Cup - Left Side (static SVG) */}
+          <div className="absolute left-10 md:left-20 bottom-32 opacity-15 md:opacity-20 hidden md:block">
+            <svg width="120" height="120" viewBox="0 0 120 120" fill="none" className="text-cream">
+              <path d="M20 40 L20 90 Q20 105 35 105 L85 105 Q100 105 100 90 L100 40 Z" fill="currentColor" />
+              <path d="M100 50 Q125 50 125 75 Q125 100 100 90" stroke="currentColor" strokeWidth="10" fill="none" strokeLinecap="round" />
+            </svg>
+            {/* Simple steam using CSS animation */}
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 flex gap-2">
+              <div className="w-0.5 h-6 bg-cream/30 rounded-full animate-pulse" />
+              <div className="w-0.5 h-6 bg-cream/30 rounded-full animate-pulse" style={{ animationDelay: '0.3s' }} />
+              <div className="w-0.5 h-6 bg-cream/30 rounded-full animate-pulse" style={{ animationDelay: '0.6s' }} />
+            </div>
+          </div>
+
+          {/* Floating coffee beans - reduced count, simple float animation */}
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="absolute w-4 h-5 rounded-full bg-cream/15 float"
+              style={{
+                left: `${15 + i * 18}%`,
+                top: `${20 + (i % 3) * 25}%`,
+                animationDelay: `${i * 0.5}s`,
+                animationDuration: `${4 + i}s`,
+              }}
+            />
+          ))}
+
+          {/* Gradient overlay for depth */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+        </div>
+
+        {/* Content */}
+        <div className="container-custom relative z-10 px-6 text-center">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-3xl"
+            transition={{ duration: 0.8 }}
+            className="max-w-4xl mx-auto"
           >
-            <span className="text-accent text-sm tracking-[0.3em] uppercase font-body">
-              Learn & Create
-            </span>
-            <h1 className="font-display text-5xl md:text-6xl font-bold text-foreground mt-4 mb-6">
-              Workshops &{" "}
-              <span className="text-gradient">Experiences</span>
-            </h1>
-            <p className="text-muted-foreground text-xl leading-relaxed">
-              Immerse yourself in the world of coffee and art through our curated
-              workshops. From brewing techniques to creative sessions, there's
-              something for everyone.
-            </p>
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-foreground leading-tight mb-8 italic"
+            >
+              Learn, Create,
+              <br />
+              <span className="text-gradient">Experience Coffee.</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="text-muted-foreground text-lg md:text-xl leading-relaxed mb-10 max-w-2xl mx-auto"
+            >
+              Immerse yourself in the art of coffee making and creative expression
+              through our curated workshops and hands-on experiences.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+            >
+              <Button
+                variant="hero"
+                size="xl"
+                className="group shadow-2xl"
+                onClick={() => {
+                  document.querySelector('#workshops-section')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                Explore Workshops
+                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </motion.div>
           </motion.div>
+        </div>
+
+        {/* Curved wave divider */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg
+            viewBox="0 0 1440 120"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-auto"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M0 120L48 110C96 100 192 80 288 70C384 60 480 60 576 65C672 70 768 80 864 85C960 90 1056 90 1152 85C1248 80 1344 70 1392 65L1440 60V120H1392C1344 120 1248 120 1152 120C1056 120 960 120 864 120C768 120 672 120 576 120C480 120 384 120 288 120C192 120 96 120 48 120H0Z"
+              fill="hsl(var(--background))"
+            />
+          </svg>
         </div>
       </section>
 
       {/* Workshops Grid - Now Dynamic */}
-      <section className="section-padding bg-background">
+      <section id="workshops-section" className="section-padding bg-background -mt-1">
         <div className="container-custom">
           {/* View Toggle and Filter */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
