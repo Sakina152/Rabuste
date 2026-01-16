@@ -8,12 +8,12 @@ const bookingSchema = new mongoose.Schema({
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User' 
+        ref: 'User'
     },
     participantDetails: {
         name: { type: String, required: true },
-        email: { 
-            type: String, 
+        email: {
+            type: String,
             required: true,
             match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address']
         },
@@ -63,21 +63,19 @@ bookingSchema.index({ registrationNumber: 1 }, { unique: true });
 
 // --- FIXED Pre-save Hook ---
 // We remove 'next' and rely on the async/await promise resolution
-bookingSchema.pre('save', async function() {
+bookingSchema.pre('save', async function () {
     // 1. Generate Registration Number
     if (!this.registrationNumber) {
         const date = new Date().getFullYear();
-        const randomStr = Math.floor(10000 + Math.random() * 90000); 
+        const randomStr = Math.floor(10000 + Math.random() * 90000);
         this.registrationNumber = `WS-${date}-${randomStr}`;
     }
 
-    // 2. Calculate Total Amount
-    if (this.isModified('numberOfSeats') || !this.totalAmount) {
-        const Workshop = mongoose.model('Workshop');
-        const workshopDoc = await Workshop.findById(this.workshop);
-        if (workshopDoc) {
-            this.totalAmount = workshopDoc.price * this.numberOfSeats;
-        }
+    // 2. Calculate Total Amount based on Workshop Price (Source of Truth)
+    const Workshop = mongoose.model('Workshop');
+    const workshopDoc = await Workshop.findById(this.workshop);
+    if (workshopDoc) {
+        this.totalAmount = workshopDoc.price * (this.numberOfSeats || 1);
     }
 });
 const Booking = mongoose.model('Booking', bookingSchema);

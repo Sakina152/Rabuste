@@ -5,13 +5,13 @@ import mongoose from 'mongoose';
  * without using external libraries.
  */
 const createSlug = (text) => {
-  return text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')     // Replace spaces with -
-    .replace(/[^\w\-]+/g, '') // Remove all non-word chars
-    .replace(/\-\-+/g, '-');  // Replace multiple - with single -
+    return text
+        .toString()
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')     // Replace spaces with -
+        .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+        .replace(/\-\-+/g, '-');  // Replace multiple - with single -
 };
 
 const workshopSchema = new mongoose.Schema({
@@ -109,18 +109,17 @@ const workshopSchema = new mongoose.Schema({
 // --- Indexes ---
 workshopSchema.index({ date: 1, status: 1 });
 workshopSchema.index({ type: 1 });
-workshopSchema.index({ slug: 1 }, { unique: true });
 
 // --- Virtual Fields ---
-workshopSchema.virtual('availableSeats').get(function() {
+workshopSchema.virtual('availableSeats').get(function () {
     return this.maxParticipants - this.currentParticipants;
 });
 
-workshopSchema.virtual('isFullyBooked').get(function() {
+workshopSchema.virtual('isFullyBooked').get(function () {
     return this.currentParticipants >= this.maxParticipants;
 });
 
-workshopSchema.virtual('isPast').get(function() {
+workshopSchema.virtual('isPast').get(function () {
     return this.date < new Date();
 });
 
@@ -128,9 +127,9 @@ workshopSchema.virtual('isPast').get(function() {
 // Removed the 'next' parameter to prevent "next is not a function" errors.
 // Modern Mongoose handles hooks that return nothing or a promise automatically.
 workshopSchema.pre('save', async function () {
-  if (this.isModified('title')) {
-    this.slug = createSlug(this.title);
-  }
+    if (this.isModified('title')) {
+        this.slug = createSlug(this.title);
+    }
 });
 
 const Workshop = mongoose.model('Workshop', workshopSchema);

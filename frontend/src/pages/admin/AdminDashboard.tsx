@@ -31,6 +31,7 @@ const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 const navItems = [
   { title: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard", active: true },
   { title: "Orders", icon: ShoppingBag, href: "/admin/dashboard/orders" },
+  { title: "Analytics", icon: TrendingUp, href: "/admin/dashboard/analytics" },
   { title: "Event Inquiries", icon: MessageSquare, href: "/admin/dashboard/inquiries" },
   { title: "Applications", icon: FileText, href: "/admin/applications" },
 ];

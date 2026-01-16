@@ -4,7 +4,8 @@ import { authorize } from '../middleware/roleMiddleware.js';
 import {
     getSalesAnalytics,
     getCategoryAnalytics,
-    getBestSellers
+    getBestSellers,
+    getComprehensiveStats
 } from '../controllers/analyticsController.js';
 
 const router = express.Router();
@@ -16,5 +17,6 @@ router.use(authorize('admin', 'super_admin'));
 router.get('/sales', getSalesAnalytics);
 router.get('/categories', getCategoryAnalytics);
 router.get('/bestsellers', getBestSellers);
+router.get('/comprehensive', getComprehensiveStats);
 
 export default router;
