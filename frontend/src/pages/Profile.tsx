@@ -204,27 +204,41 @@ const Profile = () => {
         const artPurchasesData = res.data.artPurchases || [];
 
         // Total spent (menu orders + art purchases)
-        const menuSpent = ordersData.reduce((sum: number, order: Order) => sum + order.totalPrice, 0);
-        const artSpent = artPurchasesData.reduce((sum: number, purchase: ArtPurchase) => sum + purchase.purchasePrice, 0);
-        const totalSpentAmount = Math.round((menuSpent + artSpent) * 100) / 100; // Fix floating point precision
-        setTotalSpent(totalSpentAmount);
+        const menuSpent = ordersData.reduce((sum: number, order: any) => {
+          // Use totalPrice (legacy/art) or totalAmount (new schema)
+          const amount = order.totalPrice || order.totalAmount || 0;
+          return sum + (isNaN(amount) ? 0 : amount);
+        }, 0);
+
+        const artSpent = artPurchasesData.reduce((sum: number, purchase: ArtPurchase) => {
+          const amount = purchase.purchasePrice || 0;
+          return sum + (isNaN(amount) ? 0 : amount);
+        }, 0);
+
+        const totalSpentAmount = Math.round((menuSpent + artSpent) * 100) / 100;
+        setTotalSpent(isNaN(totalSpentAmount) ? 0 : totalSpentAmount);
         setTotalOrders(ordersData.length);
 
         // Calculate favorite items (most ordered)
         const itemCount: { [key: string]: { count: number; name: string; image: string } } = {};
-        ordersData.forEach((order: Order) => {
-          order.orderItems.forEach(item => {
-            const id = item.product?._id || item.product; // Handle populated or unpopulated
-            // Use item.name and item.image directly from order item if available
-            if (typeof id === 'string' && !itemCount[id]) {
-              itemCount[id] = {
-                count: 0,
-                name: item.name,
-                image: item.image
-              };
-            }
-            if (typeof id === 'string') {
-              itemCount[id].count += item.qty;
+        ordersData.forEach((order: any) => {
+          // Check both orderItems (legacy) and items (new schema)
+          const itemsToProcess = order.orderItems || order.items || [];
+
+          itemsToProcess.forEach((item: any) => {
+            // New schema uses 'menuItem', legacy uses 'product'
+            const productId = item.product?._id || item.product || item.menuItem?._id || item.menuItem;
+
+            if (productId) {
+              const id = productId.toString();
+              if (!itemCount[id]) {
+                itemCount[id] = {
+                  count: 0,
+                  name: item.name || (item.menuItem?.name) || 'Unknown Item',
+                  image: item.image || (item.menuItem?.image) || '/placeholder-coffee.png'
+                };
+              }
+              itemCount[id].count += (item.qty || item.quantity || 0);
             }
           });
         });
@@ -660,18 +674,19 @@ const Profile = () => {
                               </div>
 
                               <div className="space-y-2">
-                                {order.orderItems.map((item, itemIdx) => (
+                                {/* Use orderItems (legacy) or items (new schema) */}
+                                {(order.orderItems?.length > 0 ? order.orderItems : (order as any).items || []).map((item: any, itemIdx: number) => (
                                   <div key={itemIdx} className="flex items-center gap-3 bg-background/50 rounded-lg p-2 border border-white/5">
                                     <img
-                                      src={item.image}
-                                      alt={item.name}
+                                      src={item.image || item.menuItem?.image || '/placeholder-coffee.png'}
+                                      alt={item.name || item.menuItem?.name || 'Item'}
                                       className="w-12 h-12 object-cover rounded-md"
                                     />
                                     <div className="flex-1 min-w-0">
-                                      <p className="font-medium text-sm truncate">{item.name}</p>
-                                      <p className="text-xs text-muted-foreground">Qty: {item.qty}</p>
+                                      <p className="font-medium text-sm truncate">{item.name || item.menuItem?.name || 'Unknown Item'}</p>
+                                      <p className="text-xs text-muted-foreground">Qty: {item.qty || item.quantity || 0}</p>
                                     </div>
-                                    <p className="font-semibold text-sm whitespace-nowrap">₹{item.price * item.qty}</p>
+                                    <p className="font-semibold text-sm whitespace-nowrap">₹{(item.price || 0) * (item.qty || item.quantity || 0)}</p>
                                   </div>
                                 ))}
                               </div>
