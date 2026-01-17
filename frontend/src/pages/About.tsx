@@ -341,8 +341,8 @@ const About = () => {
       </section>
 
       {/* Story Timeline */}
-      <section className="section-padding bg-background -mt-16 pt-8">
-        <div className="container-custom">
+      <section className="section-padding bg-background -mt-16 pt-8 relative overflow-hidden">
+        <div className="container-custom relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -405,11 +405,15 @@ const About = () => {
             </div>
           </div>
         </div>
+        {/* Dual-Shroud Transition: Bottom Fade to Coffee-Dark */}
+        <div className="absolute bottom-0 left-0 right-0 h-80 bg-gradient-to-b from-transparent via-transparent to-coffee-dark pointer-events-none z-10" />
       </section>
 
       {/* Philosophy Section */}
-      <section className="section-padding bg-coffee-dark">
-        <div className="container-custom">
+      <section className="section-padding bg-coffee-dark relative overflow-hidden">
+        {/* Dual-Shroud Transition: Top Fade from Coffee-Dark */}
+        <div className="absolute top-0 left-0 right-0 h-80 bg-gradient-to-b from-coffee-dark via-coffee-dark/60 to-transparent pointer-events-none z-10" />
+        <div className="container-custom relative z-20">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
@@ -488,7 +492,7 @@ const About = () => {
       </section>
 
       {/* Why Robusta Section */}
-      <section className="section-padding bg-coffee-dark">
+      <section className="section-padding bg-coffee-dark relative overflow-hidden">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -509,11 +513,15 @@ const About = () => {
 
           <RobustaWheel />
         </div>
+        {/* Dual-Shroud Transition: Bottom Fade to Espresso */}
+        <div className="absolute bottom-0 left-0 right-0 h-80 bg-gradient-to-b from-transparent via-transparent to-espresso pointer-events-none z-10" />
       </section>
 
       {/* Flavor Journey Section */}
-      <section className="section-padding bg-gradient-to-br from-espresso via-coffee-dark to-espresso overflow-hidden">
-        <div className="container-custom">
+      <section className="pt-12 pb-20 md:pt-16 md:pb-32 px-6 md:px-12 bg-gradient-to-br from-espresso via-coffee-dark to-espresso overflow-hidden relative">
+        {/* Dual-Shroud Transition: Top Fade from Espresso */}
+        <div className="absolute top-0 left-0 right-0 h-80 bg-gradient-to-b from-espresso via-espresso/60 to-transparent pointer-events-none z-10" />
+        <div className="container-custom relative z-20">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
@@ -611,11 +619,15 @@ const About = () => {
             </motion.div>
           </div>
         </div>
+        {/* Dual-Shroud Transition: Bottom Fade to Coffee-Dark */}
+        <div className="absolute bottom-0 left-0 right-0 h-80 bg-gradient-to-b from-transparent via-transparent to-coffee-dark pointer-events-none z-10" />
       </section>
 
       {/* CTA Section */}
-      <section className="section-padding bg-gradient-to-br from-accent/20 via-background to-coffee-medium">
-        <div className="container-custom text-center">
+      <section className="section-padding bg-coffee-dark relative overflow-hidden">
+        {/* Dual-Shroud Transition: Top Fade from Coffee-Dark */}
+        <div className="absolute top-0 left-0 right-0 h-80 bg-gradient-to-b from-coffee-dark via-coffee-dark/60 to-transparent pointer-events-none z-10" />
+        <div className="container-custom text-center relative z-20">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}

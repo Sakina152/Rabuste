@@ -316,13 +316,13 @@ END:VCALENDAR`;
       <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
         {/* Background Video */}
         <div className="absolute inset-0 z-0">
-          <video 
-            src="/workshop_background_vid.mp4" 
-            autoPlay 
-            loop 
-            muted 
-            playsInline 
-            className="w-full h-full object-cover opacity-90" 
+          <video
+            src="/workshop_background_vid.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover opacity-90"
           />
           {/* Dark Overlay for readability */}
           <div className="absolute inset-0 bg-black/60 z-10" />
@@ -397,60 +397,60 @@ END:VCALENDAR`;
       <section id="workshops-section" className="section-padding bg-[#110F0D] -mt-1 relative overflow-hidden min-h-screen">
         {/* Subtle Coffee Bean Texture Background */}
         <div className="absolute inset-0 pointer-events-none opacity-10">
-            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <pattern id="coffee-beans" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
-                        <path d="M50 50 C20 20 80 20 50 50 C20 80 80 80 50 50" fill="none" stroke="#BC653B" strokeWidth="2" opacity="0.1" transform="rotate(45 50 50)"/>
-                         {/* Large Abstract Bean Shapes */}
-                        <path d="M150 150 Q100 100 150 50 T150 150" fill="none" stroke="#BC653B" strokeWidth="150" opacity="0.05" strokeLinecap="round" />
-                    </pattern>
-                </defs>
-                 {/* Large blurry organic shapes for atmosphere */}
-                <circle cx="10%" cy="20%" r="400" fill="#3C2A21" filter="url(#blur1)" opacity="0.2"/>
-                 <circle cx="90%" cy="80%" r="500" fill="#4E3426" filter="url(#blur2)" opacity="0.15"/>
-                 
-                 {/* Coffee Bean Outlines - Decorative */}
-                 <g opacity="0.08" stroke="#BC653B" strokeWidth="2" fill="none">
-                    <path d="M -100 300 Q 100 100 300 300 T 700 300" transform="scale(1.5) rotate(-15)" />
-                    <ellipse cx="80%" cy="30%" rx="150" ry="250" transform="rotate(30)" />
-                    <path d="M 800 100 C 700 300 900 300 800 500" strokeWidth="4" />
-                 </g>
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="coffee-beans" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+                <path d="M50 50 C20 20 80 20 50 50 C20 80 80 80 50 50" fill="none" stroke="#BC653B" strokeWidth="2" opacity="0.1" transform="rotate(45 50 50)" />
+                {/* Large Abstract Bean Shapes */}
+                <path d="M150 150 Q100 100 150 50 T150 150" fill="none" stroke="#BC653B" strokeWidth="150" opacity="0.05" strokeLinecap="round" />
+              </pattern>
+            </defs>
+            {/* Large blurry organic shapes for atmosphere */}
+            <circle cx="10%" cy="20%" r="400" fill="#3C2A21" filter="url(#blur1)" opacity="0.2" />
+            <circle cx="90%" cy="80%" r="500" fill="#4E3426" filter="url(#blur2)" opacity="0.15" />
 
-                <defs>
-                    <filter id="blur1" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur in="SourceGraphic" stdDeviation="120" />
-                    </filter>
-                    <filter id="blur2" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur in="SourceGraphic" stdDeviation="150" />
-                    </filter>
-                </defs>
-             </svg>
+            {/* Coffee Bean Outlines - Decorative */}
+            <g opacity="0.08" stroke="#BC653B" strokeWidth="2" fill="none">
+              <path d="M -100 300 Q 100 100 300 300 T 700 300" transform="scale(1.5) rotate(-15)" />
+              <ellipse cx="80%" cy="30%" rx="150" ry="250" transform="rotate(30)" />
+              <path d="M 800 100 C 700 300 900 300 800 500" strokeWidth="4" />
+            </g>
+
+            <defs>
+              <filter id="blur1" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="120" />
+              </filter>
+              <filter id="blur2" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="150" />
+              </filter>
+            </defs>
+          </svg>
         </div>
 
         <div className="container-custom relative z-10 pt-10">
           {/* View Toggle and Filter */}
           <div className="flex flex-col items-center gap-8 mb-20 relative">
-            
+
             {/* Centered Pill Toggle */}
             <div className="flex bg-[#12100E] p-1.5 rounded-full border border-white/5 shadow-2xl">
-                    <button
-                        onClick={() => setViewMode("list")}
-                        className={`px-8 py-2.5 rounded-full text-sm font-medium tracking-wide transition-all duration-300 ${viewMode === "list"
-                        ? "bg-[#BC653B] text-[#1A1614] shadow-lg shadow-[#BC653B]/20"
-                        : "text-[#9A8B7D] hover:text-[#E8DCC4]"
-                        }`}
-                    >
-                        LIST VIEW
-                    </button>
-                    <button
-                        onClick={() => setViewMode("calendar")}
-                        className={`px-8 py-2.5 rounded-full text-sm font-medium tracking-wide transition-all duration-300 ${viewMode === "calendar"
-                        ? "bg-[#BC653B] text-[#1A1614] shadow-lg shadow-[#BC653B]/20"
-                        : "text-[#9A8B7D] hover:text-[#E8DCC4]"
-                        }`}
-                    >
-                        CALENDAR VIEW
-                    </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`px-8 py-2.5 rounded-full text-sm font-medium tracking-wide transition-all duration-300 ${viewMode === "list"
+                  ? "bg-[#BC653B] text-[#1A1614] shadow-lg shadow-[#BC653B]/20"
+                  : "text-[#9A8B7D] hover:text-[#E8DCC4]"
+                  }`}
+              >
+                LIST VIEW
+              </button>
+              <button
+                onClick={() => setViewMode("calendar")}
+                className={`px-8 py-2.5 rounded-full text-sm font-medium tracking-wide transition-all duration-300 ${viewMode === "calendar"
+                  ? "bg-[#BC653B] text-[#1A1614] shadow-lg shadow-[#BC653B]/20"
+                  : "text-[#9A8B7D] hover:text-[#E8DCC4]"
+                  }`}
+              >
+                CALENDAR VIEW
+              </button>
             </div>
 
             {/* Filter - Pushed to Absolute Top Right */}
@@ -475,145 +475,145 @@ END:VCALENDAR`;
             <div className="text-center text-[#A8A29E] py-20">Loading experiences...</div>
           ) : viewMode === "calendar" ? (
             /* Calendar View */
-            <div className="grid lg:grid-cols-[400px,1fr] gap-16 lg:gap-32 items-center justify-center max-w-6xl mx-auto"> 
+            <div className="grid lg:grid-cols-[400px,1fr] gap-16 lg:gap-32 items-center justify-center max-w-6xl mx-auto">
               {/* Left Side: Minimal Dark Calendar Card */}
               <div className="bg-[#12100E] border border-[#3C2A21]/40 rounded-3xl p-8 shadow-2xl relative shadow-black/50">
-                
-                <div className="relative z-10">
-                    <div className="mb-8 flex items-center justify-between px-2">
-                    <button
-                        onClick={() => changeMonth(-1)}
-                        className="p-2 text-[#6D5A4B] hover:text-[#E8DCC4] transition-colors"
-                    >
-                        <ChevronLeft className="w-5 h-5" />
-                    </button>
-                    
-                    <h3 className="font-sans font-medium text-lg text-[#E8DCC4] tracking-wide">
-                        {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                    </h3>
-                    
-                    <button
-                        onClick={() => changeMonth(1)}
-                        className="p-2 text-[#6D5A4B] hover:text-[#E8DCC4] transition-colors"
-                    >
-                        <ChevronRight className="w-5 h-5" />
-                    </button>
-                    </div>
 
-                    {/* Calendar Grid */}
-                    <div className="grid grid-cols-7 gap-y-4 gap-x-2 mb-4">
+                <div className="relative z-10">
+                  <div className="mb-8 flex items-center justify-between px-2">
+                    <button
+                      onClick={() => changeMonth(-1)}
+                      className="p-2 text-[#6D5A4B] hover:text-[#E8DCC4] transition-colors"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+
+                    <h3 className="font-sans font-medium text-lg text-[#E8DCC4] tracking-wide">
+                      {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    </h3>
+
+                    <button
+                      onClick={() => changeMonth(1)}
+                      className="p-2 text-[#6D5A4B] hover:text-[#E8DCC4] transition-colors"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Calendar Grid */}
+                  <div className="grid grid-cols-7 gap-y-4 gap-x-2 mb-4">
                     {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-                        <div key={i} className="text-center text-xs font-sans text-[#5C4D44] py-1">
+                      <div key={i} className="text-center text-xs font-sans text-[#5C4D44] py-1">
                         {day}
-                        </div>
+                      </div>
                     ))}
 
                     {(() => {
-                        const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(selectedDate);
-                        const days = [];
+                      const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(selectedDate);
+                      const days = [];
 
-                        // Empty cells
-                        for (let i = 0; i < startingDayOfWeek; i++) {
+                      // Empty cells
+                      for (let i = 0; i < startingDayOfWeek; i++) {
                         days.push(<div key={`empty-${i}`} className="aspect-square" />);
-                        }
+                      }
 
-                        // Days
-                        for (let day = 1; day <= daysInMonth; day++) {
+                      // Days
+                      for (let day = 1; day <= daysInMonth; day++) {
                         const date = new Date(year, month, day);
                         const hasWorkshop = hasWorkshopOnDate(date);
                         const isSelected = date.toDateString() === selectedDate.toDateString();
                         const isToday = date.toDateString() === new Date().toDateString();
 
                         days.push(
-                            <button
+                          <button
                             key={day}
                             onClick={() => setSelectedDate(date)}
                             className={`w-10 h-10 mx-auto flex flex-col items-center justify-center rounded-full text-sm transition-all duration-300 relative group
-                                ${isSelected 
-                                ? 'text-white shadow-[0_0_20px_rgba(188,101,59,0.4)]' 
+                                ${isSelected
+                                ? 'text-white shadow-[0_0_20px_rgba(188,101,59,0.4)]'
                                 : 'text-[#9A8B7D] hover:text-white'
-                                }
+                              }
                                 ${isToday && !isSelected ? 'border border-[#BC653B]' : ''}
                             `}
-                            >
+                          >
                             {/* Selected Background Gradient glow */}
                             {isSelected && (
-                                <div className="absolute inset-0 rounded-full bg-[#BC653B] opacity-100 -z-10" />
+                              <div className="absolute inset-0 rounded-full bg-[#BC653B] opacity-100 -z-10" />
                             )}
-                            
+
                             {day}
-                            
+
                             {hasWorkshop && (
-                                <div className={`absolute -bottom-1 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-[#BC653B]'}`} />
+                              <div className={`absolute -bottom-1 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-[#BC653B]'}`} />
                             )}
-                            </button>
+                          </button>
                         );
-                        }
+                      }
 
-                        return days;
+                      return days;
                     })()}
-                    </div>
+                  </div>
 
-                    <div className="mt-8 flex items-center justify-center gap-4 text-[11px] text-[#6D5A4B]">
-                        <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-[#BC653B]"></div>
-                            <span>Has workshops</span>
-                        </div>
+                  <div className="mt-8 flex items-center justify-center gap-4 text-[11px] text-[#6D5A4B]">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#BC653B]"></div>
+                      <span>Has workshops</span>
                     </div>
+                  </div>
                 </div>
               </div>
 
               {/* Right Side: Centered Minimal Info */}
               <div className="flex flex-col justify-center items-center text-center">
                 <div className="max-w-xl">
-                    <h3 className="font-serif text-5xl md:text-6xl text-[#E8DCC4] mb-6 leading-tight">
+                  <h3 className="font-serif text-5xl md:text-6xl text-[#E8DCC4] mb-6 leading-tight">
                     {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                    </h3>
+                  </h3>
 
-                    <div className="w-full flex justify-center">
+                  <div className="w-full flex justify-center">
                     {getWorkshopsForDate(selectedDate).length === 0 ? (
-                        <p className="text-[#A8A29E] text-xl font-sans font-light">
-                        No workshops scheduled for <br/> this date
-                        </p>
+                      <p className="text-[#A8A29E] text-xl font-sans font-light">
+                        No workshops scheduled for <br /> this date
+                      </p>
                     ) : (
-                        <div className="space-y-6 w-full text-left">
-                         <p className="text-[#BC653B] text-lg font-sans font-medium text-center mb-8">
-                            {getWorkshopsForDate(selectedDate).length} workshop{getWorkshopsForDate(selectedDate).length !== 1 ? 's' : ''} available
-                         </p>
+                      <div className="space-y-6 w-full text-left">
+                        <p className="text-[#BC653B] text-lg font-sans font-medium text-center mb-8">
+                          {getWorkshopsForDate(selectedDate).length} workshop{getWorkshopsForDate(selectedDate).length !== 1 ? 's' : ''} available
+                        </p>
                         {getWorkshopsForDate(selectedDate).map((workshop) => {
-                        const CategoryIcon = getCategoryIcon(workshop.type);
-                        return (
+                          const CategoryIcon = getCategoryIcon(workshop.type);
+                          return (
                             <motion.div
-                            key={workshop._id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="group relative bg-[#1A1614]/40 border border-[#3C2A21] rounded-xl p-6 hover:bg-[#2C2420]/60 transition-colors duration-300"
+                              key={workshop._id}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="group relative bg-[#1A1614]/40 border border-[#3C2A21] rounded-xl p-6 hover:bg-[#2C2420]/60 transition-colors duration-300"
                             >
-                                <div className="flex justify-between items-center mb-2">
-                                    <h4 className="font-serif text-2xl text-[#E8DCC4]">
-                                        {workshop.title}
-                                    </h4>
-                                    <span className="text-[#BC653B] font-mono text-sm">
-                                        {workshop.startTime}
-                                    </span>
-                                </div>
-                                <p className="text-[#9A8B7D] mb-4 text-sm font-light">
-                                    {workshop.description}
-                                </p>
-                                <Button
-                                    variant="link"
-                                    className="text-[#BC653B] p-0 h-auto font-sans tracking-wide text-xs uppercase hover:text-white"
-                                    onClick={() => setSelectedWorkshop(workshop)}
-                                    disabled={workshop.availableSeats === 0}
-                                    >
-                                    Reserve Spot →
-                                </Button>
+                              <div className="flex justify-between items-center mb-2">
+                                <h4 className="font-serif text-2xl text-[#E8DCC4]">
+                                  {workshop.title}
+                                </h4>
+                                <span className="text-[#BC653B] font-mono text-sm">
+                                  {workshop.startTime}
+                                </span>
+                              </div>
+                              <p className="text-[#9A8B7D] mb-4 text-sm font-light">
+                                {workshop.description}
+                              </p>
+                              <Button
+                                variant="link"
+                                className="text-[#BC653B] p-0 h-auto font-sans tracking-wide text-xs uppercase hover:text-white"
+                                onClick={() => setSelectedWorkshop(workshop)}
+                                disabled={workshop.availableSeats === 0}
+                              >
+                                Reserve Spot →
+                              </Button>
                             </motion.div>
-                        );
+                          );
                         })}
-                        </div>
+                      </div>
                     )}
-                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -696,6 +696,8 @@ END:VCALENDAR`;
             </div>
           )}
         </div>
+        {/* Dual-Shroud Transition: Bottom Fade to Coffee-Dark */}
+        <div className="absolute bottom-0 left-0 right-0 h-80 bg-gradient-to-b from-transparent via-transparent to-coffee-dark pointer-events-none z-10" />
       </section>
 
       {/* Registration Modal - Preserved Design with updated Fields */}
@@ -926,8 +928,10 @@ END:VCALENDAR`;
       </AnimatePresence>
 
       {/* Private Events Section - Preserved Design */}
-      <section className="section-padding bg-coffee-dark">
-        <div className="container-custom">
+      <section className="section-padding bg-coffee-dark relative overflow-hidden">
+        {/* Dual-Shroud Transition: Top Fade from Coffee-Dark */}
+        <div className="absolute top-0 left-0 right-0 h-80 bg-gradient-to-b from-coffee-dark via-coffee-dark/60 to-transparent pointer-events-none z-10" />
+        <div className="container-custom relative z-20">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, x: -30 }}

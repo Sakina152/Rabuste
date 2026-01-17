@@ -83,7 +83,7 @@ interface ArtPurchase {
     _id: string;
     title: string;
     artist: string;
-    image: string; // Changed from imageUrl to match backend
+    imageUrl: string; // Backend uses imageUrl, not image
     price: number;
   };
   purchasePrice: number;
@@ -807,7 +807,7 @@ const Profile = () => {
                               className="border border-white/10 rounded-xl overflow-hidden hover:shadow-lg transition-all"
                             >
                               <img
-                                src={purchase.art.image}
+                                src={purchase.art.imageUrl?.startsWith('http') ? purchase.art.imageUrl : `${API_URL}${purchase.art.imageUrl}`}
                                 alt={purchase.art.title}
                                 className="w-full h-40 object-cover"
                               />
