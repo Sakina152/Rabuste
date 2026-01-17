@@ -203,7 +203,7 @@ Rabuste/
 
 ### 1) Clone
 ```bash
-git clone <YOUR_REPO_URL>
+git clone https://github.com/Sakina152/Rabuste.git
 ```
 
 ### 2) Install Dependencies
