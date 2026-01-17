@@ -6,8 +6,8 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Pencil, Trash2, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Pencil, Trash2, Plus, ChevronLeft } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { getToken } from "@/utils/getToken";
 
@@ -104,16 +104,24 @@ export default function MenuManagement() {
     return (
         <div className="p-8 space-y-10">
             {/* Header */}
-            <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-display">Menu Management</h1>
-                <Button
-                    onClick={() =>
-                        navigate("/admin/dashboard/menu-management/new")
-                    }
+            <div>
+                <Link
+                    to="/admin/dashboard"
+                    className="flex items-center gap-1 text-sm text-muted-foreground hover:text-accent transition-colors mb-4 w-fit"
                 >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Item
-                </Button>
+                    <ChevronLeft size={16} /> Back to Dashboard
+                </Link>
+                <div className="flex justify-between items-center">
+                    <h1 className="text-3xl font-display">Menu Management</h1>
+                    <Button
+                        onClick={() =>
+                            navigate("/admin/dashboard/menu-management/new")
+                        }
+                    >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Item
+                    </Button>
+                </div>
             </div>
 
             {/* Category Sections */}

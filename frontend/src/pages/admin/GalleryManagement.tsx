@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { getToken } from "@/utils/getToken";
+import { Link } from "react-router-dom";
 import {
+  ChevronLeft,
   DollarSign,
   CheckCircle,
   TrendingUp,
@@ -10,9 +15,6 @@ import {
   Trash2,
   Plus,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { getToken } from "@/utils/getToken";
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
@@ -158,6 +160,12 @@ export default function GalleryManagement() {
         className="flex items-center justify-between"
       >
         <div>
+          <Link
+            to="/admin/dashboard"
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-accent transition-colors mb-4 w-fit"
+          >
+            <ChevronLeft size={16} /> Back to Dashboard
+          </Link>
           <h1 className="font-display text-3xl font-semibold">
             Gallery Management
           </h1>

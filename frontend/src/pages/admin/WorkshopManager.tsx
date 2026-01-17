@@ -11,11 +11,13 @@ import {
   Palette,
   Sparkles,
   Search,
-  AlertCircle
+  AlertCircle,
+  ChevronLeft
 } from "lucide-react";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { getToken } from "@/utils/getToken";
+import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import WorkshopForm from "./WorkshopForm";
 import { Button } from "@/components/ui/button";
@@ -170,6 +172,12 @@ export default function WorkshopManager() {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-stone-800 pb-6">
         <div>
+          <Link
+            to="/admin/dashboard"
+            className="flex items-center gap-1 text-sm text-stone-500 hover:text-amber-500 transition-colors mb-4 w-fit"
+          >
+            <ChevronLeft size={16} /> Back to Dashboard
+          </Link>
           <h1 className="text-3xl font-display font-bold text-stone-100">Workshop Manager</h1>
           <p className="text-stone-400 mt-1">Create and manage your coffee experiences</p>
         </div>
