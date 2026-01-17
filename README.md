@@ -138,6 +138,42 @@ a cafe storefront + an event system + an art gallery + a payments layer + admin 
 
 ---
 
+## 🌐✨ Google Technologies (Used in This Project)
+
+<div align="center">
+
+<img alt="Firebase" src="https://img.shields.io/badge/Firebase-Auth%20%26%20Analytics-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" />
+<img alt="Google" src="https://img.shields.io/badge/Google%20Sign--In-OAuth-4285F4?style=for-the-badge&logo=google&logoColor=white" />
+<img alt="Firebase Admin" src="https://img.shields.io/badge/Firebase%20Admin-Token%20Verification-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" />
+<img alt="Gemini" src="https://img.shields.io/badge/Gemini-AI%20Barista-1A73E8?style=for-the-badge&logo=google&logoColor=white" />
+<img alt="Gmail" src="https://img.shields.io/badge/Gmail-Email%20Automation-EA4335?style=for-the-badge&logo=gmail&logoColor=white" />
+
+</div>
+
+- **[Firebase Authentication (Web SDK)]**
+  - Implemented in `frontend/src/firebase.ts` and `frontend/src/services/authService.ts`.
+  - Supports **email/password** auth and **Google Sign-In** via `GoogleAuthProvider`.
+
+- **[Firebase Admin (Server-side verification)]**
+  - Implemented in `backend/firebase.js` + enforced in `backend/middleware/authMiddleware.js`.
+  - The backend verifies Firebase ID tokens (`firebase-admin`) to secure protected APIs.
+
+- **[Firebase Analytics]**
+  - Initialized via `getAnalytics()` in `frontend/src/firebase.ts` to enable product analytics.
+
+- **[Google Gemini (AI Barista)]**
+  - Implemented with `@google/generative-ai` in `backend/controllers/aiController.js`.
+  - Exposed via `POST /api/ai/chat` to generate **mood-based drink recommendations**.
+
+- **[Gmail (Transactional emails via Nodemailer)]**
+  - Implemented in `backend/utils/emailSender.js` using Gmail as the transport.
+  - Used for art inquiries, workshop/event inquiries, franchise leads, and contact acknowledgements.
+
+- **[reCAPTCHA verifier (Phone auth support)]**
+  - The frontend exports `RecaptchaVerifier` and `signInWithPhoneNumber` from Firebase Auth (`frontend/src/firebase.ts`).
+
+---
+
 ## 🗂️ Project Structure
 
 ```text
