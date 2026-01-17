@@ -11,7 +11,12 @@ import {
   Coffee,
   Palette,
   Zap,
-  Loader2, // Added for loading spinner
+  Loader2,
+  Heart,
+  Wallet,
+  MapPin,
+  Award,
+  GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -396,71 +401,147 @@ const Franchise = () => {
         </div>
       </section>
 
-      {/* Requirements */}
-      <section className="section-padding bg-background">
-        <div className="container-custom">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+      {/* Requirements - Immersive Split Layout */}
+      <section className="bg-background overflow-hidden relative">
+        <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[700px]">
+
+          {/* Left Column: Content */}
+          <div className="p-8 md:p-16 lg:p-20 flex flex-col justify-center bg-background z-10">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <span className="text-accent text-sm tracking-[0.3em] uppercase font-body">
+              <span className="text-accent text-sm tracking-[0.3em] uppercase font-body font-bold mb-3 block">
                 Requirements
               </span>
-              <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mt-4 mb-6">
+              <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-6">
                 What We're Looking For
               </h2>
-              <p className="text-muted-foreground text-lg leading-relaxed mb-8">
+              <p className="text-muted-foreground text-lg leading-relaxed mb-10 max-w-lg">
                 We partner with passionate individuals who share our vision for
                 exceptional coffee and community experiences.
               </p>
 
-              <ul className="space-y-4">
+              <div className="space-y-6">
                 {[
-                  "Passion for coffee and customer experience",
-                  "Minimum investment capacity of ₹150K - ₹300K",
-                  "Suitable retail location (500-1000 sq ft)",
-                  "Commitment to brand standards and quality",
-                  "Entrepreneurial mindset and local market knowledge",
-                  "Willingness to complete our training program",
+                  {
+                    icon: Heart,
+                    text: "Passion for coffee and customer experience"
+                  },
+                  {
+                    icon: Wallet,
+                    text: "Minimum investment capacity of ₹150K - ₹300K"
+                  },
+                  {
+                    icon: MapPin,
+                    text: "Suitable retail location (500-1000 sq ft)"
+                  },
+                  {
+                    icon: Award,
+                    text: "Commitment to brand standards and quality"
+                  },
+                  {
+                    icon: Users, // Entrepreneurial mindset
+                    text: "Entrepreneurial mindset and local market knowledge"
+                  },
+                  {
+                    icon: GraduationCap,
+                    text: "Willingness to complete our training program"
+                  },
                 ].map((item, index) => (
-                  <motion.li
+                  <motion.div
                     key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
-                    className="flex items-start gap-3"
+                    className="flex items-center gap-4 group"
                   >
-                    <CheckCircle className="w-5 h-5 text-accent mt-1 flex-shrink-0" />
-                    <span className="text-muted-foreground">{item}</span>
-                  </motion.li>
+                    <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0 group-hover:bg-accent group-hover:text-black transition-colors duration-300">
+                      <item.icon className="w-6 h-6 text-accent group-hover:text-black transition-colors duration-300" />
+                    </div>
+                    <span className="text-stone-300 font-medium text-lg border-b border-transparent group-hover:border-accent/50 transition-colors pb-1">
+                      {item.text}
+                    </span>
+                  </motion.div>
                 ))}
-              </ul>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="relative"
-            >
-              <div className="aspect-square rounded-2xl bg-gradient-to-br from-coffee-medium to-espresso p-8 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="font-display text-6xl font-bold text-accent mb-4">
-                    ₹150K+
-                  </div>
-                  <p className="text-foreground text-lg">
-                    Initial Investment Range
-                  </p>
-                  <p className="text-muted-foreground text-sm mt-2">
-                    Including franchise fee, build-out, and initial inventory
-                  </p>
-                </div>
               </div>
             </motion.div>
           </div>
+
+          {/* Right Column: Visual Collage & Glass Card */}
+          <div className="relative h-[450px] lg:h-auto w-full overflow-hidden lg:overflow-visible mt-8 lg:mt-0">
+
+            {/* Image 1: Main Environment - Top Right */}
+            {/* Mobile: Dominant top-right, giving breath */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="absolute top-0 right-0 w-[85%] h-[60%] lg:w-[65%] lg:h-[65%] z-10"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=2047&auto=format&fit=crop"
+                alt="Rabuste Cafe Interior"
+                className="w-full h-full object-cover rounded-l-2xl lg:rounded-2xl shadow-xl"
+              />
+            </motion.div>
+
+            {/* Image 3: Meeting - Middle Left Floating */}
+            {/* Mobile: Smaller badge style on left edge */}
+            <motion.div
+              initial={{ opacity: 0, y: -30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, duration: 0.8 }}
+              className="absolute top-[35%] left-0 w-[35%] aspect-square lg:top-12 lg:left-12 lg:w-[35%] lg:aspect-[4/3] z-20"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1932&auto=format&fit=crop"
+                alt="Partnership Meeting"
+                className="w-full h-full object-cover rounded-r-2xl lg:rounded-2xl shadow-2xl border-2 lg:border-4 border-background"
+              />
+            </motion.div>
+
+            {/* Image 2: Barista - Bottom Left */}
+            {/* Mobile: Anchored bottom-left, vertical */}
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4, duration: 0.8 }}
+              className="absolute bottom-0 left-[10%] w-[40%] h-[40%] lg:bottom-12 lg:left-0 lg:w-[45%] lg:h-[55%] z-30"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=2070&auto=format&fit=crop"
+                alt="Barista Craft"
+                className="w-full h-full object-cover rounded-t-2xl lg:rounded-2xl shadow-2xl border-2 lg:border-4 border-background"
+              />
+            </motion.div>
+
+            {/* Floating Glass Card - Bottom Right */}
+            {/* Mobile: Compact, aligned right */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.6, type: "spring", stiffness: 100 }}
+              className="absolute bottom-4 right-4 z-40 bg-black/60 lg:bg-black/40 backdrop-blur-md border border-white/10 p-4 lg:p-8 rounded-2xl shadow-2xl w-[50%] lg:w-auto lg:max-w-xs text-right"
+            >
+              <span className="text-accent/80 text-[10px] lg:text-xs font-bold tracking-widest uppercase mb-1 block">
+                Investment
+              </span>
+              <div className="font-display text-2xl lg:text-5xl font-bold text-white mb-1 lg:mb-2 drop-shadow-lg">
+                ₹150K<span className="text-accent">+</span>
+              </div>
+              <p className="text-white/80 text-[10px] lg:text-xs leading-relaxed hidden lg:block">
+                Complete franchise setup including equipment & inventory.
+              </p>
+            </motion.div>
+          </div>
+
         </div>
       </section>
 
