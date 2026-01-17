@@ -582,32 +582,53 @@ END:VCALENDAR`;
                         </p>
                         {getWorkshopsForDate(selectedDate).map((workshop) => {
                           const CategoryIcon = getCategoryIcon(workshop.type);
+                          
+                          // Determine image based on type (matching List View)
+                          let imageUrl = "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=800"; // Default coffee
+                          if (workshop.type === "art") imageUrl = "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=800";
+                          if (workshop.type === "community") imageUrl = "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&q=80&w=800";
+                          if (workshop.type === "special") imageUrl = "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=800";
+
                           return (
                             <motion.div
                               key={workshop._id}
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
-                              className="group relative bg-[#1A1614]/40 border border-[#3C2A21] rounded-xl p-6 hover:bg-[#2C2420]/60 transition-colors duration-300"
+                              className="group flex flex-row relative bg-[#1A1614]/40 border border-[#3C2A21] rounded-xl overflow-hidden hover:bg-[#2C2420]/60 transition-colors duration-300 h-40"
                             >
-                              <div className="flex justify-between items-center mb-2">
-                                <h4 className="font-serif text-2xl text-[#E8DCC4]">
-                                  {workshop.title}
-                                </h4>
-                                <span className="text-[#BC653B] font-mono text-sm">
-                                  {workshop.startTime}
-                                </span>
+                              {/* Left Side Image */}
+                              <div className="w-40 relative overflow-hidden flex-shrink-0">
+                                <img 
+                                  src={imageUrl} 
+                                  alt={workshop.title} 
+                                  className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" 
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#1A1614]/20 to-[#1A1614]/90" />
                               </div>
-                              <p className="text-[#9A8B7D] mb-4 text-sm font-light">
-                                {workshop.description}
-                              </p>
-                              <Button
-                                variant="link"
-                                className="text-[#BC653B] p-0 h-auto font-sans tracking-wide text-xs uppercase hover:text-white"
-                                onClick={() => setSelectedWorkshop(workshop)}
-                                disabled={workshop.availableSeats === 0}
-                              >
-                                Reserve Spot →
-                              </Button>
+
+                              <div className="p-5 flex flex-col justify-center flex-grow pl-2">
+                                <div className="flex justify-between items-start mb-1">
+                                    <h4 className="font-serif text-2xl text-[#E8DCC4] group-hover:text-white transition-colors leading-none">
+                                    {workshop.title}
+                                    </h4>
+                                     <span className="text-[#BC653B] font-mono text-xs font-bold bg-[#1A1614]/80 px-2 py-0.5 rounded border border-[#BC653B]/20">
+                                        {workshop.startTime}
+                                     </span>
+                                </div>
+                                <p className="text-[#9A8B7D] mb-3 text-sm font-light line-clamp-2 leading-snug">
+                                    {workshop.description}
+                                </p>
+                                <div className="mt-auto">
+                                    <Button
+                                        variant="link"
+                                        className="text-[#BC653B] p-0 h-auto font-sans tracking-wide text-xs uppercase hover:text-white"
+                                        onClick={() => setSelectedWorkshop(workshop)}
+                                        disabled={workshop.availableSeats === 0}
+                                        >
+                                        Reserve Spot →
+                                    </Button>
+                                </div>
+                              </div>
                             </motion.div>
                           );
                         })}
