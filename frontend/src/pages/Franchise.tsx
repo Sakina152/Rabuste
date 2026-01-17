@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form"; // Added for form handling
 import axios from "axios"; // Added for API calls
 import { motion } from "framer-motion";
@@ -32,6 +32,70 @@ interface FranchiseFormData {
   budget: string; // Changed from 'investment' to match Backend
   experience: string; // Changed from 'message' to match Backend
 }
+
+// Benefit type for carousel
+interface Benefit {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+}
+
+// Mobile Auto-Rotating Carousel Component
+const MobileBenefitsCarousel = ({ benefits }: { benefits: Benefit[] }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % benefits.length);
+    }, 1600); // Rotate every 1.6 seconds
+
+    return () => clearInterval(interval);
+  }, [benefits.length]);
+
+  return (
+    <div className="md:hidden relative overflow-hidden">
+      {/* Cards Container */}
+      <div
+        className="flex transition-transform duration-700 ease-in-out"
+        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+      >
+        {benefits.map((benefit) => (
+          <div
+            key={benefit.title}
+            className="w-full flex-shrink-0 px-2"
+          >
+            <div className="p-6 rounded-2xl bg-card border border-border">
+              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4">
+                <benefit.icon className="w-6 h-6 text-accent" />
+              </div>
+              <h3 className="font-display text-lg font-semibold text-foreground mb-2">
+                {benefit.title}
+              </h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                {benefit.description}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Dot Indicators */}
+      <div className="flex justify-center gap-2 mt-6">
+        {benefits.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentIndex(index)}
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentIndex
+              ? "bg-accent w-6"
+              : "bg-muted-foreground/30"
+              }`}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const Franchise = () => {
   const { toast } = useToast();
@@ -140,16 +204,16 @@ const Franchise = () => {
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-32 overflow-hidden">
-        {/* Background Image with Zoom Effect */}
+        {/* Background Image */}
         <div className="absolute inset-0">
           <div
-            className="absolute inset-0 bg-cover bg-center scale-110"
+            className="absolute inset-0 bg-cover bg-center opacity-60"
             style={{
-              backgroundImage: `url('https://res.cloudinary.com/dnk1a58sg/image/upload/v1768626512/franchise-hero_j9ksk9.jpg')`,
+              backgroundImage: `url('https://res.cloudinary.com/dnk1a58sg/image/upload/v1768628528/Gemini_Generated_Image_2d7pmd2d7pmd2d7p_g5ve4x.png')`,
             }}
           />
           {/* Dark overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-coffee-dark/85 via-coffee-dark/70 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-coffee-dark/70 via-coffee-dark/50 to-background" />
         </div>
 
         {/* Animated circles overlay */}
@@ -256,7 +320,11 @@ const Franchise = () => {
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* Mobile Auto-Rotating Carousel */}
+          <MobileBenefitsCarousel benefits={benefits} />
+
+          {/* Desktop Grid - Hidden on mobile */}
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {benefits.map((benefit, index) => (
               <motion.div
                 key={benefit.title}
