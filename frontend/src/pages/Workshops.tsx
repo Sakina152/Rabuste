@@ -618,72 +618,89 @@ END:VCALENDAR`;
               </div>
             </div>
           ) : (
-            /* List View */
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            /* List View - Premium Card Grid */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 max-w-7xl mx-auto">
               {filteredWorkshops.map((workshop, index) => {
-                const CategoryIcon = getCategoryIcon(workshop.type);
+                // Determine image based on type
+                let imageUrl = "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=800"; // Default coffee
+                if (workshop.type === "art") imageUrl = "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=800";
+                if (workshop.type === "community") imageUrl = "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&q=80&w=800";
+                if (workshop.type === "special") imageUrl = "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=800";
+
                 return (
                   <motion.div
                     key={workshop._id}
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    className="group rounded-2xl bg-card/40 backdrop-blur-md border border-border/40 hover:border-accent/50 transition-all duration-500 overflow-hidden shadow-lg"
+                    transition={{ delay: index * 0.1, duration: 0.5 }}
+                    className="group flex flex-col bg-[#1E1C1A]/90 backdrop-blur-sm border border-[#5C4033]/40 rounded-[32px] overflow-hidden shadow-lg hover:shadow-2xl shadow-black/20 hover:border-[#BC653B]/50 transition-all duration-500"
                   >
-                    <div className="p-6 pb-4">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className={`p-3 rounded-xl ${getCategoryColor(workshop.type)}`}>
-                          <CategoryIcon className="w-6 h-6" />
+                    {/* Image Thumbnail */}
+                    <div className="px-5 pt-5">
+                        <div className="relative h-48 w-full overflow-hidden rounded-2xl">
+                            <img 
+                                src={imageUrl} 
+                                alt={workshop.title} 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out opacity-90 group-hover:opacity-100" 
+                            />
+                             {/* Top Right Price Tag - Floating on Image */}
+                             <div className="absolute top-3 right-3 bg-[#1A1614]/90 backdrop-blur-md px-4 py-1.5 rounded-full border border-[#BC653B]/30">
+                                <span className="text-[#BC653B] font-serif font-bold tracking-wide">
+                                    {workshop.price === 0 ? "Free" : `₹${workshop.price}`}
+                                </span>
+                            </div>
                         </div>
-                        <span className="font-display text-2xl font-bold text-accent">
-                          {workshop.price === 0 ? "Free" : `₹${workshop.price}`}
-                        </span>
-                      </div>
-
-                      <h3 className="font-display text-xl font-semibold text-foreground mb-2 group-hover:text-accent transition-colors">
-                        {workshop.title}
-                      </h3>
-                      <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
-                        {workshop.description}
-                      </p>
                     </div>
 
-                    <div className="px-6 py-4 border-t border-border bg-coffee-dark/50">
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                          <CalendarIcon size={14} className="text-accent" />
-                          <span>{new Date(workshop.date).toLocaleDateString()}</span>
+                    <div className="p-6 flex flex-col flex-grow">
+                      {/* Header */}
+                      <div className="mb-4">
+                        <h3 className="font-serif text-2xl text-[#F2EFE9] mb-3 leading-tight group-hover:text-[#BC653B] transition-colors duration-300">
+                          {workshop.title}
+                        </h3>
+                        <p className="text-[#9A8B7D] text-sm font-sans font-light leading-relaxed line-clamp-2">
+                          {workshop.description}
+                        </p>
+                      </div>
+
+                      {/* Seats Progress Bar - Dynamic */}
+                      <div className="mb-6">
+                        <div className="flex justify-between items-center text-xs mb-1.5 font-medium tracking-wide">
+                            <span className="text-[#8C837D]">Capacity</span>
+                            <span className="text-[#BC653B]">{workshop.currentParticipants} / {workshop.maxParticipants} Booked</span>
                         </div>
-                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                          <Clock size={14} className="text-accent" />
+                        <div className="w-full h-1.5 bg-[#2C2420] rounded-full overflow-hidden">
+                            <div 
+                                className="h-full bg-[#BC653B] rounded-full transition-all duration-700 ease-out"
+                                style={{ width: `${Math.min(((workshop.currentParticipants || 0) / workshop.maxParticipants) * 100, 100)}%` }}
+                            />
+                        </div>
+                      </div>
+
+                      {/* Metadata Row */}
+                      <div className="grid grid-cols-2 gap-y-3 gap-x-4 mb-8 mt-auto pt-4 border-t border-white/5">
+                        <div className="flex items-center gap-2.5 text-[#8C837D] text-xs font-medium uppercase tracking-wider">
+                          <CalendarIcon className="w-3.5 h-3.5 text-[#BC653B]" />
+                          <span>{new Date(workshop.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                        </div>
+                        <div className="flex items-center gap-2.5 text-[#8C837D] text-xs font-medium uppercase tracking-wider">
+                          <Clock className="w-3.5 h-3.5 text-[#BC653B]" />
                           <span>{workshop.startTime}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                          <Sparkles size={14} className="text-accent" />
-                          <span>{workshop.duration} mins</span>
+                        <div className="flex items-center gap-2.5 text-[#8C837D] text-xs font-medium uppercase tracking-wider">
+                          <Sparkles className="w-3.5 h-3.5 text-[#BC653B]" />
+                          <span>{workshop.duration}m</span>
                         </div>
-                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                          <Users size={14} className="text-accent" />
-                          <span>{workshop.availableSeats} seats left</span>
-                        </div>
-                      </div>
-
-                      <div className="mb-4">
-                        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-accent rounded-full transition-all"
-                            style={{
-                              width: `${(workshop.currentParticipants / workshop.maxParticipants) * 100}%`,
-                            }}
-                          />
+                        <div className="flex items-center gap-2.5 text-[#8C837D] text-xs font-medium uppercase tracking-wider">
+                          <Users className="w-3.5 h-3.5 text-[#BC653B]" />
+                          <span>{workshop.availableSeats} Left</span>
                         </div>
                       </div>
 
+                      {/* Action Button */}
                       <Button
-                        variant="hero"
-                        size="default"
-                        className="w-full"
+                        className="w-full bg-[#BC653B] hover:bg-[#A05532] text-white rounded-full h-12 text-sm font-medium tracking-wide shadow-lg shadow-[#BC653B]/10 transition-all duration-300 transform active:scale-[0.98]"
                         onClick={() => setSelectedWorkshop(workshop)}
                         disabled={workshop.availableSeats === 0}
                       >
