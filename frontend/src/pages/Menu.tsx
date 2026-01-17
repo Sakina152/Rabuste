@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Coffee, Snowflake, UtensilsCrossed, Clock, Sparkles, ShoppingBag } from "lucide-react";
+import { Coffee, Snowflake, UtensilsCrossed, Clock, Sparkles, ShoppingBag, Search, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button"; // Import Button
@@ -206,12 +206,27 @@ const Menu = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [activeCategory, setActiveCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
   const { addToCart } = useCart();
 
   const categories = ["All", ...menuSections.map((s) => s.title)];
-  const filteredSections = activeCategory === "All"
+
+  // Filter by category first
+  const categorizedSections = activeCategory === "All"
     ? menuSections
     : menuSections.filter((s) => s.title === activeCategory);
+
+  // Then filter by search query (name only)
+  const filteredSections = searchQuery.trim() === ""
+    ? categorizedSections
+    : categorizedSections.map(section => ({
+      ...section,
+      items: section.items.filter(item =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    })).filter(section => section.items.length > 0);
+
+  const totalResults = filteredSections.reduce((sum, section) => sum + section.items.length, 0);
 
   const handleAddToCartFromModal = () => {
     if (!selectedItem) return;
@@ -377,25 +392,82 @@ const Menu = () => {
       {/* Menu Sections */}
       <section className="px-6 pb-24">
         <div className="container-custom max-w-5xl">
-          {/* Category Filter */}
-          {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-3 mb-10">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant="ghost"
-                onClick={() => setActiveCategory(category)}
-                className={cn(
-                  "rounded-full px-6 py-2 h-auto text-base transition-all duration-300",
-                  activeCategory === category
-                    ? "bg-accent text-white shadow-md hover:bg-accent/90 hover:text-white"
-                    : "bg-accent/5 text-muted-foreground hover:bg-accent/10 hover:text-accent border border-transparent hover:border-accent/20"
-                )}
-              >
-                {category}
-              </Button>
-            ))}
+          {/* Search Bar */}
+          <div className="mb-6">
+            <div className="relative max-w-2xl mx-auto">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search for an item"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-12 py-3 rounded-full bg-card/50 border border-border/30 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-accent/10 rounded-full transition-colors"
+                >
+                  <X className="w-4 h-4 text-muted-foreground hover:text-accent" />
+                </button>
+              )}
+            </div>
           </div>
+          {/* Category Filter - Two-Row Horizontal Scroll */}
+          <div className="relative mb-10 -mx-6 px-6 md:mx-0 md:px-0">
+            <div
+              className="overflow-x-auto scrollbar-hide pb-2"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
+            >
+              <div
+                className="grid auto-cols-max gap-3 md:flex md:flex-wrap md:justify-center"
+                style={{
+                  gridAutoFlow: 'column',
+                  gridTemplateRows: 'repeat(2, minmax(0, 1fr))',
+                  gridTemplateColumns: 'none',
+                }}
+              >
+                {categories.map((category) => (
+                  <Button
+                    key={category}
+                    variant="ghost"
+                    onClick={() => setActiveCategory(category)}
+                    className={cn(
+                      "rounded-full px-6 py-2 h-auto text-base transition-all duration-300 whitespace-nowrap",
+                      activeCategory === category
+                        ? "bg-accent text-white shadow-md hover:bg-accent/90 hover:text-white"
+                        : "bg-accent/5 text-muted-foreground hover:bg-accent/10 hover:text-accent border border-transparent hover:border-accent/20"
+                    )}
+                  >
+                    {category}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            {/* Scroll Indicator - Only visible on mobile */}
+            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-background to-transparent pointer-events-none md:hidden" />
+          </div>
+
+          {/* No Results Message */}
+          {searchQuery && totalResults === 0 && (
+            <div className="text-center py-20">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-4">
+                <Search className="w-8 h-8 text-accent/50" />
+              </div>
+              <h3 className="text-xl font-display text-foreground mb-2">No results found</h3>
+              <p className="text-muted-foreground mb-6">We couldn't find any items matching "{searchQuery}"</p>
+              <Button
+                onClick={() => setSearchQuery("")}
+                variant="outline"
+                className="border-accent/30 text-accent hover:bg-accent/10"
+              >
+                Clear Search
+              </Button>
+            </div>
+          )}
 
           {filteredSections.map((section, sectionIndex) => (
             <MenuSectionBlock
