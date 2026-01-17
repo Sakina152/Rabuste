@@ -15,6 +15,33 @@ import frappeImg from "@/assets/menu/robusta-frappe.jpg";
 import cappuccinoImg from "@/assets/menu/robusta-cappuccino.jpg";
 import icedAmericanoImg from "@/assets/menu/robusta-iced-americano.jpg";
 
+const FloatingBeansBackground = () => {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      {/* Background Pattern replicated from FloatingFeatures */}
+      <motion.div
+        className="absolute inset-0 opacity-[0.05]"
+        animate={{
+          backgroundPosition: ["0px 0px", "60px 60px"]
+        }}
+        transition={{
+          duration: 4,
+          ease: "linear",
+          repeat: Infinity
+        }}
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c2.2 0 3.5 2 2 4s-3 3-3 5c0 1.5 1.5 2 3 2v2c-2.5 0-4.5-1.5-4.5-4s3-3 3-5c0-1.5-1.5-2-3-2V5z' fill='%23ffffff' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+          backgroundSize: '60px 60px'
+        }}
+      />
+      {/* Soft Overlays for Depth and Transitions */}
+      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#09090b] to-transparent z-10" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-coffee-dark opacity-90" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_var(--tw-gradient-stops))] from-accent/5 via-transparent to-transparent" />
+    </div>
+  );
+};
+
 const Index = () => {
   const [showIntro, setShowIntro] = useState(() => {
     return !localStorage.getItem('introAnimationSeen');
@@ -121,7 +148,8 @@ const Index = () => {
         </section>
 
         {/* 5. Visit Us Section (Map Restored) */}
-        <section className="section-padding bg-coffee-dark relative">
+        <section className="section-padding bg-coffee-dark relative overflow-hidden">
+          <FloatingBeansBackground />
           <div className="container-custom grid lg:grid-cols-2 gap-12 items-start relative z-10">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
