@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Filter,
 } from "lucide-react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -312,82 +313,45 @@ END:VCALENDAR`;
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
-        {/* Background with gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-coffee-dark via-espresso to-coffee-medium">
-
-          {/* Simple Pour-over illustration - Right Side (static SVG, no heavy animations) */}
-          <div className="absolute right-10 md:right-20 top-1/2 -translate-y-1/2 opacity-15 md:opacity-20 hidden md:block">
-            <svg width="250" height="350" viewBox="0 0 250 350" fill="none" className="text-cream">
-              {/* Pour-over stand */}
-              <rect x="110" y="40" width="30" height="180" rx="4" fill="currentColor" />
-              {/* Pour-over dripper */}
-              <path d="M80 80 L170 80 L145 150 L105 150 Z" fill="currentColor" />
-              {/* Coffee carafe */}
-              <path d="M90 170 L90 280 Q90 300 110 300 L140 300 Q160 300 160 280 L160 170" fill="currentColor" />
-              {/* Coffee drip - simple CSS pulse */}
-              <circle cx="125" cy="155" r="3" fill="hsl(var(--accent))" className="animate-pulse" />
-              {/* Base */}
-              <rect x="65" y="300" width="120" height="15" rx="4" fill="currentColor" />
-            </svg>
-          </div>
-
-          {/* Simple Coffee Cup - Left Side (static SVG) */}
-          <div className="absolute left-10 md:left-20 bottom-32 opacity-15 md:opacity-20 hidden md:block">
-            <svg width="120" height="120" viewBox="0 0 120 120" fill="none" className="text-cream">
-              <path d="M20 40 L20 90 Q20 105 35 105 L85 105 Q100 105 100 90 L100 40 Z" fill="currentColor" />
-              <path d="M100 50 Q125 50 125 75 Q125 100 100 90" stroke="currentColor" strokeWidth="10" fill="none" strokeLinecap="round" />
-            </svg>
-            {/* Simple steam using CSS animation */}
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 flex gap-2">
-              <div className="w-0.5 h-6 bg-cream/30 rounded-full animate-pulse" />
-              <div className="w-0.5 h-6 bg-cream/30 rounded-full animate-pulse" style={{ animationDelay: '0.3s' }} />
-              <div className="w-0.5 h-6 bg-cream/30 rounded-full animate-pulse" style={{ animationDelay: '0.6s' }} />
-            </div>
-          </div>
-
-          {/* Floating coffee beans - reduced count, simple float animation */}
-          {[0, 1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="absolute w-4 h-5 rounded-full bg-cream/15 float"
-              style={{
-                left: `${15 + i * 18}%`,
-                top: `${20 + (i % 3) * 25}%`,
-                animationDelay: `${i * 0.5}s`,
-                animationDuration: `${4 + i}s`,
-              }}
-            />
-          ))}
-
-          {/* Gradient overlay for depth */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
+        {/* Background Video */}
+        <div className="absolute inset-0 z-0">
+          <video 
+            src="/workshop_background_vid.mp4" 
+            autoPlay 
+            loop 
+            muted 
+            playsInline 
+            className="w-full h-full object-cover opacity-90" 
+          />
+          {/* Dark Overlay for readability */}
+          <div className="absolute inset-0 bg-black/60 z-10" />
         </div>
 
         {/* Content */}
-        <div className="container-custom relative z-10 px-6 text-center">
+        <div className="container-custom relative z-20 px-6 text-center lg:text-left">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="max-w-4xl mx-auto"
+            className="max-w-4xl mx-auto lg:mx-0"
           >
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-foreground leading-tight mb-8 italic"
+              className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-white leading-tight mb-8 italic drop-shadow-xl"
             >
               Learn, Create,
               <br />
-              <span className="text-gradient">Experience Coffee.</span>
+              <span className="text-[#BC653B]">Experience Coffee.</span>
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-muted-foreground text-lg md:text-xl leading-relaxed mb-10 max-w-2xl mx-auto"
+              className="text-white/90 text-lg md:text-xl leading-relaxed mb-10 max-w-2xl mx-auto lg:mx-0 drop-shadow-md"
             >
               Immerse yourself in the art of coffee making and creative expression
               through our curated workshops and hands-on experiences.
@@ -399,9 +363,8 @@ END:VCALENDAR`;
               transition={{ duration: 0.8, delay: 0.6 }}
             >
               <Button
-                variant="hero"
                 size="xl"
-                className="group shadow-2xl"
+                className="group shadow-2xl bg-[#BC653B] hover:bg-[#BC653B]/90 text-white border-none rounded-full px-8 py-6 text-lg"
                 onClick={() => {
                   document.querySelector('#workshops-section')?.scrollIntoView({ behavior: 'smooth' });
                 }}
@@ -414,7 +377,7 @@ END:VCALENDAR`;
         </div>
 
         {/* Curved wave divider */}
-        <div className="absolute bottom-0 left-0 right-0">
+        <div className="absolute bottom-0 left-0 right-0 z-20">
           <svg
             viewBox="0 0 1440 120"
             fill="none"
@@ -481,7 +444,7 @@ END:VCALENDAR`;
             /* Calendar View */
             <div className="grid lg:grid-cols-[1fr,1.5fr] gap-8">
               {/* Calendar */}
-              <div className="bg-card border border-border rounded-2xl p-6">
+              <div className="bg-card/30 backdrop-blur-lg border border-white/10 rounded-2xl p-6 shadow-xl">
                 <div className="mb-6">
                   <h3 className="text-accent text-sm tracking-[0.3em] uppercase font-body mb-2">
                     Select Date
@@ -584,7 +547,7 @@ END:VCALENDAR`;
                           key={workshop._id}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="bg-card border border-border rounded-2xl p-6 hover:border-accent/50 transition-all"
+                          className="bg-card/50 backdrop-blur-md border border-border/40 rounded-2xl p-6 hover:border-accent/50 transition-all shadow-lg"
                         >
                           <div className="flex items-start gap-4 mb-4">
                             <div className={`p-3 rounded-xl ${getCategoryColor(workshop.type)}`}>
@@ -664,7 +627,7 @@ END:VCALENDAR`;
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
-                    className="group rounded-2xl bg-card border border-border hover:border-accent/50 transition-all duration-500 overflow-hidden"
+                    className="group rounded-2xl bg-card/40 backdrop-blur-md border border-border/40 hover:border-accent/50 transition-all duration-500 overflow-hidden shadow-lg"
                   >
                     <div className="p-6 pb-4">
                       <div className="flex items-start justify-between mb-4">
