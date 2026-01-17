@@ -113,7 +113,13 @@ export default function AiBaristaBot() {
                                                 {/* Product Image */}
                                                 <div className="w-12 h-12 bg-stone-800 rounded-lg overflow-hidden flex-shrink-0">
                                                     {msg.product.image ? (
-                                                        <img src={msg.product.image} alt={msg.product.name} className="w-full h-full object-cover" />
+                                                        <img
+                                                            src={msg.product.image.startsWith('http')
+                                                                ? msg.product.image
+                                                                : `${API_URL}/${msg.product.image.replace(/\\/g, "/")}`}
+                                                            alt={msg.product.name}
+                                                            className="w-full h-full object-cover"
+                                                        />
                                                     ) : (
                                                         <Coffee className="w-full h-full p-2 text-stone-600" />
                                                     )}
@@ -130,11 +136,17 @@ export default function AiBaristaBot() {
                                             <button
                                                 onClick={() => {
                                                     if (msg.product) {
+                                                        const imageUrl = msg.product.image
+                                                            ? (msg.product.image.startsWith('http')
+                                                                ? msg.product.image
+                                                                : `${API_URL}/${msg.product.image.replace(/\\/g, "/")}`)
+                                                            : "";
+
                                                         addToCart({
                                                             id: msg.product._id,
                                                             name: msg.product.name,
                                                             price: msg.product.price,
-                                                            image: msg.product.image
+                                                            image: imageUrl
                                                         });
                                                         toast.success(`Added ${msg.product.name} to cart!`);
                                                     }
