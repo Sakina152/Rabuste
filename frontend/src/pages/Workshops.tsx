@@ -394,40 +394,73 @@ END:VCALENDAR`;
       </section>
 
       {/* Workshops Grid - Now Dynamic */}
-      <section id="workshops-section" className="section-padding bg-background -mt-1">
-        <div className="container-custom">
+      <section id="workshops-section" className="section-padding bg-[#110F0D] -mt-1 relative overflow-hidden min-h-screen">
+        {/* Subtle Coffee Bean Texture Background */}
+        <div className="absolute inset-0 pointer-events-none opacity-10">
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="coffee-beans" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+                        <path d="M50 50 C20 20 80 20 50 50 C20 80 80 80 50 50" fill="none" stroke="#BC653B" strokeWidth="2" opacity="0.1" transform="rotate(45 50 50)"/>
+                         {/* Large Abstract Bean Shapes */}
+                        <path d="M150 150 Q100 100 150 50 T150 150" fill="none" stroke="#BC653B" strokeWidth="150" opacity="0.05" strokeLinecap="round" />
+                    </pattern>
+                </defs>
+                 {/* Large blurry organic shapes for atmosphere */}
+                <circle cx="10%" cy="20%" r="400" fill="#3C2A21" filter="url(#blur1)" opacity="0.2"/>
+                 <circle cx="90%" cy="80%" r="500" fill="#4E3426" filter="url(#blur2)" opacity="0.15"/>
+                 
+                 {/* Coffee Bean Outlines - Decorative */}
+                 <g opacity="0.08" stroke="#BC653B" strokeWidth="2" fill="none">
+                    <path d="M -100 300 Q 100 100 300 300 T 700 300" transform="scale(1.5) rotate(-15)" />
+                    <ellipse cx="80%" cy="30%" rx="150" ry="250" transform="rotate(30)" />
+                    <path d="M 800 100 C 700 300 900 300 800 500" strokeWidth="4" />
+                 </g>
+
+                <defs>
+                    <filter id="blur1" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur in="SourceGraphic" stdDeviation="120" />
+                    </filter>
+                    <filter id="blur2" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur in="SourceGraphic" stdDeviation="150" />
+                    </filter>
+                </defs>
+             </svg>
+        </div>
+
+        <div className="container-custom relative z-10 pt-10">
           {/* View Toggle and Filter */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-            <div className="flex gap-2 bg-card border border-border rounded-lg p-1">
-              <button
-                onClick={() => setViewMode("list")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${viewMode === "list"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-                  }`}
-              >
-                <List size={16} />
-                <span className="text-sm font-medium uppercase tracking-wide">List View</span>
-              </button>
-              <button
-                onClick={() => setViewMode("calendar")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${viewMode === "calendar"
-                  ? "bg-accent text-background shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-                  }`}
-              >
-                <CalendarIcon size={16} />
-                <span className="text-sm font-medium uppercase tracking-wide">Calendar View</span>
-              </button>
+          <div className="flex flex-col items-center gap-8 mb-20 relative">
+            
+            {/* Centered Pill Toggle */}
+            <div className="flex bg-[#12100E] p-1.5 rounded-full border border-white/5 shadow-2xl">
+                    <button
+                        onClick={() => setViewMode("list")}
+                        className={`px-8 py-2.5 rounded-full text-sm font-medium tracking-wide transition-all duration-300 ${viewMode === "list"
+                        ? "bg-[#BC653B] text-[#1A1614] shadow-lg shadow-[#BC653B]/20"
+                        : "text-[#9A8B7D] hover:text-[#E8DCC4]"
+                        }`}
+                    >
+                        LIST VIEW
+                    </button>
+                    <button
+                        onClick={() => setViewMode("calendar")}
+                        className={`px-8 py-2.5 rounded-full text-sm font-medium tracking-wide transition-all duration-300 ${viewMode === "calendar"
+                        ? "bg-[#BC653B] text-[#1A1614] shadow-lg shadow-[#BC653B]/20"
+                        : "text-[#9A8B7D] hover:text-[#E8DCC4]"
+                        }`}
+                    >
+                        CALENDAR VIEW
+                    </button>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Filter size={16} className="text-accent" />
+            {/* Filter - Pushed to Absolute Top Right */}
+            <div className="md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2 flex items-center gap-3">
+              <Filter size={16} className="text-[#6D5A4B]" />
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[180px] bg-card border-border">
+                <SelectTrigger className="w-[160px] bg-transparent border-none text-[#9A8B7D] hover:text-[#E8DCC4] text-right font-medium">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-[#1A1614] border border-[#3C2A21] text-[#E8DCC4]">
                   <SelectItem value="all">All Categories</SelectItem>
                   <SelectItem value="coffee">Coffee</SelectItem>
                   <SelectItem value="art">Art</SelectItem>
@@ -439,179 +472,148 @@ END:VCALENDAR`;
           </div>
 
           {loading ? (
-            <div className="text-center text-muted-foreground">Loading experiences...</div>
+            <div className="text-center text-[#A8A29E] py-20">Loading experiences...</div>
           ) : viewMode === "calendar" ? (
             /* Calendar View */
-            <div className="grid lg:grid-cols-[1fr,1.5fr] gap-8">
-              {/* Calendar */}
-              <div className="bg-card/30 backdrop-blur-lg border border-white/10 rounded-2xl p-6 shadow-xl">
-                <div className="mb-6">
-                  <h3 className="text-accent text-sm tracking-[0.3em] uppercase font-body mb-2">
-                    Select Date
-                  </h3>
-                  <div className="flex items-center justify-between mb-4">
+            <div className="grid lg:grid-cols-[400px,1fr] gap-16 lg:gap-32 items-center justify-center max-w-6xl mx-auto"> 
+              {/* Left Side: Minimal Dark Calendar Card */}
+              <div className="bg-[#12100E] border border-[#3C2A21]/40 rounded-3xl p-8 shadow-2xl relative shadow-black/50">
+                
+                <div className="relative z-10">
+                    <div className="mb-8 flex items-center justify-between px-2">
                     <button
-                      onClick={() => changeMonth(-1)}
-                      className="p-2 hover:bg-accent/10 rounded-lg transition-colors"
+                        onClick={() => changeMonth(-1)}
+                        className="p-2 text-[#6D5A4B] hover:text-[#E8DCC4] transition-colors"
                     >
-                      <ChevronLeft className="w-5 h-5 text-foreground" />
+                        <ChevronLeft className="w-5 h-5" />
                     </button>
-                    <h4 className="font-display text-xl font-bold text-foreground">
-                      {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                    </h4>
+                    
+                    <h3 className="font-sans font-medium text-lg text-[#E8DCC4] tracking-wide">
+                        {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    </h3>
+                    
                     <button
-                      onClick={() => changeMonth(1)}
-                      className="p-2 hover:bg-accent/10 rounded-lg transition-colors"
+                        onClick={() => changeMonth(1)}
+                        className="p-2 text-[#6D5A4B] hover:text-[#E8DCC4] transition-colors"
                     >
-                      <ChevronRight className="w-5 h-5 text-foreground" />
+                        <ChevronRight className="w-5 h-5" />
                     </button>
-                  </div>
-                </div>
-
-                {/* Calendar Grid */}
-                <div className="grid grid-cols-7 gap-1">
-                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-                    <div key={i} className="text-center text-sm font-medium text-muted-foreground py-2">
-                      {day}
                     </div>
-                  ))}
 
-                  {(() => {
-                    const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(selectedDate);
-                    const days = [];
+                    {/* Calendar Grid */}
+                    <div className="grid grid-cols-7 gap-y-4 gap-x-2 mb-4">
+                    {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+                        <div key={i} className="text-center text-xs font-sans text-[#5C4D44] py-1">
+                        {day}
+                        </div>
+                    ))}
 
-                    // Empty cells before first day
-                    for (let i = 0; i < startingDayOfWeek; i++) {
-                      days.push(<div key={`empty-${i}`} className="aspect-square" />);
-                    }
+                    {(() => {
+                        const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(selectedDate);
+                        const days = [];
 
-                    // Days of month
-                    for (let day = 1; day <= daysInMonth; day++) {
-                      const date = new Date(year, month, day);
-                      const hasWorkshop = hasWorkshopOnDate(date);
-                      const isSelected = date.toDateString() === selectedDate.toDateString();
-                      const isToday = date.toDateString() === new Date().toDateString();
+                        // Empty cells
+                        for (let i = 0; i < startingDayOfWeek; i++) {
+                        days.push(<div key={`empty-${i}`} className="aspect-square" />);
+                        }
 
-                      days.push(
-                        <button
-                          key={day}
-                          onClick={() => setSelectedDate(date)}
-                          className={`aspect-square flex items-center justify-center rounded-lg text-sm font-medium transition-all relative
-                            ${isSelected ? 'bg-accent text-background' : 'text-foreground hover:bg-accent/10'}
-                            ${isToday && !isSelected ? 'ring-2 ring-accent/50' : ''}
-                          `}
-                        >
-                          {day}
-                          {hasWorkshop && (
-                            <div className={`absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full ${isSelected ? 'bg-background' : 'bg-accent'}`} />
-                          )}
-                        </button>
-                      );
-                    }
+                        // Days
+                        for (let day = 1; day <= daysInMonth; day++) {
+                        const date = new Date(year, month, day);
+                        const hasWorkshop = hasWorkshopOnDate(date);
+                        const isSelected = date.toDateString() === selectedDate.toDateString();
+                        const isToday = date.toDateString() === new Date().toDateString();
 
-                    return days;
-                  })()}
-                </div>
+                        days.push(
+                            <button
+                            key={day}
+                            onClick={() => setSelectedDate(date)}
+                            className={`w-10 h-10 mx-auto flex flex-col items-center justify-center rounded-full text-sm transition-all duration-300 relative group
+                                ${isSelected 
+                                ? 'text-white shadow-[0_0_20px_rgba(188,101,59,0.4)]' 
+                                : 'text-[#9A8B7D] hover:text-white'
+                                }
+                                ${isToday && !isSelected ? 'border border-[#BC653B]' : ''}
+                            `}
+                            >
+                            {/* Selected Background Gradient glow */}
+                            {isSelected && (
+                                <div className="absolute inset-0 rounded-full bg-[#BC653B] opacity-100 -z-10" />
+                            )}
+                            
+                            {day}
+                            
+                            {hasWorkshop && (
+                                <div className={`absolute -bottom-1 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-[#BC653B]'}`} />
+                            )}
+                            </button>
+                        );
+                        }
 
-                <div className="mt-6 flex items-center gap-4 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-accent"></div>
-                    <span>Has workshops</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full ring-2 ring-accent/50"></div>
-                    <span>Today</span>
-                  </div>
+                        return days;
+                    })()}
+                    </div>
+
+                    <div className="mt-8 flex items-center justify-center gap-4 text-[11px] text-[#6D5A4B]">
+                        <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#BC653B]"></div>
+                            <span>Has workshops</span>
+                        </div>
+                    </div>
                 </div>
               </div>
 
-              {/* Selected Date Workshops */}
-              <div>
-                <h3 className="font-display text-2xl font-bold text-foreground mb-1">
-                  {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                </h3>
-                <p className="text-muted-foreground text-sm mb-6">
-                  {getWorkshopsForDate(selectedDate).length} workshop{getWorkshopsForDate(selectedDate).length !== 1 ? 's' : ''} scheduled
-                </p>
+              {/* Right Side: Centered Minimal Info */}
+              <div className="flex flex-col justify-center items-center text-center">
+                <div className="max-w-xl">
+                    <h3 className="font-serif text-5xl md:text-6xl text-[#E8DCC4] mb-6 leading-tight">
+                    {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </h3>
 
-                <div className="space-y-4">
-                  {getWorkshopsForDate(selectedDate).length === 0 ? (
-                    <div className="text-center py-12 text-muted-foreground">
-                      No workshops scheduled for this date
+                    <div className="w-full flex justify-center">
+                    {getWorkshopsForDate(selectedDate).length === 0 ? (
+                        <p className="text-[#A8A29E] text-xl font-sans font-light">
+                        No workshops scheduled for <br/> this date
+                        </p>
+                    ) : (
+                        <div className="space-y-6 w-full text-left">
+                         <p className="text-[#BC653B] text-lg font-sans font-medium text-center mb-8">
+                            {getWorkshopsForDate(selectedDate).length} workshop{getWorkshopsForDate(selectedDate).length !== 1 ? 's' : ''} available
+                         </p>
+                        {getWorkshopsForDate(selectedDate).map((workshop) => {
+                        const CategoryIcon = getCategoryIcon(workshop.type);
+                        return (
+                            <motion.div
+                            key={workshop._id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="group relative bg-[#1A1614]/40 border border-[#3C2A21] rounded-xl p-6 hover:bg-[#2C2420]/60 transition-colors duration-300"
+                            >
+                                <div className="flex justify-between items-center mb-2">
+                                    <h4 className="font-serif text-2xl text-[#E8DCC4]">
+                                        {workshop.title}
+                                    </h4>
+                                    <span className="text-[#BC653B] font-mono text-sm">
+                                        {workshop.startTime}
+                                    </span>
+                                </div>
+                                <p className="text-[#9A8B7D] mb-4 text-sm font-light">
+                                    {workshop.description}
+                                </p>
+                                <Button
+                                    variant="link"
+                                    className="text-[#BC653B] p-0 h-auto font-sans tracking-wide text-xs uppercase hover:text-white"
+                                    onClick={() => setSelectedWorkshop(workshop)}
+                                    disabled={workshop.availableSeats === 0}
+                                    >
+                                    Reserve Spot →
+                                </Button>
+                            </motion.div>
+                        );
+                        })}
+                        </div>
+                    )}
                     </div>
-                  ) : (
-                    getWorkshopsForDate(selectedDate).map((workshop) => {
-                      const CategoryIcon = getCategoryIcon(workshop.type);
-                      return (
-                        <motion.div
-                          key={workshop._id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="bg-card/50 backdrop-blur-md border border-border/40 rounded-2xl p-6 hover:border-accent/50 transition-all shadow-lg"
-                        >
-                          <div className="flex items-start gap-4 mb-4">
-                            <div className={`p-3 rounded-xl ${getCategoryColor(workshop.type)}`}>
-                              <CategoryIcon className="w-5 h-5" />
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-start justify-between mb-2">
-                                <h4 className="font-display text-xl font-semibold text-foreground">
-                                  {workshop.title}
-                                </h4>
-                                <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide px-2 py-1 bg-accent/10 rounded">
-                                  {workshop.type}
-                                </span>
-                              </div>
-                              <p className="text-muted-foreground text-sm mb-4">
-                                {workshop.description}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-4 mb-4">
-                            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                              <CalendarIcon size={14} className="text-accent" />
-                              <span>{new Date(workshop.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                              <Clock size={14} className="text-accent" />
-                              <span>{workshop.startTime}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                              <MapPin size={14} className="text-accent" />
-                              <span>Surat</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                              <Users size={14} className="text-accent" />
-                              <span>Instructor: Sam</span>
-                            </div>
-                          </div>
-
-                          <div className="flex gap-3 pt-4 border-t border-border">
-                            <Button
-                              variant="subtle"
-                              size="default"
-                              className="flex-1"
-                              onClick={() => window.open(generateGoogleCalendarLink(workshop), '_blank')}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              Add to Calendar
-                            </Button>
-                            <Button
-                              variant="hero"
-                              size="default"
-                              className="flex-1"
-                              onClick={() => setSelectedWorkshop(workshop)}
-                              disabled={workshop.availableSeats === 0}
-                            >
-                              Book Now
-                              <ArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
-                          </div>
-                        </motion.div>
-                      );
-                    })
-                  )}
                 </div>
               </div>
             </div>
