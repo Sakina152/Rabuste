@@ -357,7 +357,7 @@ const About = () => {
                   playsInline
                   className="w-full h-full object-cover"
                 >
-                  <source src="/videos/Rabuste.mp4" type="video/mp4" />
+                  <source src="https://res.cloudinary.com/dnk1a58sg/video/upload/v1768626804/Rabuste_tk6bbp.mp4" type="video/mp4" />
                 </video>
 
                 {/* Play/Pause Button Overlay */}

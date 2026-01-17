@@ -139,7 +139,20 @@ const Franchise = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden bg-hero-gradient">
+      <section className="relative pt-32 pb-32 overflow-hidden">
+        {/* Background Image with Zoom Effect */}
+        <div className="absolute inset-0">
+          <div
+            className="absolute inset-0 bg-cover bg-center scale-110"
+            style={{
+              backgroundImage: `url('https://res.cloudinary.com/dnk1a58sg/image/upload/v1768626512/franchise-hero_j9ksk9.jpg')`,
+            }}
+          />
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-coffee-dark/85 via-coffee-dark/70 to-background" />
+        </div>
+
+        {/* Animated circles overlay */}
         <div className="absolute inset-0 overflow-hidden">
           {[...Array(5)].map((_, i) => (
             <motion.div
@@ -184,6 +197,45 @@ const Franchise = () => {
               scalable, profitable café concept.
             </p>
           </motion.div>
+        </div>
+
+        {/* Flowing Wave Transition */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg
+            viewBox="0 0 1440 120"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-auto"
+            preserveAspectRatio="none"
+          >
+            {/* Bottom wave layer */}
+            <path
+              d="M0,120 L0,80 Q180,40 360,60 T720,50 T1080,70 T1440,50 L1440,120 Z"
+              className="fill-background"
+            />
+            {/* Middle wave layer */}
+            <path
+              d="M0,120 L0,90 Q240,50 480,70 T960,55 T1440,75 L1440,120 Z"
+              className="fill-background/80"
+            />
+            {/* Top accent wave */}
+            <motion.path
+              d="M0,120 L0,100 Q360,70 720,90 T1440,80 L1440,120 Z"
+              className="fill-accent/10"
+              animate={{
+                d: [
+                  "M0,120 L0,100 Q360,70 720,90 T1440,80 L1440,120 Z",
+                  "M0,120 L0,95 Q360,80 720,85 T1440,90 L1440,120 Z",
+                  "M0,120 L0,100 Q360,70 720,90 T1440,80 L1440,120 Z",
+                ],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          </svg>
         </div>
       </section>
 
