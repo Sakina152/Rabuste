@@ -1,5 +1,5 @@
 import { useState, useRef, useLayoutEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Coffee, Target, Play, Pause } from "lucide-react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
@@ -117,6 +117,15 @@ const MobileTimelineCards = ({ timeline }: { timeline: TimelineItem[] }) => {
 const About = () => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const ctaRef = useRef(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: ctaRef,
+    offset: ["start end", "end start"]
+  });
+  
+  const yBg = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
+  const yText = useTransform(scrollYProgress, [0, 1], ["20%", "-20%"]);
 
   const toggleVideo = () => {
     if (videoRef.current) {
@@ -410,7 +419,7 @@ const About = () => {
       </section>
 
       {/* Philosophy Section */}
-      <section className="section-padding bg-coffee-dark relative overflow-hidden">
+      <section className="bg-coffee-dark relative overflow-hidden pt-8 pb-20 px-6 md:pt-16 md:pb-32 md:px-12">
         {/* Dual-Shroud Transition: Top Fade from Coffee-Dark */}
         <div className="absolute top-0 left-0 right-0 h-80 bg-gradient-to-b from-coffee-dark via-coffee-dark/60 to-transparent pointer-events-none z-10" />
         <div className="container-custom relative z-20">
@@ -492,7 +501,7 @@ const About = () => {
       </section>
 
       {/* Why Robusta Section */}
-      <section className="section-padding bg-coffee-dark relative overflow-hidden">
+      <section className="bg-coffee-dark relative overflow-hidden pt-8 pb-20 px-6 md:pt-20 md:pb-32 md:px-12">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -597,7 +606,7 @@ const About = () => {
                 <div className="absolute -inset-4 bg-gradient-to-br from-accent/20 via-transparent to-coffee-medium/30 blur-2xl" />
 
                 {/* Video container */}
-                <div className="relative aspect-[9/16] max-h-[450px] rounded-2xl overflow-hidden">
+                <div className="relative aspect-[9/16] max-h-[400px] rounded-2xl overflow-hidden">
                   <video
                     autoPlay
                     loop
@@ -623,36 +632,68 @@ const About = () => {
         <div className="absolute bottom-0 left-0 right-0 h-80 bg-gradient-to-b from-transparent via-transparent to-coffee-dark pointer-events-none z-10" />
       </section>
 
-      {/* CTA Section */}
-      <section className="section-padding bg-coffee-dark relative overflow-hidden">
-        {/* Dual-Shroud Transition: Top Fade from Coffee-Dark */}
-        <div className="absolute top-0 left-0 right-0 h-80 bg-gradient-to-b from-coffee-dark via-coffee-dark/60 to-transparent pointer-events-none z-10" />
-        <div className="container-custom text-center relative z-20">
+      {/* CTA Section - Parallax Effect */}
+      <section ref={ctaRef} className="relative overflow-hidden h-[90vh] flex items-center justify-center">
+         {/* Parallax Video Background Layer - Moves Slow */}
+         <motion.div 
+            style={{ y: yBg }}
+            className="absolute inset-0 z-0 h-[140%] -top-[20%]"
+         >
+            <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+            >
+                <source src="/coffee_workshop.mp4" type="video/mp4" />
+            </video>
+            {/* Dark Aesthetic Overlay */}
+            <div className="absolute inset-0 bg-[#1A1614]/70 backdrop-blur-[2px]" />
+            {/* Subtle Gradient for readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1A1614] via-transparent to-[#1A1614]" />
+        </motion.div>
+
+        {/* Floating Content Layer - Moves Fast */}
+        <motion.div 
+            style={{ y: yText }}
+            className="container-custom text-center relative z-20"
+        >
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="max-w-2xl mx-auto space-y-8"
+            className="max-w-3xl mx-auto space-y-10"
           >
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground">
-              Ready to Experience the Bold?
+            <h2 className="font-display text-5xl md:text-7xl font-bold text-[#E8DCC4] drop-shadow-2xl leading-tight">
+              Ready to <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BC653B] to-[#E8DCC4]">Experience the Bold?</span>
             </h2>
-            <p className="text-muted-foreground text-lg">
-              Visit our café, join a workshop, or explore partnership opportunities.
+            <p className="text-[#E8DCC4]/80 text-lg md:text-xl font-light tracking-wide max-w-xl mx-auto drop-shadow-md">
+              Step into a world where coffee meets creativity. Visit our café, join a workshop, or explore partnership opportunities.
             </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Button variant="hero" size="xl" asChild>
+            <div className="flex flex-wrap justify-center gap-6 pt-4">
+              <Button 
+                variant="hero" 
+                size="xl" 
+                asChild
+                className="bg-[#BC653B] hover:bg-[#A05532] text-white border-none shadow-[0_10px_40px_rgba(188,101,59,0.3)] hover:shadow-[0_10px_50px_rgba(188,101,59,0.5)] transition-all duration-300 scale-100 hover:scale-105"
+              >
                 <Link to="/workshops">
                   Join a Workshop
-                  <ArrowRight className="ml-2" />
+                  <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
               </Button>
-              <Button variant="accent" size="xl" asChild>
+              <Button 
+                variant="outline" 
+                size="xl" 
+                asChild
+                className="border-[#E8DCC4]/30 text-[#E8DCC4] hover:bg-[#E8DCC4]/10 hover:text-white backdrop-blur-md scale-100 hover:scale-105 transition-all duration-300"
+              >
                 <Link to="/gallery">Explore Art</Link>
               </Button>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       </section>
 
       <Footer />
