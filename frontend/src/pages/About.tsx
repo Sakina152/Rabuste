@@ -1,13 +1,118 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Coffee, Target, Play, Pause } from "lucide-react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import RobustaWheel from "@/components/RobustaWheel";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+
+// Register GSAP plugins
+gsap.registerPlugin(ScrollTrigger);
+
+// Timeline item type
+interface TimelineItem {
+  year: string;
+  title: string;
+  description: string;
+}
+
+// Mobile Card Shuffle Component
+const MobileTimelineCards = ({ timeline }: { timeline: TimelineItem[] }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement[]>([]);
+
+  useLayoutEffect(() => {
+    // Only run on mobile (< 1024px)
+    const mm = gsap.matchMedia();
+
+    mm.add("(max-width: 1023px)", () => {
+      const cards = cardsRef.current;
+      const container = containerRef.current;
+
+      if (!container || cards.length === 0) return;
+
+      // Set initial stacked state - cards stacked with interesting offset
+      gsap.set(cards, {
+        y: (i) => i * 12,
+        x: (i) => (i % 2 === 0 ? -8 : 8), // Alternating slight horizontal offset
+        scale: (i) => 1 - i * 0.03,
+        opacity: (i) => 1 - i * 0.15,
+        rotation: (i) => (i % 2 === 0 ? -2 : 2), // Slight alternating rotation
+        zIndex: (i) => timeline.length - i,
+      });
+
+      // Create timeline for card spread animation
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: container,
+          start: "top 60%", // Start when section enters view
+          end: "top -20%", // End when section has scrolled up
+          scrub: true, // Direct scroll-to-animation mapping
+        },
+      });
+
+      // Animate each card sequentially - one by one as you scroll
+      cards.forEach((card, i) => {
+        tl.to(
+          card,
+          {
+            y: i * 200,
+            x: 0,
+            scale: 1,
+            opacity: 1,
+            rotation: 0,
+            duration: 0.4,
+            ease: "power2.inOut",
+          },
+          i * 0.15 // Stagger - each card starts slightly after previous
+        );
+      });
+
+      return () => {
+        ScrollTrigger.getAll().forEach((st) => st.kill());
+      };
+    });
+
+    return () => mm.revert();
+  }, [timeline]);
+
+  return (
+    <div ref={containerRef} className="lg:hidden relative" style={{ minHeight: `${timeline.length * 200 + 120}px` }}>
+      <div className="relative px-4">
+        {timeline.map((item, index) => (
+          <div
+            key={item.year}
+            ref={(el) => {
+              if (el) cardsRef.current[index] = el;
+            }}
+            className="absolute left-0 right-0 mx-4 will-change-transform"
+            style={{ top: 0 }}
+          >
+            <div className="p-6 rounded-2xl bg-card border border-border shadow-lg backdrop-blur-sm">
+              {/* Year badge */}
+              <div className="inline-block px-3 py-1 rounded-full bg-accent/10 border border-accent/20 mb-3">
+                <span className="font-display text-xl font-bold text-accent">
+                  {item.year}
+                </span>
+              </div>
+              <h3 className="font-display text-xl font-semibold text-foreground mb-2">
+                {item.title}
+              </h3>
+              <p className="text-muted-foreground leading-relaxed text-sm">
+                {item.description}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const About = () => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(true);
@@ -252,11 +357,15 @@ const About = () => {
             </h2>
           </motion.div>
 
-          <div className="relative">
-            {/* Timeline Line */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border hidden lg:block" />
+          {/* Mobile Card Shuffle Animation */}
+          <MobileTimelineCards timeline={timeline} />
 
-            <div className="space-y-12 lg:space-y-0">
+          {/* Desktop Timeline - Hidden on mobile */}
+          <div className="relative hidden lg:block">
+            {/* Timeline Line */}
+            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border" />
+
+            <div className="space-y-0">
               {timeline.map((item, index) => (
                 <motion.div
                   key={item.year}
@@ -264,17 +373,17 @@ const About = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className={`relative lg:grid lg:grid-cols-2 lg:gap-8 ${index % 2 === 0 ? "" : "lg:flex-row-reverse"
+                  className={`relative grid grid-cols-2 gap-8 ${index % 2 === 0 ? "" : "flex-row-reverse"
                     }`}
                 >
                   <div
-                    className={`lg:text-right ${index % 2 === 0 ? "" : "lg:col-start-2 lg:text-left"
+                    className={`text-right ${index % 2 === 0 ? "" : "col-start-2 text-left"
                       }`}
                   >
                     <div
                       className={`p-8 rounded-2xl bg-card border border-border ${index % 2 === 0
-                        ? "lg:mr-12"
-                        : "lg:ml-12 lg:col-start-2"
+                        ? "mr-12"
+                        : "ml-12 col-start-2"
                         }`}
                     >
                       <span className="font-display text-3xl font-bold text-accent">
@@ -290,7 +399,7 @@ const About = () => {
                   </div>
 
                   {/* Timeline Dot */}
-                  <div className="absolute left-1/2 top-8 w-4 h-4 -ml-2 rounded-full bg-accent hidden lg:block" />
+                  <div className="absolute left-1/2 top-8 w-4 h-4 -ml-2 rounded-full bg-accent" />
                 </motion.div>
               ))}
             </div>
