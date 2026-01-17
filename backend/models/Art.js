@@ -24,7 +24,7 @@ const artSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
-  image: {
+  imageUrl: {
     type: String,
     required: [true, 'Please provide an image']
   },
