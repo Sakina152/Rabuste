@@ -333,7 +333,7 @@ const Menu = () => {
             </h1>
 
             <p className="font-body text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-              Experience the perfect balance of bold flavors and artisanal care in every cup we serve.
+              Experience the perfect balance of bold flavors and artisanal care in every cup we serve
             </p>
           </motion.div>
         </div>
