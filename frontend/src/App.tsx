@@ -30,6 +30,7 @@ import AdminRegister from "./pages/admin/AdminRegister";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import OrderManagement from "./pages/admin/OrderManagement";
+import Analytics from "./pages/admin/Analytics";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
@@ -82,6 +83,7 @@ const App = () => (
               <Route path="/admin/dashboard/workshops" element={<WorkshopManager />} />
               <Route path="/admin/dashboard/inquiries" element={<InquiryManagement />} />
               <Route path="/admin/dashboard/orders" element={<OrderManagement />} />
+              <Route path="/admin/dashboard/analytics" element={<Analytics />} />
               <Route path="/admin/gallery" element={<GalleryManagement />} />
             </Route>
 

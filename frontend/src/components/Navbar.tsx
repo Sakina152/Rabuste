@@ -8,8 +8,8 @@ import rabusteLogo from "@/assets/rabuste-logo.png";
 
 const navLinks = [
   { name: "Home", path: "/" },
-  { name: "Menu", path: "/menu" },
   { name: "About", path: "/about" },
+  { name: "Menu", path: "/menu" },
   { name: "Art Gallery", path: "/gallery" },
   { name: "Workshops", path: "/workshops" },
   { name: "Franchise", path: "/franchise" },

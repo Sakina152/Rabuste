@@ -1,13 +1,134 @@
+import { useState, useRef, useLayoutEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Coffee, Target } from "lucide-react";
+import { ArrowRight, Coffee, Target, Play, Pause } from "lucide-react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import RobustaWheel from "@/components/RobustaWheel";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+// Register GSAP plugins
+gsap.registerPlugin(ScrollTrigger);
+
+// Timeline item type
+interface TimelineItem {
+  year: string;
+  title: string;
+  description: string;
+}
+
+// Mobile Card Shuffle Component
+const MobileTimelineCards = ({ timeline }: { timeline: TimelineItem[] }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement[]>([]);
+
+  useLayoutEffect(() => {
+    // Only run on mobile (< 1024px)
+    const mm = gsap.matchMedia();
+
+    mm.add("(max-width: 1023px)", () => {
+      const cards = cardsRef.current;
+      const container = containerRef.current;
+
+      if (!container || cards.length === 0) return;
+
+      // Set initial stacked state - cards stacked with interesting offset
+      gsap.set(cards, {
+        y: (i) => i * 12,
+        x: (i) => (i % 2 === 0 ? -8 : 8), // Alternating slight horizontal offset
+        scale: (i) => 1 - i * 0.03,
+        opacity: (i) => 1 - i * 0.15,
+        rotation: (i) => (i % 2 === 0 ? -2 : 2), // Slight alternating rotation
+        zIndex: (i) => timeline.length - i,
+      });
+
+      // Create timeline for card spread animation
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: container,
+          start: "top 60%", // Start when section enters view
+          end: "top -20%", // End when section has scrolled up
+          scrub: true, // Direct scroll-to-animation mapping
+        },
+      });
+
+      // Animate each card sequentially - one by one as you scroll
+      cards.forEach((card, i) => {
+        tl.to(
+          card,
+          {
+            y: i * 200,
+            x: 0,
+            scale: 1,
+            opacity: 1,
+            rotation: 0,
+            duration: 0.4,
+            ease: "power2.inOut",
+          },
+          i * 0.15 // Stagger - each card starts slightly after previous
+        );
+      });
+
+      return () => {
+        ScrollTrigger.getAll().forEach((st) => st.kill());
+      };
+    });
+
+    return () => mm.revert();
+  }, [timeline]);
+
+  return (
+    <div ref={containerRef} className="lg:hidden relative" style={{ minHeight: `${timeline.length * 200 + 120}px` }}>
+      <div className="relative px-4">
+        {timeline.map((item, index) => (
+          <div
+            key={item.year}
+            ref={(el) => {
+              if (el) cardsRef.current[index] = el;
+            }}
+            className="absolute left-0 right-0 mx-4 will-change-transform"
+            style={{ top: 0 }}
+          >
+            <div className="p-6 rounded-2xl bg-card border border-border shadow-lg backdrop-blur-sm">
+              {/* Year badge */}
+              <div className="inline-block px-3 py-1 rounded-full bg-accent/10 border border-accent/20 mb-3">
+                <span className="font-display text-xl font-bold text-accent">
+                  {item.year}
+                </span>
+              </div>
+              <h3 className="font-display text-xl font-semibold text-foreground mb-2">
+                {item.title}
+              </h3>
+              <p className="text-muted-foreground leading-relaxed text-sm">
+                {item.description}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const About = () => {
+  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const toggleVideo = () => {
+    if (videoRef.current) {
+      if (isVideoPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsVideoPlaying(!isVideoPlaying);
+    }
+  };
+
   const timeline = [
     {
       year: "2020",
@@ -49,7 +170,22 @@ const About = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-32 overflow-hidden bg-gradient-to-b from-coffee-dark via-background to-background">
+      <section className="relative pt-32 pb-32 overflow-hidden">
+        {/* Video Background */}
+        <div className="absolute inset-0 w-full h-full overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute top-0 left-0 w-full h-full object-cover"
+          >
+            <source src="/videos/about-hero.mp4" type="video/mp4" />
+          </video>
+          {/* Dark overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-coffee-dark/80 via-coffee-dark/70 to-background/95" />
+        </div>
+
         {/* Background decorative "coffee" text */}
         <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none select-none hidden lg:block">
           <div className="text-[180px] font-display font-bold text-accent/[0.07] leading-none tracking-tight">
@@ -131,15 +267,17 @@ const About = () => {
                   transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
                 />
 
-                {/* Inner gradient circle */}
-                <div className="absolute inset-4 rounded-full bg-gradient-to-br from-coffee-medium via-espresso to-coffee-dark flex items-center justify-center shadow-2xl">
-                  {/* Coffee cup icon */}
-                  <motion.div
-                    animate={{ y: [-5, 5, -5] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <Coffee className="w-24 h-24 md:w-32 md:h-32 text-cream" />
-                  </motion.div>
+                {/* Inner gradient circle with Lottie animation */}
+                <div className="absolute inset-4 rounded-full bg-gradient-to-br from-coffee-medium via-espresso to-coffee-dark flex items-center justify-center shadow-2xl overflow-hidden">
+                  {/* Lottie coffee animation */}
+                  <div className="w-52 h-52 md:w-72 md:h-72">
+                    <DotLottieReact
+                      src="https://lottie.host/d88be254-5262-4231-ba92-3a957eb11ea8/qsftjuydT3.lottie"
+                      loop
+                      autoplay
+                      style={{ width: "100%", height: "100%" }}
+                    />
+                  </div>
                 </div>
 
                 {/* Steam effect */}
@@ -191,8 +329,15 @@ const About = () => {
           </div>
         </div>
 
-        {/* Gradient fade to next section */}
-        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
+        {/* Enhanced gradient fade to next section */}
+        <div className="absolute bottom-0 left-0 right-0 h-64 pointer-events-none">
+          {/* Primary fade layer */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+          {/* Secondary subtle fade layer for added depth */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+          {/* Accent color hint for visual interest */}
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent/20 to-transparent" />
+        </div>
       </section>
 
       {/* Story Timeline */}
@@ -212,11 +357,15 @@ const About = () => {
             </h2>
           </motion.div>
 
-          <div className="relative">
-            {/* Timeline Line */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border hidden lg:block" />
+          {/* Mobile Card Shuffle Animation */}
+          <MobileTimelineCards timeline={timeline} />
 
-            <div className="space-y-12 lg:space-y-0">
+          {/* Desktop Timeline - Hidden on mobile */}
+          <div className="relative hidden lg:block">
+            {/* Timeline Line */}
+            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border" />
+
+            <div className="space-y-0">
               {timeline.map((item, index) => (
                 <motion.div
                   key={item.year}
@@ -224,17 +373,17 @@ const About = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className={`relative lg:grid lg:grid-cols-2 lg:gap-8 ${index % 2 === 0 ? "" : "lg:flex-row-reverse"
+                  className={`relative grid grid-cols-2 gap-8 ${index % 2 === 0 ? "" : "flex-row-reverse"
                     }`}
                 >
                   <div
-                    className={`lg:text-right ${index % 2 === 0 ? "" : "lg:col-start-2 lg:text-left"
+                    className={`text-right ${index % 2 === 0 ? "" : "col-start-2 text-left"
                       }`}
                   >
                     <div
                       className={`p-8 rounded-2xl bg-card border border-border ${index % 2 === 0
-                        ? "lg:mr-12"
-                        : "lg:ml-12 lg:col-start-2"
+                        ? "mr-12"
+                        : "ml-12 col-start-2"
                         }`}
                     >
                       <span className="font-display text-3xl font-bold text-accent">
@@ -250,7 +399,7 @@ const About = () => {
                   </div>
 
                   {/* Timeline Dot */}
-                  <div className="absolute left-1/2 top-8 w-4 h-4 -ml-2 rounded-full bg-accent hidden lg:block" />
+                  <div className="absolute left-1/2 top-8 w-4 h-4 -ml-2 rounded-full bg-accent" />
                 </motion.div>
               ))}
             </div>
@@ -307,18 +456,31 @@ const About = () => {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="aspect-square rounded-2xl bg-gradient-to-br from-coffee-medium to-espresso overflow-hidden relative">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <Coffee className="w-24 h-24 text-accent mx-auto mb-4" />
-                    <span className="font-display text-2xl font-bold text-foreground">
-                      Robusta Only
-                    </span>
-                  </div>
-                </div>
-                {/* Decorative elements */}
-                <div className="absolute top-8 right-8 w-20 h-20 border-2 border-accent/20 rounded-full" />
-                <div className="absolute bottom-12 left-12 w-32 h-32 border border-accent/10 rounded-full" />
+              <div className="aspect-[9/16] max-h-[500px] rounded-2xl overflow-hidden relative shadow-2xl mx-auto">
+                {/* Video Player */}
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                >
+                  <source src="https://res.cloudinary.com/dnk1a58sg/video/upload/v1768626804/Rabuste_tk6bbp.mp4" type="video/mp4" />
+                </video>
+
+                {/* Play/Pause Button Overlay */}
+                <button
+                  onClick={toggleVideo}
+                  className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors duration-300 shadow-lg border border-accent/20"
+                  aria-label={isVideoPlaying ? "Pause video" : "Play video"}
+                >
+                  {isVideoPlaying ? (
+                    <Pause className="w-5 h-5 text-accent" />
+                  ) : (
+                    <Play className="w-5 h-5 text-accent ml-0.5" />
+                  )}
+                </button>
               </div>
             </motion.div>
           </div>
@@ -419,42 +581,32 @@ const About = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="relative"
+              className="relative flex items-center justify-center"
             >
-              <div className="aspect-square rounded-2xl bg-gradient-to-br from-coffee-medium/50 to-espresso/80 p-8 flex items-center justify-center relative overflow-hidden">
-                {/* Animated coffee bean */}
-                <motion.div
-                  animate={{ rotate: [0, 5, 0, -5, 0] }}
-                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                  className="relative z-10"
-                >
-                  <svg className="w-48 h-48 text-accent" viewBox="0 0 100 100" fill="currentColor">
-                    <ellipse cx="50" cy="50" rx="35" ry="45" />
-                    <path d="M50 10 Q55 50 50 90" stroke="hsl(var(--espresso))" strokeWidth="4" fill="none" />
-                  </svg>
-                </motion.div>
+              {/* Video styled as animation */}
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                {/* Glow effect behind video */}
+                <div className="absolute -inset-4 bg-gradient-to-br from-accent/20 via-transparent to-coffee-medium/30 blur-2xl" />
 
-                {/* Floating particles */}
-                {[...Array(8)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="absolute w-2 h-2 bg-accent/40 rounded-full"
-                    style={{
-                      left: `${20 + Math.random() * 60}%`,
-                      top: `${20 + Math.random() * 60}%`,
-                    }}
-                    animate={{
-                      y: [-10, 10, -10],
-                      opacity: [0.3, 0.7, 0.3],
-                      scale: [1, 1.2, 1],
-                    }}
-                    transition={{
-                      duration: 3 + Math.random() * 2,
-                      repeat: Infinity,
-                      delay: i * 0.3,
-                    }}
-                  />
-                ))}
+                {/* Video container */}
+                <div className="relative aspect-[9/16] max-h-[450px] rounded-2xl overflow-hidden">
+                  <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                    style={{ pointerEvents: 'none' }}
+                  >
+                    <source src="/videos/about-tasteflavor.mp4" type="video/mp4" />
+                  </video>
+
+                  {/* Subtle vignette overlay for animation feel */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-espresso/20 via-transparent to-espresso/10 pointer-events-none" />
+
+                  {/* Soft inner glow border */}
+                  <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-accent/10 pointer-events-none" />
+                </div>
               </div>
             </motion.div>
           </div>

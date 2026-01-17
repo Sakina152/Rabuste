@@ -32,6 +32,7 @@ const importData = async () => {
       name: 'Admin',
       email: 'admin@rabuste.com',
       password: hashedPassword,
+      phoneNumber: '1234567890',
       role: 'super_admin',
     });
 
@@ -39,37 +40,37 @@ const importData = async () => {
 
     // Create Categories
     const categories = await MenuCategory.insertMany([
-      { 
+      {
         name: 'Robusta Special (Cold)',
         description: 'Chilled Robusta coffee specials',
         icon: 'coffee',
         displayOrder: 1
       },
-      { 
+      {
         name: 'Robusta Special (Hot)',
         description: 'Hot Robusta coffee specials',
         icon: 'coffee',
         displayOrder: 2
       },
-      { 
+      {
         name: 'Blend Special (Cold)',
         description: 'Chilled Arabica-Robusta blend specials',
         icon: 'coffee',
         displayOrder: 3
       },
-      { 
+      {
         name: 'Blend Special (Hot)',
         description: 'Hot Arabica-Robusta blend specials',
         icon: 'coffee',
         displayOrder: 4
       },
-      { 
+      {
         name: 'Manual Brews & Tea',
         description: 'Specialty brews and tea selection',
         icon: 'mug-hot',
         displayOrder: 5
       },
-      { 
+      {
         name: 'Food & Bakery',
         description: 'Delicious snacks and pastries',
         icon: 'utensils',
@@ -149,7 +150,7 @@ const importData = async () => {
 
     await MenuItem.insertMany(menuItems);
     console.log('Menu items created!');
-    
+
     console.log('Data Imported!');
     process.exit();
   } catch (error) {

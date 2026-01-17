@@ -278,12 +278,14 @@ export const verifyPayment = asyncHandler(async (req, res) => {
             throw new Error('Workshop not found during verification');
           }
 
+          const numberOfSeats = orderData.quantity || 1;
+
           // Create Booking
           const bookingData = {
             workshop: orderData.itemId,
-            participantDetails: orderData.participantDetails, // Passed from frontend
-            numberOfSeats: orderData.quantity || 1,
-            totalAmount: orderData.amount, // Verified amount
+            participantDetails: orderData.participantDetails,
+            numberOfSeats,
+            totalAmount: workshop.price * numberOfSeats, // Recalculate to be sure
             paymentStatus: 'completed',
             paymentId: paymentId,
             status: 'confirmed',
@@ -297,8 +299,8 @@ export const verifyPayment = asyncHandler(async (req, res) => {
           const booking = new Booking(bookingData);
           await booking.save();
 
-          // Update workshop participant count
-          workshop.currentParticipants += (orderData.quantity || 1);
+          // Update workshop participant count by actual seats
+          workshop.currentParticipants += numberOfSeats;
           await workshop.save();
 
           console.log('Workshop booking saved:', booking.registrationNumber);

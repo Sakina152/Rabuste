@@ -352,10 +352,12 @@ export const registerForWorkshop = async (req, res) => {
             });
         }
 
-        if (workshop.currentParticipants >= workshop.maxParticipants) {
+        const numberOfSeats = Number(req.body.numberOfSeats) || 1;
+
+        if (workshop.currentParticipants + numberOfSeats > workshop.maxParticipants) {
             return res.status(400).json({
                 success: false,
-                message: 'Workshop is fully booked'
+                message: `Not enough seats available. Only ${workshop.maxParticipants - workshop.currentParticipants} seats left.`
             });
         }
 
@@ -363,11 +365,13 @@ export const registerForWorkshop = async (req, res) => {
             ...req.body,
             workshop: workshop._id,
             user: req.user ? req.user.id : null,
+            numberOfSeats,
+            totalAmount: workshop.price * numberOfSeats, // Always calculate on backend
             status: 'confirmed'
         });
 
-        // Update participant count
-        workshop.currentParticipants += 1;
+        // Update participant count by the actual number of seats
+        workshop.currentParticipants += numberOfSeats;
         await workshop.save();
 
         res.status(201).json({
@@ -555,11 +559,11 @@ export const cancelRegistration = async (req, res) => {
         registration.cancelledAt = new Date();
         await registration.save();
 
-        // Update workshop participant count
+        // Update workshop participant count correctly
         if (registration.workshop) {
             registration.workshop.currentParticipants = Math.max(
                 0,
-                registration.workshop.currentParticipants - 1
+                registration.workshop.currentParticipants - (registration.numberOfSeats || 1)
             );
             await registration.workshop.save();
         }
