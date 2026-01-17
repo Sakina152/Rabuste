@@ -14,7 +14,7 @@ interface Artwork {
   artist: string;
   price: number;
   status: "Available" | "Reserved" | "Sold";
-  image?: string;
+  imageUrl?: string;
   dimensions?: string;
   description?: string;
   category?: "abstract" | "landscape" | "portrait";
@@ -69,7 +69,7 @@ const Gallery = () => {
           artist: art.artist,
           price: art.price,
           status: art.status,
-          image: art.image,
+          imageUrl: art.imageUrl,
           dimensions: art.dimensions,
           description: art.description,
           category: art.category || 'abstract'
@@ -207,9 +207,9 @@ const Gallery = () => {
 
                     {/* Artwork Container (No matting) */}
                     <div className="relative aspect-[4/5] overflow-hidden shadow-[inset_0_4px_20px_rgba(0,0,0,0.6)] bg-espresso">
-                      {artwork.image ? (
+                      {artwork.imageUrl ? (
                         <img
-                          src={`${API_URL}/${artwork.image.replace(/\\/g, "/")}`}
+                          src={`${API_URL}/${artwork.imageUrl.replace(/\\/g, "/")}`}
                           alt={artwork.title}
                           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                         />
@@ -289,9 +289,9 @@ const Gallery = () => {
               <div className="grid md:grid-cols-2">
                 {/* Art Preview */}
                 <div className="aspect-square overflow-hidden">
-                  {selectedArt.image ? (
+                  {selectedArt.imageUrl ? (
                     <img
-                      src={`${API_URL}/${selectedArt.image.replace(/\\/g, "/")}`}
+                      src={`${API_URL}/${selectedArt.imageUrl.replace(/\\/g, "/")}`}
                       alt={selectedArt.title}
                       className="w-full h-full object-cover"
                     />

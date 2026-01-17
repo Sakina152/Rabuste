@@ -34,18 +34,17 @@ const artPurchaseSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 
-artPurchaseSchema.pre('save', async function (next) {
+artPurchaseSchema.pre('save', async function () {
   if (!this.purchaseNumber) {
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const random = Math.floor(1000 + Math.random() * 9000);
     this.purchaseNumber = `PU${date}${random}`;
   }
-  next();
 });
 
-artPurchaseSchema.post('save', async function() {
+artPurchaseSchema.post('save', async function () {
   const Art = mongoose.model('Art');
-  await Art.findByIdAndUpdate(this.art, { 
+  await Art.findByIdAndUpdate(this.art, {
     status: 'Sold',
     soldAt: new Date()
   });

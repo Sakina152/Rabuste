@@ -18,7 +18,7 @@ export const addArt = async (req, res) => {
   try {
     const artData = {
       ...req.body,
-      image: req.file ? req.file.path : null // Handle image upload
+      imageUrl: req.file ? req.file.path : null // Handle image upload
     };
     const newArt = new Art(artData);
     await newArt.save();
@@ -202,7 +202,7 @@ export const updateArt = async (req, res) => {
     art.status = req.body.status ?? art.status;
 
     if (req.file) {
-      art.image = req.file.path;
+      art.imageUrl = req.file.path;
     }
 
     const updatedArt = await art.save();
