@@ -209,7 +209,7 @@ const Gallery = () => {
                     <div className="relative aspect-[4/5] overflow-hidden shadow-[inset_0_4px_20px_rgba(0,0,0,0.6)] bg-espresso">
                       {artwork.imageUrl ? (
                         <img
-                          src={`${API_URL}/${artwork.imageUrl.replace(/\\/g, "/")}`}
+                          src={artwork.imageUrl.startsWith('http') ? artwork.imageUrl : `${API_URL}/${artwork.imageUrl.replace(/\\/g, "/")}`}
                           alt={artwork.title}
                           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                         />
@@ -291,7 +291,7 @@ const Gallery = () => {
                 <div className="aspect-square overflow-hidden">
                   {selectedArt.imageUrl ? (
                     <img
-                      src={`${API_URL}/${selectedArt.imageUrl.replace(/\\/g, "/")}`}
+                      src={selectedArt.imageUrl.startsWith('http') ? selectedArt.imageUrl : `${API_URL}/${selectedArt.imageUrl.replace(/\\/g, "/")}`}
                       alt={selectedArt.title}
                       className="w-full h-full object-cover"
                     />

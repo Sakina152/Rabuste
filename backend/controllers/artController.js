@@ -16,11 +16,22 @@ export const getAllArt = async (req, res) => {
 // 2. Add New Art (Admin only)
 export const addArt = async (req, res) => {
   try {
-    const artData = {
-      ...req.body,
-      imageUrl: req.file ? req.file.path : null // Handle image upload
-    };
-    const newArt = new Art(artData);
+    const { title, artist, price, status, imageUrl, description, dimensions } = req.body;
+
+    if (!imageUrl) {
+      return res.status(400).json({ message: "Please provide an imageUrl (Cloudinary link)" });
+    }
+
+    const newArt = new Art({
+      title,
+      artist,
+      price: Number(price),
+      status,
+      imageUrl,
+      description,
+      dimensions
+    });
+
     await newArt.save();
     res.status(201).json({ message: "Art piece added successfully", newArt });
   } catch (error) {
@@ -198,11 +209,13 @@ export const updateArt = async (req, res) => {
 
     art.title = req.body.title ?? art.title;
     art.artist = req.body.artist ?? art.artist;
-    art.price = req.body.price ?? art.price;
+    art.price = req.body.price ? Number(req.body.price) : art.price;
     art.status = req.body.status ?? art.status;
+    art.description = req.body.description ?? art.description;
+    art.dimensions = req.body.dimensions ?? art.dimensions;
 
-    if (req.file) {
-      art.imageUrl = req.file.path;
+    if (req.body.imageUrl !== undefined) {
+      art.imageUrl = req.body.imageUrl;
     }
 
     const updatedArt = await art.save();

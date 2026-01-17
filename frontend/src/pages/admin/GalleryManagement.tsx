@@ -24,7 +24,9 @@ interface Art {
   artist: string;
   price: number;
   status: "Available" | "Reserved" | "Sold";
-  image?: string; // Renamed from imageUrl
+  imageUrl?: string;
+  description?: string;
+  dimensions?: string;
 }
 
 /* ================= COMPONENT ================= */
@@ -42,6 +44,13 @@ export default function GalleryManagement() {
 
   const token = getToken();
 
+  /* ---------- HELPERS ---------- */
+  const getImageUrl = (path?: string) => {
+    if (!path) return "";
+    if (path.startsWith('http')) return path;
+    return `${API_URL}/${path.replace(/\\/g, "/")}`;
+  };
+
   /* ---------- FETCH DATA ---------- */
   useEffect(() => {
     const fetchData = async () => {
@@ -49,13 +58,6 @@ export default function GalleryManagement() {
         const artRes = await fetch(`${API_URL}/api/art`);
         setArtworks(await artRes.json());
 
-        // Wait for token to be available if it's a promise (although here it seems synchronous based on usage,
-        // but previous context suggested it might be async. 
-        // Based on the code viewed previously, getToken() returns the token string directly if using localStorage, 
-        // or a promise? Let's check imports. It imports getToken from utils.
-        // Assuming synchronous usage based on existing code, but best to be safe if it was async earlier.
-        // The existing code was : const token = getToken(); then using it in useEffect.
-        // If it's async, we should await it.
         const resolvedToken = await Promise.resolve(token);
 
         if (!resolvedToken) return;
@@ -221,9 +223,9 @@ export default function GalleryManagement() {
 
                 {/* Image */}
                 <div className="aspect-[4/5] bg-muted/40 overflow-hidden">
-                  {art.image ? (
+                  {art.imageUrl ? (
                     <img
-                      src={`${API_URL}/${art.image.replace(/\\/g, "/")}`}
+                      src={getImageUrl(art.imageUrl)}
                       alt={art.title}
                       className="w-full h-full object-cover"
                     />
@@ -351,18 +353,19 @@ function ArtModal({
   const [artist, setArtist] = useState(art?.artist || "");
   const [price, setPrice] = useState(art?.price?.toString() || "");
   const [status, setStatus] = useState(art?.status || "Available");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(
-    art?.image ? `${API_URL}/${art.image.replace(/\\/g, "/")}` : null
-  );
+  const [imageUrl, setImageUrl] = useState(art?.imageUrl || "");
+  const [description, setDescription] = useState(art?.description || "");
+  const [dimensions, setDimensions] = useState(art?.dimensions || "");
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
+  const getInitialPreview = (path?: string) => {
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+    return `${API_URL}/${path.replace(/\\/g, "/")}`;
   };
+
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    getInitialPreview(art?.imageUrl)
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -379,23 +382,22 @@ function ArtModal({
 
     const method = art ? "PUT" : "POST";
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("artist", artist);
-    formData.append("price", price);
-    formData.append("status", status);
-    if (imageFile) {
-      formData.append("image", imageFile);
-    }
-
     const res = await fetch(url, {
       method,
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${resolvedToken}`,
       },
-      body: formData,
+      body: JSON.stringify({
+        title,
+        artist,
+        price: Number(price),
+        status,
+        imageUrl,
+        description,
+        dimensions
+      }),
     });
-
 
     if (!res.ok) {
       const err = await res.json();
@@ -411,14 +413,14 @@ function ArtModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-2xl bg-card border border-border shadow-xl">
+      <div className="w-full max-w-lg rounded-2xl bg-card border border-border shadow-xl h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-border">
+        <div className="px-6 py-4 border-b border-border sticky top-0 bg-card z-10">
           <h2 className="text-xl font-semibold">
             {art ? "Edit Artwork" : "Add New Artwork"}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Enter artwork details below
+            Enter artwork details below (Using Cloudinary URLs)
           </p>
         </div>
 
@@ -432,6 +434,7 @@ function ArtModal({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Artwork title"
               className="w-full rounded-xl bg-muted/40 border border-border px-4 py-2"
+              required
             />
           </div>
 
@@ -443,6 +446,7 @@ function ArtModal({
               onChange={(e) => setArtist(e.target.value)}
               placeholder="Artist name"
               className="w-full rounded-xl bg-muted/40 border border-border px-4 py-2"
+              required
             />
           </div>
 
@@ -455,6 +459,7 @@ function ArtModal({
               onChange={(e) => setPrice(e.target.value)}
               placeholder="Price (₹)"
               className="w-full rounded-xl bg-muted/40 border border-border px-4 py-2"
+              required
             />
           </div>
 
@@ -472,30 +477,64 @@ function ArtModal({
             </select>
           </div>
 
-          {/* Image Upload */}
+          {/* Dimensions */}
           <div className="space-y-1">
-            <label className="text-sm text-muted-foreground">Artwork Image</label>
-
-            {imagePreview && (
-              <div className="mb-2 h-40 w-full rounded-xl overflow-hidden border border-border">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            )}
-
+            <label className="text-sm text-muted-foreground">Dimensions</label>
             <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
+              value={dimensions}
+              onChange={(e) => setDimensions(e.target.value)}
+              placeholder="e.g. 24x36 inches"
               className="w-full rounded-xl bg-muted/40 border border-border px-4 py-2"
             />
           </div>
 
+          {/* Description */}
+          <div className="space-y-1">
+            <label className="text-sm text-muted-foreground">Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Artwork description..."
+              className="w-full rounded-xl bg-muted/40 border border-border px-4 py-2 min-h-[100px]"
+            />
+          </div>
+
+          {/* Image URL */}
+          <div className="space-y-1">
+            <label className="text-sm text-muted-foreground">Image URL (Cloudinary)</label>
+            <input
+              value={imageUrl}
+              onChange={(e) => {
+                setImageUrl(e.target.value);
+                setImagePreview(e.target.value);
+              }}
+              placeholder="https://res.cloudinary.com/..."
+              className="w-full rounded-xl bg-muted/40 border border-border px-4 py-2"
+              required
+            />
+          </div>
+
+          {/* Preview */}
+          <div className="space-y-1">
+            <label className="text-sm text-muted-foreground">Preview</label>
+            {imagePreview ? (
+              <div className="h-40 w-full rounded-xl overflow-hidden border border-border bg-muted/20">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="h-full w-full object-cover"
+                  onError={(e) => (e.currentTarget.src = "")}
+                />
+              </div>
+            ) : (
+              <div className="h-40 w-full rounded-xl border border-dashed border-border flex items-center justify-center text-muted-foreground text-sm">
+                No image preview
+              </div>
+            )}
+          </div>
+
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6 pb-2">
             <button
               type="button"
               onClick={onClose}

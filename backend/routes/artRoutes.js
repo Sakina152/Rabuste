@@ -15,21 +15,6 @@ import {
 
 const router = express.Router();
 
-// Multer Config
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/art/');
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(
-            null,
-            file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname)
-        );
-    },
-});
-const upload = multer({ storage: storage });
-
 // --- Public Routes ---
 // Anyone can view the gallery and send an inquiry
 router.get('/', getAllArt);
@@ -44,8 +29,8 @@ router.post('/purchase/:id', protect, purchaseArt);
 router.use(protect);
 router.use(authorize('admin', 'super_admin'));
 
-router.post('/', upload.single('image'), addArt);
-router.put('/:id', upload.single('image'), updateArt);
+router.post('/', addArt);
+router.put('/:id', updateArt);
 router.patch('/:id/status', updateArtStatus);
 router.delete('/:id', deleteArt);
 
