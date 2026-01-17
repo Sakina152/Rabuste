@@ -60,7 +60,6 @@ export default function WorkshopForm({
     endTime: "",
     price: "",
     maxParticipants: "",
-    status: "draft",
     isFeatured: false,
   });
 
@@ -83,7 +82,6 @@ export default function WorkshopForm({
       endTime: workshop.endTime || "",
       price: workshop.price !== undefined ? workshop.price : "",
       maxParticipants: workshop.maxParticipants !== undefined ? workshop.maxParticipants : "",
-      status: workshop.status || "draft",
       isFeatured: workshop.isFeatured || false,
     });
 
@@ -399,24 +397,6 @@ export default function WorkshopForm({
                 <Label htmlFor="isFeatured" className="cursor-pointer text-stone-300">
                   Feature on Homepage?
                 </Label>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Label htmlFor="status" className="text-stone-300">Status:</Label>
-                <Select
-                  value={formData.status}
-                  onValueChange={(val) => handleChange("status", val)}
-                >
-                  <SelectTrigger className="w-[140px] bg-stone-800 border-stone-700 h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-stone-800 border-stone-700">
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="published">Published</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
           </div>
