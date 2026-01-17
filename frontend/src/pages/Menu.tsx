@@ -19,6 +19,7 @@ import espressoImg from "@/assets/menu/robusta-espresso.jpg";
 import frappeImg from "@/assets/menu/robusta-frappe.jpg";
 import espressoTonicImg from "@/assets/menu/espresso-tonic.jpg";
 import bagelImg from "@/assets/menu/bagel.jpg";
+import rabusteCup from "@/assets/rabuste-cup.png";
 
 console.log('ENV:', import.meta.env);
 console.log('BASE URL:', import.meta.env.VITE_API_BASE_URL);
@@ -296,21 +297,43 @@ const Menu = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-16 px-6">
-        <div className="container-custom text-center">
+      <section className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden">
+        {/* Full Background Image with Parallax-like effect */}
+        <div className="absolute inset-0 z-0">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            initial={{ scale: 1.1 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 10, ease: "linear" }}
+            className="w-full h-full"
           >
-            <span className="inline-block px-4 py-2 rounded-full bg-accent/10 text-accent font-body text-sm tracking-wide mb-6">
-              Our Menu
-            </span>
-            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl text-foreground mb-4">
-              Crafted with <span className="text-accent">Passion</span>
+            <img
+              src={rabusteCup}
+              alt="Rabuste Background"
+              className="w-full h-full object-cover opacity-45"
+            />
+            {/* Gradient Overlay for Text Readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/40 to-background" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-background/80" />
+          </motion.div>
+        </div>
+
+        <div className="container-custom relative z-10 text-center max-w-4xl px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent font-body text-sm tracking-wide mb-6 border border-accent/20 backdrop-blur-sm">
+              <Sparkles className="w-3 h-3" />
+              <span>Premium Quality</span>
+            </div>
+
+            <h1 className="font-display text-5xl md:text-7xl lg:text-8xl text-foreground mb-6 leading-tight">
+              Crafted with <span className="text-accent italic">Passion</span>
             </h1>
-            <p className="font-body text-muted-foreground text-lg max-w-2xl mx-auto">
-              From bold Robusta brews to artisan bites, every item is crafted to elevate your café experience.
+
+            <p className="font-body text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+              Experience the perfect balance of bold flavors and artisanal care in every cup we serve.
             </p>
           </motion.div>
         </div>

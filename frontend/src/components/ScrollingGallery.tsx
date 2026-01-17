@@ -91,13 +91,13 @@ const ScrollingGallery = () => {
                             <span className="inline-block p-3 mb-6 rounded-2xl bg-white/5 backdrop-blur border border-white/10 text-accent">
                                 <Palette size={32} />
                             </span>
-                            <h2 className="text-6xl md:text-8xl font-black text-white leading-[0.9] mb-8">
+                            <h2 className="text-4xl md:text-8xl font-black text-white leading-[0.9] mb-6 md:mb-8">
                                 THE <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-purple-500">
                                     GALLERY
                                 </span>
                             </h2>
-                            <p className="text-xl md:text-2xl text-zinc-400 max-w-md leading-relaxed">
+                            <p className="text-base md:text-2xl text-zinc-400 max-w-md leading-relaxed">
                                 A digital storefront for our tangible masterpieces. Discover, admire, and acquire
                                 art directly from our café walls.
                             </p>
@@ -146,7 +146,7 @@ const ScrollingGallery = () => {
 const ArtCard = ({ item, index, API_URL }: { item: Artwork, index: number, API_URL: string }) => {
     return (
         <motion.div
-            className="group relative h-[60vh] w-[40vh] md:w-[60vh] flex-shrink-0 cursor-pointer perspective-1000"
+            className="group relative h-[50vh] md:h-[60vh] w-[35vh] md:w-[60vh] flex-shrink-0 cursor-pointer perspective-1000"
             whileHover={{ scale: 1.05, rotateY: 5, zIndex: 50 }}
             transition={{ duration: 0.4 }}
         >
@@ -166,9 +166,9 @@ const ArtCard = ({ item, index, API_URL }: { item: Artwork, index: number, API_U
                 )}
 
                 {/* Overlay Content */}
-                <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black/90 via-black/50 to-transparent translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 text-left">
-                    <h4 className="text-3xl font-bold text-white mb-1 leading-tight">{item.title}</h4>
-                    <p className="text-accent font-medium text-lg">{item.artist}</p>
+                <div className="absolute inset-x-0 bottom-0 p-6 md:p-8 bg-gradient-to-t from-black/90 via-black/50 to-transparent translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 text-left">
+                    <h4 className="text-2xl md:text-3xl font-bold text-white mb-1 leading-tight">{item.title}</h4>
+                    <p className="text-accent font-medium text-base md:text-lg">{item.artist}</p>
                 </div>
 
                 {/* Index Number */}
