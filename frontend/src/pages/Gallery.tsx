@@ -184,7 +184,7 @@ const Gallery = () => {
         <div className="container-custom">
           <motion.div
             layout
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-16"
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-16 max-w-[1800px] mx-auto"
           >
             <AnimatePresence mode="popLayout">
               {artworks.map((artwork, index) => (
@@ -198,8 +198,11 @@ const Gallery = () => {
                   className="group relative"
                 >
                   {/* Heavy Ornate Frame Container */}
-                  <div
-                    className="relative p-[14px] bg-gradient-to-br from-[#1A0F0A] via-[#8D6E63] to-[#F5F5DC] rounded-sm transform transition-all duration-500 group-hover:shadow-[0_60px_120px_-30px_rgba(0,0,0,0.9)] cursor-pointer shadow-[20px_20px_60px_rgba(0,0,0,0.6),_inset_0_2px_15px_rgba(255,255,255,0.1)] overflow-visible"
+                  {/* Heavy Ornate Frame Container */}
+                  <motion.div
+                    whileHover="hover"
+                    initial="initial"
+                    className="relative p-[14px] bg-gradient-to-br from-[#1A0F0A] via-[#8D6E63] to-[#F5F5DC] rounded-sm transform transition-all duration-500 group-hover:shadow-[0_60px_120px_-30px_rgba(0,0,0,0.9)] cursor-pointer shadow-[20px_20px_60px_rgba(0,0,0,0.6),_inset_0_2px_15px_rgba(255,255,255,0.1)] overflow-visible group"
                     onClick={() => setSelectedArt(artwork)}
                   >
                     {/* Frame Interior Edge (Bevel) */}
@@ -208,10 +211,15 @@ const Gallery = () => {
                     {/* Artwork Container (No matting) */}
                     <div className="relative aspect-[4/5] overflow-hidden shadow-[inset_0_4px_20px_rgba(0,0,0,0.6)] bg-espresso">
                       {artwork.imageUrl ? (
-                        <img
+                        <motion.img
+                          variants={{
+                            initial: { scale: 1 },
+                            hover: { scale: 1.1 }
+                          }}
+                          transition={{ duration: 1, ease: "easeOut" }}
                           src={artwork.imageUrl.startsWith('http') ? artwork.imageUrl : `${API_URL}/${artwork.imageUrl.replace(/\\/g, "/")}`}
                           alt={artwork.title}
-                          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                          className="w-full h-full object-cover"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-espresso/40">
@@ -219,49 +227,58 @@ const Gallery = () => {
                         </div>
                       )}
 
+                      {/* Interactive Espresso Overlay (Refined with Gradient & Poppy Text) */}
+                      <motion.div
+                        variants={{
+                          initial: { y: "100%", opacity: 0 },
+                          hover: { y: 0, opacity: 1 }
+                        }}
+                        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                        className="absolute inset-0 bg-gradient-to-t from-[#1a0f0a] via-[#1a0f0a]/90 to-transparent p-8 flex flex-col justify-end pointer-events-none z-10"
+                      >
+                        <div className="space-y-4 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-100">
+                          <div className="flex justify-between items-start gap-4">
+                            <h3 className="font-display text-3xl md:text-4xl font-black text-white leading-[1.1] tracking-tighter drop-shadow-2xl flex-1">
+                              {artwork.title}
+                            </h3>
+                            <span className="font-display text-2xl md:text-3xl font-bold text-accent drop-shadow-lg whitespace-nowrap mt-2">
+                              ₹{artwork.price.toLocaleString('en-IN')}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="h-[2px] w-12 bg-accent" />
+                            <span className="text-accent font-display text-sm md:text-base font-bold tracking-[0.25em] uppercase drop-shadow-md">
+                              {artwork.artist}
+                            </span>
+                          </div>
+                          {artwork.description && (
+                            <p className="text-white/95 text-base md:text-lg leading-relaxed line-clamp-3 mt-6 font-body font-medium drop-shadow-md max-w-[85%] italic">
+                              {artwork.description}
+                            </p>
+                          )}
+                        </div>
+                      </motion.div>
+
                       {/* Hover glaze effect */}
-                      <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                      <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-20" />
                     </div>
 
                     {/* SOLD Gold Plaque (Bottom Center) */}
                     {artwork.status === "Sold" && (
-                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-20">
+                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-[30]">
                         <div className="bg-gradient-to-b from-[#91672C] via-[#B8860B] to-[#705206] px-6 py-1.5 rounded-sm border border-[#F5F5DC]/20 shadow-2xl scale-110">
                           <p className="text-[#FDFCF0] text-[12px] font-display font-black uppercase tracking-[0.4em] drop-shadow-md">
                             SOLD
                           </p>
                         </div>
-                        {/* Shadow for plate */}
                         <div className="absolute -bottom-1 left-[10%] right-[10%] h-2 bg-black/40 blur-md -z-10" />
                       </div>
                     )}
 
-                    {/* Frame Highlights/Texture details */}
+                    {/* Frame Highlights */}
                     <div className="absolute inset-0 border-t border-white/10 pointer-events-none" />
                     <div className="absolute inset-x-0 bottom-0 h-[3px] bg-black/20 pointer-events-none" />
-                  </div>
-
-                  {/* Info */}
-                  <div className="mt-4 space-y-2">
-                    <h3 className="font-display text-xl font-semibold text-foreground">
-                      {artwork.title}
-                    </h3>
-                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                      <User size={14} />
-                      <span>{artwork.artist}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-display text-xl font-bold text-accent">
-                        ₹{artwork.price.toLocaleString('en-IN')}
-                      </span>
-                      {artwork.status === "Available" && (
-                        <button className="flex items-center gap-1 text-muted-foreground hover:text-accent transition-colors text-sm">
-                          <Heart size={14} />
-                          <span>Save</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
+                  </motion.div>
                 </motion.div>
               ))}
             </AnimatePresence>
