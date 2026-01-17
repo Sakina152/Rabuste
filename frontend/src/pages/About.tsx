@@ -1,6 +1,8 @@
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Coffee, Target } from "lucide-react";
+import { ArrowRight, Coffee, Target, Play, Pause } from "lucide-react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import RobustaWheel from "@/components/RobustaWheel";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import { Button } from "@/components/ui/button";
@@ -8,6 +10,20 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const About = () => {
+  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const toggleVideo = () => {
+    if (videoRef.current) {
+      if (isVideoPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsVideoPlaying(!isVideoPlaying);
+    }
+  };
+
   const timeline = [
     {
       year: "2020",
@@ -49,7 +65,22 @@ const About = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-32 overflow-hidden bg-gradient-to-b from-coffee-dark via-background to-background">
+      <section className="relative pt-32 pb-32 overflow-hidden">
+        {/* Video Background */}
+        <div className="absolute inset-0 w-full h-full overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute top-0 left-0 w-full h-full object-cover"
+          >
+            <source src="/videos/about-hero.mp4" type="video/mp4" />
+          </video>
+          {/* Dark overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-coffee-dark/80 via-coffee-dark/70 to-background/95" />
+        </div>
+
         {/* Background decorative "coffee" text */}
         <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none select-none hidden lg:block">
           <div className="text-[180px] font-display font-bold text-accent/[0.07] leading-none tracking-tight">
@@ -131,15 +162,17 @@ const About = () => {
                   transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
                 />
 
-                {/* Inner gradient circle */}
-                <div className="absolute inset-4 rounded-full bg-gradient-to-br from-coffee-medium via-espresso to-coffee-dark flex items-center justify-center shadow-2xl">
-                  {/* Coffee cup icon */}
-                  <motion.div
-                    animate={{ y: [-5, 5, -5] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <Coffee className="w-24 h-24 md:w-32 md:h-32 text-cream" />
-                  </motion.div>
+                {/* Inner gradient circle with Lottie animation */}
+                <div className="absolute inset-4 rounded-full bg-gradient-to-br from-coffee-medium via-espresso to-coffee-dark flex items-center justify-center shadow-2xl overflow-hidden">
+                  {/* Lottie coffee animation */}
+                  <div className="w-52 h-52 md:w-72 md:h-72">
+                    <DotLottieReact
+                      src="https://lottie.host/d88be254-5262-4231-ba92-3a957eb11ea8/qsftjuydT3.lottie"
+                      loop
+                      autoplay
+                      style={{ width: "100%", height: "100%" }}
+                    />
+                  </div>
                 </div>
 
                 {/* Steam effect */}
@@ -191,8 +224,15 @@ const About = () => {
           </div>
         </div>
 
-        {/* Gradient fade to next section */}
-        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
+        {/* Enhanced gradient fade to next section */}
+        <div className="absolute bottom-0 left-0 right-0 h-64 pointer-events-none">
+          {/* Primary fade layer */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+          {/* Secondary subtle fade layer for added depth */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+          {/* Accent color hint for visual interest */}
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent/20 to-transparent" />
+        </div>
       </section>
 
       {/* Story Timeline */}
@@ -307,18 +347,31 @@ const About = () => {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="aspect-square rounded-2xl bg-gradient-to-br from-coffee-medium to-espresso overflow-hidden relative">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <Coffee className="w-24 h-24 text-accent mx-auto mb-4" />
-                    <span className="font-display text-2xl font-bold text-foreground">
-                      Robusta Only
-                    </span>
-                  </div>
-                </div>
-                {/* Decorative elements */}
-                <div className="absolute top-8 right-8 w-20 h-20 border-2 border-accent/20 rounded-full" />
-                <div className="absolute bottom-12 left-12 w-32 h-32 border border-accent/10 rounded-full" />
+              <div className="aspect-[9/16] max-h-[500px] rounded-2xl overflow-hidden relative shadow-2xl mx-auto">
+                {/* Video Player */}
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                >
+                  <source src="/videos/Rabuste.mp4" type="video/mp4" />
+                </video>
+
+                {/* Play/Pause Button Overlay */}
+                <button
+                  onClick={toggleVideo}
+                  className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors duration-300 shadow-lg border border-accent/20"
+                  aria-label={isVideoPlaying ? "Pause video" : "Play video"}
+                >
+                  {isVideoPlaying ? (
+                    <Pause className="w-5 h-5 text-accent" />
+                  ) : (
+                    <Play className="w-5 h-5 text-accent ml-0.5" />
+                  )}
+                </button>
               </div>
             </motion.div>
           </div>
@@ -419,42 +472,32 @@ const About = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="relative"
+              className="relative flex items-center justify-center"
             >
-              <div className="aspect-square rounded-2xl bg-gradient-to-br from-coffee-medium/50 to-espresso/80 p-8 flex items-center justify-center relative overflow-hidden">
-                {/* Animated coffee bean */}
-                <motion.div
-                  animate={{ rotate: [0, 5, 0, -5, 0] }}
-                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                  className="relative z-10"
-                >
-                  <svg className="w-48 h-48 text-accent" viewBox="0 0 100 100" fill="currentColor">
-                    <ellipse cx="50" cy="50" rx="35" ry="45" />
-                    <path d="M50 10 Q55 50 50 90" stroke="hsl(var(--espresso))" strokeWidth="4" fill="none" />
-                  </svg>
-                </motion.div>
+              {/* Video styled as animation */}
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                {/* Glow effect behind video */}
+                <div className="absolute -inset-4 bg-gradient-to-br from-accent/20 via-transparent to-coffee-medium/30 blur-2xl" />
 
-                {/* Floating particles */}
-                {[...Array(8)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="absolute w-2 h-2 bg-accent/40 rounded-full"
-                    style={{
-                      left: `${20 + Math.random() * 60}%`,
-                      top: `${20 + Math.random() * 60}%`,
-                    }}
-                    animate={{
-                      y: [-10, 10, -10],
-                      opacity: [0.3, 0.7, 0.3],
-                      scale: [1, 1.2, 1],
-                    }}
-                    transition={{
-                      duration: 3 + Math.random() * 2,
-                      repeat: Infinity,
-                      delay: i * 0.3,
-                    }}
-                  />
-                ))}
+                {/* Video container */}
+                <div className="relative aspect-[9/16] max-h-[450px] rounded-2xl overflow-hidden">
+                  <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                    style={{ pointerEvents: 'none' }}
+                  >
+                    <source src="/videos/about-tasteflavor.mp4" type="video/mp4" />
+                  </video>
+
+                  {/* Subtle vignette overlay for animation feel */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-espresso/20 via-transparent to-espresso/10 pointer-events-none" />
+
+                  {/* Soft inner glow border */}
+                  <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-accent/10 pointer-events-none" />
+                </div>
               </div>
             </motion.div>
           </div>
