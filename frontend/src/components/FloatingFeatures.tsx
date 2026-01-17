@@ -1,37 +1,32 @@
 import { motion } from "framer-motion";
-import { Coffee, Palette, Sparkles, Users } from "lucide-react";
-
-const features = [
-    {
-        icon: Coffee,
-        title: "Bold Flavors",
-        description: "Premium Robusta beans sourced directly for maximum intensity.",
-        color: "bg-orange-500/10 text-orange-500"
-    },
-    {
-        icon: Palette,
-        title: "Art Gallery",
-        description: "A rotating showcase of fine art within our cafe space.",
-        color: "bg-purple-500/10 text-purple-500"
-    },
-    {
-        id: 3,
-        icon: Users,
-        title: "Community",
-        description: "Workshops and events that bring coffee lovers together.",
-        color: "bg-blue-500/10 text-blue-500"
-    },
-    {
-        icon: Sparkles,
-        title: "Innovation",
-        description: "AI Baristas and VR tours redefining the cafe experience.",
-        color: "bg-emerald-500/10 text-emerald-500"
-    },
-];
+import espresso from '../assets/menu/robusta-espresso.jpg';
+import frappe from '../assets/menu/robusta-frappe.jpg';
+import cappuccino from '../assets/menu/robusta-cappuccino.jpg';
+import tonic from '../assets/menu/espresso-tonic.jpg';
 
 const FloatingFeatures = () => {
     return (
-        <section className="py-32 bg-background relative overflow-hidden">
+        <section className="py-32 relative overflow-hidden bg-[#251912]">
+            {/* Background Pattern */}
+            <motion.div 
+                className="absolute inset-0 opacity-[0.05]"
+                animate={{ 
+                    backgroundPosition: ["0px 0px", "60px 60px"] 
+                }}
+                transition={{ 
+                    duration: 20, 
+                    ease: "linear", 
+                    repeat: Infinity 
+                }}
+                style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c2.2 0 3.5 2 2 4s-3 3-3 5c0 1.5 1.5 2 3 2v2c-2.5 0-4.5-1.5-4.5-4s3-3 3-5c0-1.5-1.5-2-3-2V5z' fill='%23ffffff' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+                    backgroundSize: '60px 60px'
+                }}
+            />
+
+            {/* Gradient Fade Overlay at Bottom */}
+            <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent via-[#251912] to-[#110F0D] z-10" />
+
             <div className="container-custom relative z-10 px-6">
                 <div className="grid md:grid-cols-2 gap-16 items-center">
 
@@ -41,35 +36,72 @@ const FloatingFeatures = () => {
                         viewport={{ once: true }}
                         transition={{ duration: 0.8 }}
                     >
-                        <h2 className="font-display text-5xl md:text-7xl font-bold mb-6 text-foreground">
+                        <h2 className="font-display text-5xl md:text-7xl font-bold mb-6 text-white leading-tight">
                             Crafting <br />
-                            <span className="text-accent italic">Unique</span> <br />
+                            <span className="text-[#BC653B] italic">Unique</span> <br />
                             Moments.
                         </h2>
-                        <p className="text-xl text-muted-foreground leading-relaxed">
+                        <p className="text-xl text-white/80 leading-relaxed max-w-lg">
                             We're not just serving coffee; we're curating an atmosphere where creativity,
-                            technology, and taste collide.
+                            technology, and taste collide. Experience the difference in every cup.
                         </p>
+                        
+                        <div className="mt-8">
+                             <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="px-8 py-3 bg-[#BC653B] text-white rounded-full font-medium shadow-lg hover:shadow-[#BC653B]/20 transition-all"
+                            >
+                                Explore Menu
+                            </motion.button>
+                        </div>
                     </motion.div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        {features.map((feature, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 50 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.5, delay: i * 0.1 }}
-                                whileHover={{ y: -10, scale: 1.02 }}
-                                className="p-8 rounded-3xl bg-card border border-border shadow-lg hover:shadow-xl transition-all"
-                            >
-                                <div className={`w-12 h-12 rounded-2xl ${feature.color} flex items-center justify-center mb-6`}>
-                                    <feature.icon className="w-6 h-6" />
-                                </div>
-                                <h3 className="text-xl font-bold mb-2 text-foreground">{feature.title}</h3>
-                                <p className="text-muted-foreground">{feature.description}</p>
-                            </motion.div>
-                        ))}
+                    {/* Image Grid */}
+                    <div className="grid grid-cols-2 gap-6 max-w-[75%] mx-auto">
+                         <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8 }}
+                            className="aspect-[4/5] rounded-2xl overflow-hidden relative group"
+                        >
+                            <img src={espresso} alt="Espresso" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
+                        </motion.div>
+                        
+                        <motion.div
+                            initial={{ opacity: 0, y: 40 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8, delay: 0.1 }}
+                            className="aspect-[4/5] rounded-2xl overflow-hidden relative group mt-8"
+                        >
+                            <img src={frappe} alt="Frappe" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8, delay: 0.2 }}
+                            className="aspect-[4/5] rounded-2xl overflow-hidden relative group -mt-8"
+                        >
+                            <img src={cappuccino} alt="Cappuccino" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 40 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8, delay: 0.3 }}
+                            className="aspect-[4/5] rounded-2xl overflow-hidden relative group"
+                        >
+                            <img src={tonic} alt="Tonic" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
+                        </motion.div>
                     </div>
 
                 </div>
