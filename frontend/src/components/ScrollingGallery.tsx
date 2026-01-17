@@ -8,7 +8,8 @@ interface Artwork {
     _id: string;
     title: string;
     artist: string;
-    image?: string;
+    imageUrl?: string;
+    price: number;
 }
 
 const ScrollingGallery = () => {
@@ -35,7 +36,7 @@ const ScrollingGallery = () => {
                 const res = await fetch(`${API_URL}/api/art`);
                 if (res.ok) {
                     const data = await res.json();
-                    // Take first 6 for the preview
+                    // Take first 3 for the preview
                     setArtworks(Array.isArray(data) ? data.slice(0, 3) : []);
                 }
             } catch (err) {
@@ -153,9 +154,9 @@ const ArtCard = ({ item, index, API_URL }: { item: Artwork, index: number, API_U
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-3xl transform -rotate-2 scale-105 opacity-0 group-hover:opacity-100 transition-all duration-500 blur-xl" />
 
             <div className="relative h-full w-full rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 shadow-2xl">
-                {item.image ? (
+                {item.imageUrl ? (
                     <img
-                        src={`${API_URL}/${item.image.replace(/\\/g, "/")}`}
+                        src={item.imageUrl.startsWith('http') ? item.imageUrl : `${API_URL}/${item.imageUrl.replace(/\\/g, "/")}`}
                         alt={item.title}
                         className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
                     />
