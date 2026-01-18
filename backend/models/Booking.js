@@ -59,7 +59,7 @@ const bookingSchema = new mongoose.Schema({
 
 // --- Indexes ---
 bookingSchema.index({ workshop: 1, 'participantDetails.email': 1 }, { unique: true });
-bookingSchema.index({ registrationNumber: 1 }, { unique: true });
+// Duplicate index definition removed: bookingSchema.index({ registrationNumber: 1 }, { unique: true });
 
 // --- FIXED Pre-save Hook ---
 // We remove 'next' and rely on the async/await promise resolution

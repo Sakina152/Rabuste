@@ -107,6 +107,12 @@ const getRecentActivity = (orders: any[]) => {
         time: timeAgo,
         type: "art"
       };
+    } else if (order.orderType === 'WORKSHOP') {
+      return {
+        action: `Workshop booking: ₹${order.totalPrice}`,
+        time: timeAgo,
+        type: "menu" // Re-using accent color or maybe 'art' color? Let's stick to blue/menu style or add new.
+      };
     } else {
       return {
         action: `Menu order: ₹${order.totalPrice} (${order.orderItems?.length || 0} items)`,

@@ -1,39 +1,44 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ScrollToTop from "@/components/ScrollToTop";
-import Index from "./pages/Index";
-import About from "./pages/About";
-import Login from "./pages/UserLogin";
-import Register from "./pages/UserRegister";
-import Gallery from "./pages/Gallery";
-import Workshops from "./pages/Workshops";
-import WorkshopManager from "@/pages/admin/WorkshopManager";
-import InquiryManagement from "@/pages/admin/InquiryManagement";
-import Franchise from "./pages/Franchise";
-import Menu from "./pages/Menu";
-import VirtualTour from "./pages/VirtualTour";
-import MenuManagement from "./pages/admin/MenuManagement";
-import MenuItemForm from "./pages/admin/MenuItemForm";
-import Checkout from "./pages/Checkout";
-import Profile from "@/pages/Profile";
-
 import { CartProvider } from "@/context/CartContext";
+<<<<<<< Updated upstream
 import { NotificationProvider } from "@/context/NotificationContext";
 import GalleryManagement from "@/pages/admin/GalleryManagement";
+=======
+>>>>>>> Stashed changes
 import AiBaristaBot from "./components/aiBaristaBot";
-
-import OrderSuccess from "./pages/OrderSuccess";
-
-import AdminRegister from "./pages/admin/AdminRegister";
-import AdminLogin from "./pages/admin/AdminLogin";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import OrderManagement from "./pages/admin/OrderManagement";
-import Analytics from "./pages/admin/Analytics";
 import ProtectedRoute from "./components/ProtectedRoute";
-import NotFound from "./pages/NotFound";
+import CoffeeLoader from "./components/CoffeeLoader";
+
+// Lazy Pages
+const Index = lazy(() => import("./pages/Index"));
+const About = lazy(() => import("./pages/About"));
+const Login = lazy(() => import("./pages/UserLogin"));
+const Register = lazy(() => import("./pages/UserRegister"));
+const Gallery = lazy(() => import("./pages/Gallery"));
+const Workshops = lazy(() => import("./pages/Workshops"));
+const WorkshopManager = lazy(() => import("@/pages/admin/WorkshopManager"));
+const InquiryManagement = lazy(() => import("@/pages/admin/InquiryManagement"));
+const Franchise = lazy(() => import("./pages/Franchise"));
+const Menu = lazy(() => import("./pages/Menu"));
+const VirtualTour = lazy(() => import("./pages/VirtualTour"));
+const MenuManagement = lazy(() => import("./pages/admin/MenuManagement"));
+const MenuItemForm = lazy(() => import("./pages/admin/MenuItemForm"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const GalleryManagement = lazy(() => import("@/pages/admin/GalleryManagement"));
+const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
+const AdminRegister = lazy(() => import("./pages/admin/AdminRegister"));
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const OrderManagement = lazy(() => import("./pages/admin/OrderManagement"));
+const Analytics = lazy(() => import("./pages/admin/Analytics"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
@@ -45,10 +50,18 @@ const App = () => (
           <Toaster />
           <Sonner />
 
+<<<<<<< Updated upstream
           <BrowserRouter>
             <ScrollToTop />
             <Routes>
               {/* 
+=======
+        <BrowserRouter>
+          <ScrollToTop />
+          <Suspense fallback={<CoffeeLoader />}>
+            <Routes>
+            {/* 
+>>>>>>> Stashed changes
               PUBLIC ROUTES - Accessible to everyone (logged in or not)
               "/" = Landing page with intro animation + full homepage
               All main pages are public for browsing
@@ -97,12 +110,21 @@ const App = () => (
                 <Route path="/profile" element={<Profile />} />
               </Route>
 
+<<<<<<< Updated upstream
               {/* 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
             <AiBaristaBot />
           </BrowserRouter>
         </NotificationProvider>
+=======
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          </Suspense>
+          <AiBaristaBot />
+        </BrowserRouter>
+>>>>>>> Stashed changes
       </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>

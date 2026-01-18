@@ -29,7 +29,17 @@ const NotificationContext = createContext<NotificationContextType>({
     fetchNotifications: async () => { },
 });
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const getApiUrl = () => {
+    if (import.meta.env.VITE_API_BASE_URL) return import.meta.env.VITE_API_BASE_URL;
+    // If running locally, assume backend is on the same hostname at port 5000
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+        return "http://localhost:5000";
+    }
+    // For local network testing (e.g. mobile accessing computer IP)
+    return `http://${window.location.hostname}:5000`;
+};
+
+const API_URL = getApiUrl();
 
 export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);

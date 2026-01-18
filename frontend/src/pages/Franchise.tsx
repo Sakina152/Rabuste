@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form"; // Added for form handling
-import axios from "axios"; // Added for API calls
 import { motion } from "framer-motion";
 import {
+<<<<<<< Updated upstream
   ArrowRight,
   CheckCircle,
   Building,
@@ -11,147 +10,23 @@ import {
   Coffee,
   Palette,
   Zap,
-  Loader2,
+=======
+>>>>>>> Stashed changes
   Heart,
   Wallet,
   MapPin,
   Award,
+  Users,
   GraduationCap,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useToast } from "@/hooks/use-toast";
-
-const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-
-// Define the shape of data sending to Backend
-interface FranchiseFormData {
-  name: string;
-  email: string;
-  phone: string;
-  location: string;
-  budget: string; // Changed from 'investment' to match Backend
-  experience: string; // Changed from 'message' to match Backend
-}
-
-// Benefit type for carousel
-interface Benefit {
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  description: string;
-}
-
-// Mobile Auto-Rotating Carousel Component
-const MobileBenefitsCarousel = ({ benefits }: { benefits: Benefit[] }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % benefits.length);
-    }, 1600); // Rotate every 1.6 seconds
-
-    return () => clearInterval(interval);
-  }, [benefits.length]);
-
-  return (
-    <div className="md:hidden relative overflow-hidden">
-      {/* Cards Container */}
-      <div
-        className="flex transition-transform duration-700 ease-in-out"
-        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-      >
-        {benefits.map((benefit) => (
-          <div
-            key={benefit.title}
-            className="w-full flex-shrink-0 px-2"
-          >
-            <div className="p-6 rounded-2xl bg-card border border-border">
-              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4">
-                <benefit.icon className="w-6 h-6 text-accent" />
-              </div>
-              <h3 className="font-display text-lg font-semibold text-foreground mb-2">
-                {benefit.title}
-              </h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                {benefit.description}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Dot Indicators */}
-      <div className="flex justify-center gap-2 mt-6">
-        {benefits.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentIndex(index)}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentIndex
-              ? "bg-accent w-6"
-              : "bg-muted-foreground/30"
-              }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
+import FranchiseFormats from "@/components/FranchiseFormats";
+import FranchiseBenefits from "@/components/FranchiseBenefits";
+import FranchiseFAQ from "@/components/FranchiseFAQ";
+import FranchiseCTA from "@/components/FranchiseCTA";
 
 const Franchise = () => {
-  const { toast } = useToast();
-
-  // React Hook Form setup
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<FranchiseFormData>();
-
-  const benefits = [
-    {
-      icon: Coffee,
-      title: "Unique Concept",
-      description:
-        "A differentiated café model focusing exclusively on premium Robusta coffee.",
-    },
-    {
-      icon: Palette,
-      title: "Art Integration",
-      description:
-        "Built-in revenue stream through art sales and gallery partnerships.",
-    },
-    {
-      icon: TrendingUp,
-      title: "Scalable Model",
-      description:
-        "Compact footprint designed for efficient operations and quick scaling.",
-    },
-    {
-      icon: Users,
-      title: "Community Focus",
-      description:
-        "Workshop programs that build loyal customer communities and recurring revenue.",
-    },
-    {
-      icon: Building,
-      title: "Full Support",
-      description:
-        "Comprehensive training, marketing support, and operational guidance.",
-    },
-    {
-      icon: Zap,
-      title: "Tech-Enabled",
-      description:
-        "AI-enhanced customer experience and modern operational systems.",
-    },
-  ];
-
   const steps = [
     {
       number: "01",
@@ -179,29 +54,6 @@ const Franchise = () => {
       description: "Open your Rabuste Coffee café with full support.",
     },
   ];
-
-  // The Actual Submit Function
-  const onSubmit = async (data: FranchiseFormData) => {
-    try {
-      // Send data to your backend
-      await axios.post(`${API}/api/franchise`, data);
-
-      toast({
-        title: "Inquiry Submitted!",
-        description: "Thank you! We have received your application and emailed you a confirmation.",
-        variant: "default",
-      });
-
-      reset(); // Clear the form
-    } catch (error: any) {
-      console.error("Submission failed:", error);
-      toast({
-        title: "Submission Failed",
-        description: error.response?.data?.message || "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -309,50 +161,10 @@ const Franchise = () => {
       </section>
 
       {/* Benefits Grid */}
-      <section className="section-padding bg-background">
-        <div className="container-custom">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <span className="text-accent text-sm tracking-[0.3em] uppercase font-body">
-              Why Partner With Us
-            </span>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mt-4">
-              The Rabuste Advantage
-            </h2>
-          </motion.div>
+      <FranchiseBenefits />
 
-          {/* Mobile Auto-Rotating Carousel */}
-          <MobileBenefitsCarousel benefits={benefits} />
-
-          {/* Desktop Grid - Hidden on mobile */}
-          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {benefits.map((benefit, index) => (
-              <motion.div
-                key={benefit.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="group p-8 rounded-2xl bg-card border border-border hover:border-accent/50 transition-all duration-500 hover:shadow-glow"
-              >
-                <div className="w-14 h-14 rounded-xl bg-accent/10 flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
-                  <benefit.icon className="w-7 h-7 text-accent" />
-                </div>
-                <h3 className="font-display text-xl font-semibold text-foreground mb-3">
-                  {benefit.title}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {benefit.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Investment Formats */}
+      <FranchiseFormats />
 
       {/* Process Steps */}
       <section className="section-padding bg-coffee-dark">
@@ -474,7 +286,6 @@ const Franchise = () => {
           <div className="relative h-[450px] lg:h-auto w-full overflow-hidden lg:overflow-visible mt-8 lg:mt-0">
 
             {/* Image 1: Main Environment - Top Right */}
-            {/* Mobile: Dominant top-right, giving breath */}
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -490,7 +301,6 @@ const Franchise = () => {
             </motion.div>
 
             {/* Image 3: Meeting - Middle Left Floating */}
-            {/* Mobile: Smaller badge style on left edge */}
             <motion.div
               initial={{ opacity: 0, y: -30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -506,7 +316,6 @@ const Franchise = () => {
             </motion.div>
 
             {/* Image 2: Barista - Bottom Left */}
-            {/* Mobile: Anchored bottom-left, vertical */}
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -522,7 +331,6 @@ const Franchise = () => {
             </motion.div>
 
             {/* Floating Glass Card - Bottom Right */}
-            {/* Mobile: Compact, aligned right */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -545,28 +353,10 @@ const Franchise = () => {
         </div>
       </section>
 
-      {/* Inquiry Form */}
-      <section className="section-padding bg-coffee-dark">
-        <div className="container-custom">
-          <div className="max-w-2xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
-            >
-              <span className="text-accent text-sm tracking-[0.3em] uppercase font-body">
-                Get Started
-              </span>
-              <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mt-4">
-                Franchise Inquiry
-              </h2>
-              <p className="text-muted-foreground text-lg mt-4">
-                Ready to bring Rabuste Coffee to your community? Fill out the form
-                below and our franchise team will be in touch.
-              </p>
-            </motion.div>
+      {/* FAQ Section */}
+      <FranchiseFAQ />
 
+<<<<<<< Updated upstream
             <motion.form
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -654,7 +444,26 @@ const Franchise = () => {
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <svg
+                      className="mr-2 h-4 w-4 animate-spin"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
                     Sending Inquiry...
                   </>
                 ) : (
@@ -668,6 +477,10 @@ const Franchise = () => {
           </div>
         </div>
       </section>
+=======
+      {/* Final CTA */}
+      <FranchiseCTA />
+>>>>>>> Stashed changes
 
       <Footer />
     </div>

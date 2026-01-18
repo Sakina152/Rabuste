@@ -19,15 +19,17 @@ export const submitFranchise = async (req, res) => {
       experience
     });
 
-    // 2. Alert the Admin (Plain text is fine for you)
-    await sendEmail({
-      email: process.env.EMAIL_USER,
-      subject: `🔥 New Franchise Lead: ${name}`,
-      message: `You have a new franchise inquiry! \n\nName: ${name} \nBudget: ${budget} \nLocation: ${location} \nPhone: ${phone} \nEmail: ${email}`
-    });
+    // 2. Try to Send Emails (Don't block success if email fails)
+    try {
+      // Alert the Admin
+      await sendEmail({
+        email: process.env.EMAIL_USER,
+        subject: `🔥 New Franchise Lead: ${name}`,
+        message: `You have a new franchise inquiry! \n\nName: ${name} \nBudget: ${budget} \nLocation: ${location} \nPhone: ${phone} \nEmail: ${email}`
+      });
 
-    // 3. Send Beautiful HTML Email to Customer
-    const emailTemplate = `
+      // Send Beautiful HTML Email to Customer
+      const emailTemplate = `
       <div style="background-color: #1a1a1a; padding: 40px; font-family: Arial, sans-serif; color: #ffffff;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #2a2a2a; padding: 30px; border-radius: 10px; border: 1px solid #333;">
           
@@ -67,12 +69,19 @@ export const submitFranchise = async (req, res) => {
       </div>
     `;
 
-    await sendEmail({
-      email: email, 
-      subject: 'Application Received - Rabuste Coffee',
-      message: `Hi ${name},\n\nThank you for your interest! We received your application for ${location}.`, // Fallback text
-      html: emailTemplate // <--- This sends the design
-    });
+      await sendEmail({
+        email: email, 
+        subject: 'Application Received - Rabuste Coffee',
+        message: `Hi ${name},\n\nThank you for your interest! We received your application for ${location}.`, 
+        html: emailTemplate 
+      });
+      
+    } catch (emailError) {
+      console.warn("⚠️ Notification emails failed to send (Bad Credentials), but database record was saved.");
+      console.warn(emailError.message);
+      // Suppress error so frontend receives success response
+    }
+
 
     res.status(201).json({
       success: true,

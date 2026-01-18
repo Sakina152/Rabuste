@@ -45,13 +45,12 @@ initSocket(server);
 
 // 2. UPDATED CORS CONFIGURATION
 app.use(cors({
-  origin: [
-    "http://localhost:5173", // Vite default port
-    "http://localhost:8080", // Your current frontend port
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:8080",
-    "https://rabuste-omegon.vercel.app"
-  ],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    // Allow any origin for development
+    return callback(null, true);
+  },
   credentials: true // Important for headers/cookies
 }));
 

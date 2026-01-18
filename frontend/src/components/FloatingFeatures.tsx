@@ -42,15 +42,7 @@ const FloatingFeatures = () => {
                             technology, and taste collide. Experience the difference in every cup.
                         </p>
 
-                        <div className="mt-8">
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="px-8 py-3 bg-[#BC653B] text-white rounded-full font-medium shadow-lg hover:shadow-[#BC653B]/20 transition-all"
-                            >
-                                Explore Menu
-                            </motion.button>
-                        </div>
+
                     </motion.div>
 
                     {/* Image Grid */}
