@@ -109,7 +109,8 @@ export const useRazorpay = () => {
 
       if (requestType === 'MENU') {
         payload = { type: 'MENU', cartItems };
-        orderAmount = cartTotal;
+        // Include 5% Tax to match backend and Checkout display
+        orderAmount = cartTotal * 1.05;
       } else if (requestType === 'ART') {
         payload = { type: 'ART', itemId: data._id };
         orderAmount = data.price || 0;

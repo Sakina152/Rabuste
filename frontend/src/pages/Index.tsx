@@ -6,6 +6,7 @@ import IntroAnimation from "@/components/IntroAnimation";
 import HeroParallax from "@/components/HeroParallax";
 import ScrollingGallery from "@/components/ScrollingGallery";
 import FloatingFeatures from "@/components/FloatingFeatures";
+import Testimonials from "@/components/Testimonials"; // Imported Testimonials
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, MapPin, Phone, Mail } from "lucide-react";
@@ -172,7 +173,10 @@ const Index = () => {
           </div>
         </section>
 
-        {/* 5. Visit Us Section (Map Restored) */}
+        {/* 5. Testimonials Section */}
+        <Testimonials />
+
+        {/* 6. Visit Us Section (Map Restored) */}
         <section className="section-padding bg-coffee-dark relative overflow-hidden">
           <FloatingBeansBackground />
           <div className="container-custom grid lg:grid-cols-2 gap-12 items-start relative z-10">

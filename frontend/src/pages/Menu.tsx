@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Coffee, Snowflake, UtensilsCrossed, Clock, Sparkles, ShoppingBag, Search, X } from "lucide-react";
+import { Coffee, Snowflake, UtensilsCrossed, Clock, Sparkles, ShoppingBag, Search, X, Mic, MicOff } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button"; // Import Button
@@ -13,6 +13,12 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"; // Import Dialog components
 import { cn } from "@/lib/utils"; // Import cn utility
+
+// ... imports ...
+
+// Helper for Speech Recognition Type
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
 // Section images
 import espressoImg from "@/assets/menu/robusta-espresso.jpg";
@@ -207,7 +213,46 @@ const Menu = () => {
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isListening, setIsListening] = useState(false); // State for voice search
   const { addToCart } = useCart();
+
+  // Voice Search Handler
+  const toggleVoiceSearch = () => {
+    if (isListening) {
+      setIsListening(false);
+      return;
+    }
+
+    if (!SpeechRecognition) {
+      alert("Your browser does not support voice search. Please try Chrome or Edge.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    setIsListening(true);
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setSearchQuery(transcript);
+      setIsListening(false);
+    };
+
+    recognition.onspeechend = () => {
+      recognition.stop();
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error", event.error);
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
 
   const categories = ["All", ...menuSections.map((s) => s.title)];
 
@@ -398,20 +443,43 @@ const Menu = () => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search for an item"
+                placeholder={isListening ? "Listening..." : "Search for an item"}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-12 py-3 rounded-full bg-card/50 border border-border/30 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all"
+                className={cn(
+                  "w-full pl-12 pr-20 py-3 rounded-full bg-card/50 border border-border/30 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all",
+                  isListening && "ring-2 ring-accent/50 border-accent/50 bg-accent/5"
+                )}
               />
-              {searchQuery && (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="p-1 hover:bg-accent/10 rounded-full transition-colors"
+                  >
+                    <X className="w-4 h-4 text-muted-foreground hover:text-accent" />
+                  </button>
+                )}
+
                 <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-accent/10 rounded-full transition-colors"
+                  onClick={toggleVoiceSearch}
+                  className={cn(
+                    "p-2 rounded-full transition-all duration-300",
+                    isListening
+                      ? "bg-red-500/10 text-red-500 hover:bg-red-500/20 animate-pulse"
+                      : "hover:bg-accent/10 text-muted-foreground hover:text-accent"
+                  )}
+                  title="Search by voice"
                 >
-                  <X className="w-4 h-4 text-muted-foreground hover:text-accent" />
+                  {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                 </button>
-              )}
+              </div>
             </div>
+            {isListening && (
+              <p className="text-center text-xs text-accent mt-2 animate-pulse">
+                Try saying "Espresso" or "Cappuccino"...
+              </p>
+            )}
           </div>
           {/* Category Filter - Two-Row Horizontal Scroll */}
           <div className="relative mb-10 -mx-6 px-6 md:mx-0 md:px-0">

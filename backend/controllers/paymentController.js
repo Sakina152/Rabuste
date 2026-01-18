@@ -81,7 +81,11 @@ export const createOrder = asyncHandler(async (req, res) => {
         return acc + (item.price * (item.quantity || 1));
       }, 0);
     }
+    // Apply 5% Tax (GST)
+    const taxAmount = totalAmount * 0.05;
+    totalAmount += taxAmount;
   }
+
   // SCENARIO C: Workshop Registration
   else if (type === 'WORKSHOP' && itemId) {
     const workshop = await Workshop.findById(itemId);
