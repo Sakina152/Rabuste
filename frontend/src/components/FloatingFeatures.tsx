@@ -1,8 +1,4 @@
 import { motion } from "framer-motion";
-import espresso from '../assets/menu/robusta-espresso.jpg';
-import frappe from '../assets/menu/robusta-frappe.jpg';
-import cappuccino from '../assets/menu/robusta-cappuccino.jpg';
-import tonic from '../assets/menu/espresso-tonic.jpg';
 
 const FloatingFeatures = () => {
     return (
@@ -66,7 +62,7 @@ const FloatingFeatures = () => {
                             transition={{ duration: 0.8 }}
                             className="aspect-[4/5] rounded-2xl overflow-hidden relative group"
                         >
-                            <img src={espresso} alt="Espresso" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
+                            <img src="https://res.cloudinary.com/dnk1a58sg/image/upload/v1768706696/2_ltegwi.png" alt="Espresso" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
                             <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                         </motion.div>
 
@@ -77,7 +73,7 @@ const FloatingFeatures = () => {
                             transition={{ duration: 0.8, delay: 0.1 }}
                             className="aspect-[4/5] rounded-2xl overflow-hidden relative group mt-8"
                         >
-                            <img src={frappe} alt="Frappe" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
+                            <img src="https://res.cloudinary.com/dnk1a58sg/image/upload/v1768706696/4_izqkxt.png" alt="Frappe" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
                             <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                         </motion.div>
 
@@ -88,7 +84,7 @@ const FloatingFeatures = () => {
                             transition={{ duration: 0.8, delay: 0.2 }}
                             className="aspect-[4/5] rounded-2xl overflow-hidden relative group -mt-8"
                         >
-                            <img src={cappuccino} alt="Cappuccino" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
+                            <img src="https://res.cloudinary.com/dnk1a58sg/image/upload/v1768706696/1_zgaucu.png" alt="Cappuccino" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
                             <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                         </motion.div>
 
@@ -99,7 +95,7 @@ const FloatingFeatures = () => {
                             transition={{ duration: 0.8, delay: 0.3 }}
                             className="aspect-[4/5] rounded-2xl overflow-hidden relative group"
                         >
-                            <img src={tonic} alt="Tonic" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
+                            <img src="https://res.cloudinary.com/dnk1a58sg/image/upload/v1768706696/3_gr6t5m.png" alt="Tonic" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
                             <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                         </motion.div>
                     </div>
