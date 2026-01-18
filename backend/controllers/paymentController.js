@@ -259,7 +259,9 @@ export const verifyPayment = asyncHandler(async (req, res) => {
             totalAmount: orderData.amount, // Amount is already in rupees from frontend
             paymentStatus: 'completed',
             paymentId: paymentId,
-            status: 'confirmed'
+            status: 'confirmed',
+            isPaid: true,
+            paidAt: new Date()
           };
 
           // Only add user if authenticated

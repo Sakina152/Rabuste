@@ -168,7 +168,7 @@ export default function AdminDashboard() {
         setDashboardStats(statsResponse.data);
 
         // Fetch recent orders
-        const ordersResponse = await axios.get(`${API_BASE}/api/orders?status=completed`);
+        const ordersResponse = await axios.get(`${API_BASE}/api/orders`);
         setRecentOrders(ordersResponse.data || []);
       } catch (error: any) {
         console.error('Error fetching dashboard data:', error);
@@ -421,7 +421,7 @@ export default function AdminDashboard() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
+                    <div className="flex flex-col gap-6">
                       {getQuickActions(dashboardStats).map((action, index) => (
                         <Link to={action.href || "#"} key={action.title}>
                           <motion.button

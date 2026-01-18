@@ -31,7 +31,7 @@ export const getWeeklySalesStats = async (req, res) => {
 
     const startOfLastWeek = new Date(now);
     startOfLastWeek.setDate(now.getDate() - 14);
-    
+
     const thisWeekSales = await Art.countDocuments({
       status: 'Sold',
       soldAt: { $gte: startOfThisWeek }
@@ -86,9 +86,9 @@ export const getDashboardStats = async (req, res) => {
 
     // Menu Orders Statistics
     const totalMenuOrders = await Order.countDocuments({ orderType: 'MENU' });
-    const paidMenuOrders = await Order.countDocuments({ 
-      orderType: 'MENU', 
-      isPaid: true 
+    const paidMenuOrders = await Order.countDocuments({
+      orderType: 'MENU',
+      isPaid: true
     });
     const menuRevenue = await Order.aggregate([
       { $match: { orderType: 'MENU', isPaid: true } },
@@ -113,7 +113,7 @@ export const getDashboardStats = async (req, res) => {
     lastWeekStart.setDate(lastWeekStart.getDate() - 7);
     const lastWeekOrders = await Order.countDocuments({
       isPaid: true,
-      createdAt: { 
+      createdAt: {
         $gte: lastWeekStart,
         $lt: startOfThisWeek
       }
@@ -121,11 +121,11 @@ export const getDashboardStats = async (req, res) => {
 
     // This week revenue
     const thisWeekRevenue = await Order.aggregate([
-      { 
-        $match: { 
+      {
+        $match: {
           isPaid: true,
           createdAt: { $gte: startOfThisWeek }
-        } 
+        }
       },
       { $group: { _id: null, total: { $sum: '$totalPrice' } } }
     ]);
@@ -133,14 +133,14 @@ export const getDashboardStats = async (req, res) => {
 
     // Last week revenue
     const lastWeekRevenue = await Order.aggregate([
-      { 
-        $match: { 
+      {
+        $match: {
           isPaid: true,
-          createdAt: { 
+          createdAt: {
             $gte: lastWeekStart,
             $lt: startOfThisWeek
           }
-        } 
+        }
       },
       { $group: { _id: null, total: { $sum: '$totalPrice' } } }
     ]);
@@ -151,12 +151,12 @@ export const getDashboardStats = async (req, res) => {
     const confirmedWorkshops = await Booking.countDocuments({ status: 'confirmed' });
 
     // Pending franchises
-    const pendingFranchises = await Franchise.countDocuments({ 
-      status: 'pending' 
+    const pendingFranchises = await Franchise.countDocuments({
+      status: 'pending'
     }).catch(() => 0);
 
     // Calculate trends
-    const revenueTrend = lastWeekRevenueTotal > 0 
+    const revenueTrend = lastWeekRevenueTotal > 0
       ? ((thisWeekRevenueTotal - lastWeekRevenueTotal) / lastWeekRevenueTotal * 100).toFixed(1)
       : 0;
     const ordersTrend = lastWeekOrders > 0
@@ -181,7 +181,7 @@ export const getDashboardStats = async (req, res) => {
 
       // Art Stats
       totalArtSold,
-      
+
       // Workshop Stats
       totalWorkshops,
       confirmedWorkshops,
