@@ -7,14 +7,9 @@ Bookings for workshops, a living art gallery with inquiries & purchases, an AI B
 
 <br />
 
+
 <!-- TODO: Replace with your actual demo link -->
 <a href="https://rabuste-omegon.vercel.app" target="_blank"><b>Live Demo</b></a>
-·
-<!-- TODO: Add your demo video link -->
-<a href="#" target="_blank"><b>Video Walkthrough</b></a>
-·
-<!-- TODO: Add your pitch deck link -->
-<a href="#" target="_blank"><b>Pitch Deck</b></a>
 
 <br /><br />
 
@@ -35,8 +30,6 @@ Bookings for workshops, a living art gallery with inquiries & purchases, an AI B
 
 <br /><br />
 
-<!-- Demo GIF Placeholder -->
-<img src="https://placehold.co/1000x500/111827/FFFFFF?text=Demo+GIF+Placeholder+-+Add+your+screen+recording+here" alt="Project Demo GIF Placeholder" />
 
 </div>
 
@@ -391,20 +384,6 @@ Base URL (local): `http://localhost:5000`
 
 ---
 
-## 🖼️ Screenshots (Placeholders)
-
-<!-- Replace these placeholders with real screenshots -->
-<div align="center">
-
-<img src="https://placehold.co/900x500/0B1320/FFFFFF?text=Landing+Page" alt="Landing Page Screenshot" />
-<br /><br />
-<img src="https://placehold.co/900x500/0B1320/FFFFFF?text=Menu+%26+Checkout" alt="Menu & Checkout Screenshot" />
-<br /><br />
-<img src="https://placehold.co/900x500/0B1320/FFFFFF?text=Gallery+%26+Artwork+Details" alt="Gallery Screenshot" />
-<br /><br />
-<img src="https://placehold.co/900x500/0B1320/FFFFFF?text=Admin+Dashboard" alt="Admin Dashboard Screenshot" />
-
-</div>
 
 ---
 

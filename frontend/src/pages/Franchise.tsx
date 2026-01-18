@@ -1,17 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-<<<<<<< Updated upstream
-  ArrowRight,
-  CheckCircle,
-  Building,
-  TrendingUp,
-  Users,
-  Coffee,
-  Palette,
-  Zap,
-=======
->>>>>>> Stashed changes
+
   Heart,
   Wallet,
   MapPin,
@@ -356,131 +346,8 @@ const Franchise = () => {
       {/* FAQ Section */}
       <FranchiseFAQ />
 
-<<<<<<< Updated upstream
-            <motion.form
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              onSubmit={handleSubmit(onSubmit)} // Use Hook Form submit
-              className="space-y-6 bg-card rounded-2xl p-8 border border-border"
-            >
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name *</Label>
-                  <Input
-                    id="name"
-                    {...register("name", { required: "Name is required" })}
-                    placeholder="Your name"
-                  />
-                  {errors.name && <span className="text-red-500 text-xs">{errors.name.message}</span>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    {...register("email", { required: "Email is required" })}
-                    placeholder="your@email.com"
-                  />
-                  {errors.email && <span className="text-red-500 text-xs">{errors.email.message}</span>}
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number *</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    {...register("phone", { required: "Phone is required" })}
-                    placeholder="+1 (555) 000-0000"
-                  />
-                  {errors.phone && <span className="text-red-500 text-xs">{errors.phone.message}</span>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="location">Preferred Location *</Label>
-                  <Input
-                    id="location"
-                    {...register("location", { required: "Location is required" })}
-                    placeholder="City, State/Country"
-                  />
-                  {errors.location && <span className="text-red-500 text-xs">{errors.location.message}</span>}
-                </div>
-              </div>
-
-              {/* UPDATED: Dropdown to match Backend Schema */}
-              <div className="space-y-2">
-                <Label htmlFor="budget">Available Investment Range *</Label>
-                <select
-                  id="budget"
-                  {...register("budget", { required: "Please select a budget" })}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="">Select a range...</option>
-                  <option value="10k-50k">₹10,000 - ₹50,000</option>
-                  <option value="50k-100k">₹50,000 - ₹100,000</option>
-                  <option value="100k+">₹100,000+</option>
-                </select>
-                {errors.budget && <span className="text-red-500 text-xs">{errors.budget.message}</span>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="experience">Tell Us About Yourself</Label>
-                <Textarea
-                  id="experience"
-                  {...register("experience", { required: "This field is required" })}
-                  placeholder="Share your background, why you're interested in Rabuste Coffee, and any relevant experience..."
-                  rows={4}
-                />
-                {errors.experience && <span className="text-red-500 text-xs">{errors.experience.message}</span>}
-              </div>
-
-              <Button
-                type="submit"
-                variant="hero"
-                size="xl"
-                className="w-full"
-                disabled={isSubmitting} // Disable while sending
-              >
-                {isSubmitting ? (
-                  <>
-                    <svg
-                      className="mr-2 h-4 w-4 animate-spin"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Sending Inquiry...
-                  </>
-                ) : (
-                  <>
-                    Submit Inquiry
-                    <ArrowRight className="ml-2" />
-                  </>
-                )}
-              </Button>
-            </motion.form>
-          </div>
-        </div>
-      </section>
-=======
       {/* Final CTA */}
       <FranchiseCTA />
->>>>>>> Stashed changes
 
       <Footer />
     </div>
