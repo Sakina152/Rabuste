@@ -5,6 +5,7 @@ import { Menu, X, Coffee, User, LogOut, LogIn, ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import rabusteLogo from "@/assets/rabuste-logo.png";
+import NotificationDropdown from "./NotificationDropdown";
 
 const navLinks = [
   { name: "Home", path: "/" },
@@ -119,6 +120,9 @@ const Navbar = () => {
           {/* AUTH LOGIC: Show Dropdown OR Login Button */}
           {user ? (
             <div className="flex items-center gap-3">
+              {/* Notification Hub */}
+              <NotificationDropdown />
+
               {/* Cart Icon - Only show when logged in */}
               <Link to="/checkout">
                 <Button
@@ -186,27 +190,27 @@ const Navbar = () => {
             </Button>
           )}
         </div>
-
-        {/* Mobile Actions (Cart + Menu) */}
-        <div className="flex items-center gap-2 lg:hidden">
-          {/* Mobile Cart Icon - Visible when logged in */}
+        {/* Mobile Actions */}
+        <div className="flex items-center gap-3 lg:hidden">
           {user && (
-            <Link to="/checkout" className="relative p-2 text-foreground hover:text-accent transition-colors">
-              <ShoppingBag className="w-5 h-5" />
-              {cartCount > 0 && (
-                <span className="absolute top-0 right-0 bg-terracotta text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
+            <>
+              <NotificationDropdown />
+              <Link to="/checkout" className="relative p-2 text-foreground hover:text-accent transition-colors">
+                <ShoppingBag className="w-5 h-5" />
+                {cartCount > 0 && (
+                  <span className="absolute top-0 right-0 bg-terracotta text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+            </>
           )}
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-2 text-foreground hover:text-accent transition-colors"
           >
-            {isMobileMenuOpen ? <X /> : <Menu />}
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </nav>

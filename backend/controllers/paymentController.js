@@ -7,6 +7,8 @@ import Order from '../models/Order.js';
 import ArtPurchase from '../models/ArtPurchase.js';
 import Workshop from '../models/Workshop.js';
 import Booking from '../models/Booking.js';
+import Notification from '../models/Notification.js';
+import { emitNotification } from '../socket.js';
 
 // Validate Razorpay credentials
 if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
@@ -244,6 +246,16 @@ export const verifyPayment = asyncHandler(async (req, res) => {
           // Mark art as sold
           await Art.findByIdAndUpdate(orderData.itemId, { status: 'Sold' });
 
+          if (userId) {
+            const notification = await Notification.create({
+              user: userId,
+              title: 'Art Purchase Confirmed',
+              message: `Your purchase of "${orderData.name || 'artwork'}" is confirmed!`,
+              type: 'ORDER_UPDATE'
+            });
+            emitNotification(userId, notification);
+          }
+
         } else if (orderData.type === 'MENU' && orderData.cartItems) {
           const orderDocument = {
             items: orderData.cartItems.map(item => ({
@@ -276,6 +288,17 @@ export const verifyPayment = asyncHandler(async (req, res) => {
           const order = new Order(orderDocument);
           await order.save();
           console.log('Order saved:', order._id);
+
+          if (userId) {
+            const notification = await Notification.create({
+              user: userId,
+              title: 'Order Confirmed',
+              message: `Your order is confirmed and will commence preparation shortly!`,
+              type: 'ORDER_UPDATE',
+              orderId: order._id
+            });
+            emitNotification(userId, notification);
+          }
         } else if (orderData.type === 'WORKSHOP' && orderData.itemId) {
           // WORKSHOP BOOKING
           const workshop = await Workshop.findById(orderData.itemId);
@@ -310,6 +333,16 @@ export const verifyPayment = asyncHandler(async (req, res) => {
           await workshop.save();
 
           console.log('Workshop booking saved:', booking.registrationNumber);
+
+          if (userId) {
+            const notification = await Notification.create({
+              user: userId,
+              title: 'Workshop Booking Confirmed',
+              message: `You're all set for the "${workshop.title}" workshop!`,
+              type: 'ORDER_UPDATE'
+            });
+            emitNotification(userId, notification);
+          }
 
           // You might want to return the registration number to the frontend
           // We can attach it to the response via a side-channel or just let the frontend separate query

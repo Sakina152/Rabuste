@@ -21,6 +21,7 @@ import Checkout from "./pages/Checkout";
 import Profile from "@/pages/Profile";
 
 import { CartProvider } from "@/context/CartContext";
+import { NotificationProvider } from "@/context/NotificationContext";
 import GalleryManagement from "@/pages/admin/GalleryManagement";
 import AiBaristaBot from "./components/aiBaristaBot";
 
@@ -40,66 +41,68 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <CartProvider>
-        <Toaster />
-        <Sonner />
+        <NotificationProvider>
+          <Toaster />
+          <Sonner />
 
-        <BrowserRouter>
-          <ScrollToTop />
-          <Routes>
-            {/* 
+          <BrowserRouter>
+            <ScrollToTop />
+            <Routes>
+              {/* 
               PUBLIC ROUTES - Accessible to everyone (logged in or not)
               "/" = Landing page with intro animation + full homepage
               All main pages are public for browsing
             */}
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/menu" element={<Menu />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/gallery" element={<Gallery />} />
-            <Route path="/workshops" element={<Workshops />} />
-            <Route path="/franchise" element={<Franchise />} />
-            <Route path="/virtual-tour" element={<VirtualTour />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/menu" element={<Menu />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/gallery" element={<Gallery />} />
+              <Route path="/workshops" element={<Workshops />} />
+              <Route path="/franchise" element={<Franchise />} />
+              <Route path="/virtual-tour" element={<VirtualTour />} />
 
-            {/* Checkout & Order Success - Works for both guests and logged-in users */}
-            <Route path="/checkout" element={<Checkout />} />
+              {/* Checkout & Order Success - Works for both guests and logged-in users */}
+              <Route path="/checkout" element={<Checkout />} />
 
-            {/* Order Success */}
-            <Route path="/order-success" element={<OrderSuccess />} />
+              {/* Order Success */}
+              <Route path="/order-success" element={<OrderSuccess />} />
 
-            {/* Admin Auth Routes */}
-            <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/admin/register" element={<AdminRegister />} />
+              {/* Admin Auth Routes */}
+              <Route path="/admin" element={<AdminLogin />} />
+              <Route path="/admin/register" element={<AdminRegister />} />
 
-            {/* 
+              {/* 
               PROTECTED ADMIN ROUTES - Requires admin authentication
               Uses ProtectedRoute component with Firebase/JWT verification
             */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/dashboard/menu-management" element={<MenuManagement />} />
-              <Route path="/admin/dashboard/menu-management/new" element={<MenuItemForm />} />
-              <Route path="/admin/dashboard/menu-management/edit/:id" element={<MenuItemForm />} />
-              <Route path="/admin/dashboard/workshops" element={<WorkshopManager />} />
-              <Route path="/admin/dashboard/inquiries" element={<InquiryManagement />} />
-              <Route path="/admin/dashboard/orders" element={<OrderManagement />} />
-              <Route path="/admin/dashboard/analytics" element={<Analytics />} />
-              <Route path="/admin/gallery" element={<GalleryManagement />} />
-            </Route>
+              <Route element={<ProtectedRoute />}>
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/dashboard/menu-management" element={<MenuManagement />} />
+                <Route path="/admin/dashboard/menu-management/new" element={<MenuItemForm />} />
+                <Route path="/admin/dashboard/menu-management/edit/:id" element={<MenuItemForm />} />
+                <Route path="/admin/dashboard/workshops" element={<WorkshopManager />} />
+                <Route path="/admin/dashboard/inquiries" element={<InquiryManagement />} />
+                <Route path="/admin/dashboard/orders" element={<OrderManagement />} />
+                <Route path="/admin/dashboard/analytics" element={<Analytics />} />
+                <Route path="/admin/gallery" element={<GalleryManagement />} />
+              </Route>
 
-            {/* 
+              {/* 
               PROTECTED USER ROUTES - Requires user authentication
               Currently only /profile, but can add order history, saved items, etc.
             */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/profile" element={<Profile />} />
-            </Route>
+              <Route element={<ProtectedRoute />}>
+                <Route path="/profile" element={<Profile />} />
+              </Route>
 
-            {/* 404 */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <AiBaristaBot />
-        </BrowserRouter>
+              {/* 404 */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <AiBaristaBot />
+          </BrowserRouter>
+        </NotificationProvider>
       </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>

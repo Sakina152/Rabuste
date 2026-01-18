@@ -6,9 +6,11 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import fs from 'fs';
+import { createServer } from 'http';
 
 import { connectDB } from './config/db.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
+import { initSocket } from './socket.js';
 
 // Import Routes
 import authRoutes from './routes/authRoutes.js';
@@ -24,16 +26,10 @@ import profileRoutes from './routes/profileRoutes.js';
 import workshopInquiryRoutes from './routes/workshopInquiryRoutes.js';
 import artistSubmissionRoutes from './routes/artistSubmissionRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
-
-// firebase
-
-
-
+import notificationRoutes from './routes/notificationRoutes.js';
 
 // Load environment variables
 dotenv.config();
-
-import firebase from './firebase.js';
 
 // Connect to database
 connectDB();
@@ -42,6 +38,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
+const server = createServer(app);
+
+// Initialize Socket.io
+initSocket(server);
 
 // 2. UPDATED CORS CONFIGURATION
 app.use(cors({
@@ -93,6 +93,8 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/workshop-inquiries', workshopInquiryRoutes);
 app.use('/api/artist-submissions', artistSubmissionRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/notifications', notificationRoutes);
+
 // Basic route
 app.get('/', (req, res) => {
   res.send('Rabuste Coffee API is running...');
@@ -104,7 +106,7 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(
     `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`
   );

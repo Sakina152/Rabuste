@@ -1,6 +1,8 @@
 import asyncHandler from 'express-async-handler';
 import Order from '../models/Order.js';
 import Art from '../models/Art.js';
+import Notification from '../models/Notification.js';
+import { emitNotification } from '../socket.js';
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -36,9 +38,19 @@ export const createOrder = asyncHandler(async (req, res) => {
     throw new Error('Invalid total price');
   }
 
+  // Determine user to link to this order
+  let userId = user || (req.user ? req.user._id : undefined);
+
+  if (!userId && customerEmail) {
+    const existingUser = await User.findOne({ email: customerEmail });
+    if (existingUser) {
+      userId = existingUser._id;
+    }
+  }
+
   // Create order
   const order = await Order.create({
-    user, // Save user ID
+    user: userId,
     orderItems: orderItems || [],
     orderType,
     artItem: orderType === 'ART' ? artItem : undefined,
@@ -51,6 +63,8 @@ export const createOrder = asyncHandler(async (req, res) => {
     customerName,
     status: isPaid ? 'in progress' : 'pending'
   });
+
+  console.log(`[Order] Created: ${order._id}, User: ${order.user}`);
 
   // If it's an art order and payment is successful, mark art as sold
   if (orderType === 'ART' && artItem && isPaid) {
@@ -65,6 +79,19 @@ export const createOrder = asyncHandler(async (req, res) => {
       console.error('Error updating art status:', error);
       // Don't fail the order creation if art update fails
     }
+  }
+
+  // Trigger Notification for new order
+  if (user && isPaid) {
+    const notification = await Notification.create({
+      user,
+      title: 'Order Confirmed',
+      message: `Your order is confirmed and will commence preparation shortly.`,
+      type: 'ORDER_UPDATE',
+      orderId: order._id
+    });
+
+    emitNotification(user, notification);
   }
 
   res.status(201).json(order);
@@ -140,6 +167,22 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
   order.status = status;
   await order.save();
+
+  // Trigger Notification
+  if (order.user) {
+    console.log(`Creating notification for user: ${order.user} for order: ${order._id}`);
+    const notification = await Notification.create({
+      user: order.user,
+      title: 'Order Updated',
+      message: `Your order is now ${status}.`,
+      type: 'ORDER_UPDATE',
+      orderId: order._id
+    });
+
+    emitNotification(order.user, notification);
+  } else {
+    console.log(`No user associated with order ${order._id}, skipping notification.`);
+  }
 
   res.json(order);
 });

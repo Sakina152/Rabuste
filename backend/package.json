@@ -14,7 +14,6 @@
   "description": "Rabuste Coffee Backend API",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "@google/generative-ai": "^0.24.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^2.2.2",
     "cloudinary": "^2.8.0",
@@ -31,7 +30,8 @@
     "multer-storage-cloudinary": "^2.2.1",
     "nodemailer": "^7.0.12",
     "razorpay": "^2.9.6",
-    "slugify": "^1.6.6"
+    "slugify": "^1.6.6",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
