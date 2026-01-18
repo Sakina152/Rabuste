@@ -61,7 +61,7 @@ const Workshops = () => {
   const [selectedWorkshop, setSelectedWorkshop] = useState<Workshop | null>(null);
   const [showCalendarOptions, setShowCalendarOptions] = useState(false);
   const [registeredWorkshop, setRegisteredWorkshop] = useState<Workshop | null>(null);
-  const [viewMode, setViewMode] = useState<"list" | "calendar">("calendar");
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [formData, setFormData] = useState({
@@ -582,7 +582,7 @@ END:VCALENDAR`;
                         </p>
                         {getWorkshopsForDate(selectedDate).map((workshop) => {
                           const CategoryIcon = getCategoryIcon(workshop.type);
-                          
+
                           // Determine image based on type (matching List View)
                           let imageUrl = "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=800"; // Default coffee
                           if (workshop.type === "art") imageUrl = "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=800";
@@ -598,35 +598,35 @@ END:VCALENDAR`;
                             >
                               {/* Left Side Image */}
                               <div className="w-40 relative overflow-hidden flex-shrink-0">
-                                <img 
-                                  src={imageUrl} 
-                                  alt={workshop.title} 
-                                  className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" 
+                                <img
+                                  src={imageUrl}
+                                  alt={workshop.title}
+                                  className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#1A1614]/20 to-[#1A1614]/90" />
                               </div>
 
                               <div className="p-5 flex flex-col justify-center flex-grow pl-2">
                                 <div className="flex justify-between items-start mb-1">
-                                    <h4 className="font-serif text-2xl text-[#E8DCC4] group-hover:text-white transition-colors leading-none">
+                                  <h4 className="font-serif text-2xl text-[#E8DCC4] group-hover:text-white transition-colors leading-none">
                                     {workshop.title}
-                                    </h4>
-                                     <span className="text-[#BC653B] font-mono text-xs font-bold bg-[#1A1614]/80 px-2 py-0.5 rounded border border-[#BC653B]/20">
-                                        {workshop.startTime}
-                                     </span>
+                                  </h4>
+                                  <span className="text-[#BC653B] font-mono text-xs font-bold bg-[#1A1614]/80 px-2 py-0.5 rounded border border-[#BC653B]/20">
+                                    {workshop.startTime}
+                                  </span>
                                 </div>
                                 <p className="text-[#9A8B7D] mb-3 text-sm font-light line-clamp-2 leading-snug">
-                                    {workshop.description}
+                                  {workshop.description}
                                 </p>
                                 <div className="mt-auto">
-                                    <Button
-                                        variant="link"
-                                        className="text-[#BC653B] p-0 h-auto font-sans tracking-wide text-xs uppercase hover:text-white"
-                                        onClick={() => setSelectedWorkshop(workshop)}
-                                        disabled={workshop.availableSeats === 0}
-                                        >
-                                        Reserve Spot →
-                                    </Button>
+                                  <Button
+                                    variant="link"
+                                    className="text-[#BC653B] p-0 h-auto font-sans tracking-wide text-xs uppercase hover:text-white"
+                                    onClick={() => setSelectedWorkshop(workshop)}
+                                    disabled={workshop.availableSeats === 0}
+                                  >
+                                    Reserve Spot →
+                                  </Button>
                                 </div>
                               </div>
                             </motion.div>
@@ -659,19 +659,19 @@ END:VCALENDAR`;
                   >
                     {/* Image Thumbnail */}
                     <div className="px-5 pt-5">
-                        <div className="relative h-48 w-full overflow-hidden rounded-2xl">
-                            <img 
-                                src={imageUrl} 
-                                alt={workshop.title} 
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out opacity-90 group-hover:opacity-100" 
-                            />
-                             {/* Top Right Price Tag - Floating on Image */}
-                             <div className="absolute top-3 right-3 bg-[#1A1614]/90 backdrop-blur-md px-4 py-1.5 rounded-full border border-[#BC653B]/30">
-                                <span className="text-[#BC653B] font-serif font-bold tracking-wide">
-                                    {workshop.price === 0 ? "Free" : `₹${workshop.price}`}
-                                </span>
-                            </div>
+                      <div className="relative h-48 w-full overflow-hidden rounded-2xl">
+                        <img
+                          src={imageUrl}
+                          alt={workshop.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out opacity-90 group-hover:opacity-100"
+                        />
+                        {/* Top Right Price Tag - Floating on Image */}
+                        <div className="absolute top-3 right-3 bg-[#1A1614]/90 backdrop-blur-md px-4 py-1.5 rounded-full border border-[#BC653B]/30">
+                          <span className="text-[#BC653B] font-serif font-bold tracking-wide">
+                            {workshop.price === 0 ? "Free" : `₹${workshop.price}`}
+                          </span>
                         </div>
+                      </div>
                     </div>
 
                     <div className="p-6 flex flex-col flex-grow">
@@ -688,14 +688,14 @@ END:VCALENDAR`;
                       {/* Seats Progress Bar - Dynamic */}
                       <div className="mb-6">
                         <div className="flex justify-between items-center text-xs mb-1.5 font-medium tracking-wide">
-                            <span className="text-[#8C837D]">Capacity</span>
-                            <span className="text-[#BC653B]">{workshop.currentParticipants} / {workshop.maxParticipants} Booked</span>
+                          <span className="text-[#8C837D]">Capacity</span>
+                          <span className="text-[#BC653B]">{workshop.currentParticipants} / {workshop.maxParticipants} Booked</span>
                         </div>
                         <div className="w-full h-1.5 bg-[#2C2420] rounded-full overflow-hidden">
-                            <div 
-                                className="h-full bg-[#BC653B] rounded-full transition-all duration-700 ease-out"
-                                style={{ width: `${Math.min(((workshop.currentParticipants || 0) / workshop.maxParticipants) * 100, 100)}%` }}
-                            />
+                          <div
+                            className="h-full bg-[#BC653B] rounded-full transition-all duration-700 ease-out"
+                            style={{ width: `${Math.min(((workshop.currentParticipants || 0) / workshop.maxParticipants) * 100, 100)}%` }}
+                          />
                         </div>
                       </div>
 
