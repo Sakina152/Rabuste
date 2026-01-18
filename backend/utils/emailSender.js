@@ -28,8 +28,14 @@ const sendEmail = async (options) => {
     await transporter.sendMail(mailOptions);
     console.log('✅ Email Sent Successfully to: ' + options.email);
   } catch (error) {
-    console.error('❌ Email could not be sent:', error);
-    throw new Error('Email could not be sent'); 
+    if (error.code === 'EAUTH') {
+      console.warn('⚠️  Email Auth Failed: Please check your EMAIL_USER and EMAIL_PASS in .env');
+      console.warn('   (Use an App Password if using Gmail: https://myaccount.google.com/apppasswords)');
+    } else {
+      console.error('❌ Email could not be sent:', error.message);
+    }
+    // We throw so the controller knows it failed, but the log is now cleaner
+    throw new Error('Email sending failed'); 
   }
 };
 

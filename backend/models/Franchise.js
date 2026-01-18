@@ -25,7 +25,7 @@ const franchiseSchema = new mongoose.Schema({
   budget: {
     type: String,
     required: [true, 'Please select your budget range'],
-    enum: ['10k-50k', '50k-100k', '100k+']
+    enum: ['10k-50k', '50k-100k', '100k+', '15L-25L', '25L-40L', '40L+']
   },
   experience: {
     type: String,
