@@ -7,6 +7,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import RobustaWheel from "@/components/RobustaWheel";
 import AnimatedCounter from "@/components/AnimatedCounter";
+import JourneySection from "@/components/JourneySection";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -118,12 +119,12 @@ const About = () => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const ctaRef = useRef(null);
-  
+
   const { scrollYProgress } = useScroll({
     target: ctaRef,
     offset: ["start end", "end start"]
   });
-  
+
   const yBg = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
   const yText = useTransform(scrollYProgress, [0, 1], ["20%", "-20%"]);
 
@@ -350,73 +351,7 @@ const About = () => {
       </section>
 
       {/* Story Timeline */}
-      <section className="section-padding bg-background -mt-16 pt-8 relative overflow-hidden">
-        <div className="container-custom relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <span className="text-accent text-sm tracking-[0.3em] uppercase font-body">
-              Our Journey
-            </span>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mt-4">
-              How It All Started
-            </h2>
-          </motion.div>
-
-          {/* Mobile Card Shuffle Animation */}
-          <MobileTimelineCards timeline={timeline} />
-
-          {/* Desktop Timeline - Hidden on mobile */}
-          <div className="relative hidden lg:block">
-            {/* Timeline Line */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border" />
-
-            <div className="space-y-0">
-              {timeline.map((item, index) => (
-                <motion.div
-                  key={item.year}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className={`relative grid grid-cols-2 gap-8 ${index % 2 === 0 ? "" : "flex-row-reverse"
-                    }`}
-                >
-                  <div
-                    className={`text-right ${index % 2 === 0 ? "" : "col-start-2 text-left"
-                      }`}
-                  >
-                    <div
-                      className={`p-8 rounded-2xl bg-card border border-border ${index % 2 === 0
-                        ? "mr-12"
-                        : "ml-12 col-start-2"
-                        }`}
-                    >
-                      <span className="font-display text-3xl font-bold text-accent">
-                        {item.year}
-                      </span>
-                      <h3 className="font-display text-xl font-semibold text-foreground mt-2 mb-3">
-                        {item.title}
-                      </h3>
-                      <p className="text-muted-foreground leading-relaxed">
-                        {item.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Timeline Dot */}
-                  <div className="absolute left-1/2 top-8 w-4 h-4 -ml-2 rounded-full bg-accent" />
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-        {/* Dual-Shroud Transition: Bottom Fade to Coffee-Dark */}
-        <div className="absolute bottom-0 left-0 right-0 h-80 bg-gradient-to-b from-transparent via-transparent to-coffee-dark pointer-events-none z-10" />
-      </section>
+      <JourneySection />
 
       {/* Philosophy Section */}
       <section className="bg-coffee-dark relative overflow-hidden pt-8 pb-20 px-6 md:pt-16 md:pb-32 md:px-12">
@@ -634,30 +569,30 @@ const About = () => {
 
       {/* CTA Section - Parallax Effect */}
       <section ref={ctaRef} className="relative overflow-hidden h-[90vh] flex items-center justify-center">
-         {/* Parallax Video Background Layer - Moves Slow */}
-         <motion.div 
-            style={{ y: yBg }}
-            className="absolute inset-0 z-0 h-[140%] -top-[20%]"
-         >
-            <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full h-full object-cover"
-            >
-                <source src="/coffee_workshop.mp4" type="video/mp4" />
-            </video>
-            {/* Dark Aesthetic Overlay */}
-            <div className="absolute inset-0 bg-[#1A1614]/70 backdrop-blur-[2px]" />
-            {/* Subtle Gradient for readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1A1614] via-transparent to-[#1A1614]" />
+        {/* Parallax Video Background Layer - Moves Slow */}
+        <motion.div
+          style={{ y: yBg }}
+          className="absolute inset-0 z-0 h-[140%] -top-[20%]"
+        >
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+          >
+            <source src="/coffee_workshop.mp4" type="video/mp4" />
+          </video>
+          {/* Dark Aesthetic Overlay */}
+          <div className="absolute inset-0 bg-[#1A1614]/70 backdrop-blur-[2px]" />
+          {/* Subtle Gradient for readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1A1614] via-transparent to-[#1A1614]" />
         </motion.div>
 
         {/* Floating Content Layer - Moves Fast */}
-        <motion.div 
-            style={{ y: yText }}
-            className="container-custom text-center relative z-20"
+        <motion.div
+          style={{ y: yText }}
+          className="container-custom text-center relative z-20"
         >
           <motion.div
             initial={{ opacity: 0 }}
@@ -666,15 +601,15 @@ const About = () => {
             className="max-w-3xl mx-auto space-y-10"
           >
             <h2 className="font-display text-5xl md:text-7xl font-bold text-[#E8DCC4] drop-shadow-2xl leading-tight">
-              Ready to <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BC653B] to-[#E8DCC4]">Experience the Bold?</span>
+              Ready to <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BC653B] to-[#E8DCC4]">Experience the Bold?</span>
             </h2>
             <p className="text-[#E8DCC4]/80 text-lg md:text-xl font-light tracking-wide max-w-xl mx-auto drop-shadow-md">
               Step into a world where coffee meets creativity. Visit our café, join a workshop, or explore partnership opportunities.
             </p>
             <div className="flex flex-wrap justify-center gap-6 pt-4">
-              <Button 
-                variant="hero" 
-                size="xl" 
+              <Button
+                variant="hero"
+                size="xl"
                 asChild
                 className="bg-[#BC653B] hover:bg-[#A05532] text-white border-none shadow-[0_10px_40px_rgba(188,101,59,0.3)] hover:shadow-[0_10px_50px_rgba(188,101,59,0.5)] transition-all duration-300 scale-100 hover:scale-105"
               >
@@ -683,9 +618,9 @@ const About = () => {
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
               </Button>
-              <Button 
-                variant="outline" 
-                size="xl" 
+              <Button
+                variant="outline"
+                size="xl"
                 asChild
                 className="border-[#E8DCC4]/30 text-[#E8DCC4] hover:bg-[#E8DCC4]/10 hover:text-white backdrop-blur-md scale-100 hover:scale-105 transition-all duration-300"
               >

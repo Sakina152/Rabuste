@@ -187,13 +187,28 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="lg:hidden p-2 text-foreground"
-        >
-          {isMobileMenuOpen ? <X /> : <Menu />}
-        </button>
+        {/* Mobile Actions (Cart + Menu) */}
+        <div className="flex items-center gap-2 lg:hidden">
+          {/* Mobile Cart Icon - Visible when logged in */}
+          {user && (
+            <Link to="/checkout" className="relative p-2 text-foreground hover:text-accent transition-colors">
+              <ShoppingBag className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span className="absolute top-0 right-0 bg-terracotta text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+          )}
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 text-foreground hover:text-accent transition-colors"
+          >
+            {isMobileMenuOpen ? <X /> : <Menu />}
+          </button>
+        </div>
       </nav>
 
       {/* Mobile Menu */}

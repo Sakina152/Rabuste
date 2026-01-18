@@ -217,7 +217,7 @@ const Checkout = () => {
                       {/* Details */}
                       <div className="flex-1 flex flex-col justify-between">
                         <div>
-                          <h3 className="font-display text-lg font-semibold text-foreground mb-1">
+                          <h3 className="font-display text-lg font-semibold text-foreground mb-1 line-clamp-1">
                             {item.name}
                           </h3>
                           <p className="text-accent font-medium text-sm">
@@ -225,9 +225,9 @@ const Checkout = () => {
                           </p>
                         </div>
 
-                        <div className="flex items-center justify-between mt-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 gap-4">
                           {/* Quantity Controls */}
-                          <div className="flex items-center gap-3 bg-coffee-dark/50 rounded-lg p-1">
+                          <div className="flex items-center gap-3 bg-coffee-dark/50 rounded-lg p-1 w-fit">
                             <button
                               onClick={() => updateQuantity(item.id, item.quantity - 1)}
                               className="p-2 hover:bg-accent/10 rounded-md transition-colors"
@@ -247,7 +247,7 @@ const Checkout = () => {
                           </div>
 
                           {/* Price & Delete */}
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
                             <span className="font-display text-xl font-bold text-accent">
                               ₹{(item.price * item.quantity).toFixed(2)}
                             </span>
