@@ -66,6 +66,12 @@ const userSchema = new mongoose.Schema(
       enum: ['firebase', 'local'],
       default: 'local',
     },
+    savedArtworks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Art'
+      }
+    ]
   },
   {
     timestamps: true,

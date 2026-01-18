@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { User, Mail, Phone, MapPin, ArrowLeft, TrendingUp, Heart, Coffee, Calendar, Package, Star, Award, Flame, Edit2, Save, X } from "lucide-react";
+import { User, Mail, Phone, MapPin, ArrowLeft, TrendingUp, Heart, Coffee, Calendar, Package, Star, Award, Flame, Edit2, Save, X, Bookmark } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -125,6 +125,7 @@ const Profile = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [artPurchases, setArtPurchases] = useState<ArtPurchase[]>([]);
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
+  const [savedArtworks, setSavedArtworks] = useState<any[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
 
@@ -191,6 +192,7 @@ const Profile = () => {
         setOrders(res.data.orders || []);
         setArtPurchases(res.data.artPurchases || []);
         setWorkshops(res.data.workshops || []);
+        setSavedArtworks(res.data.savedArtworks || []);
 
         console.log('Profile data loaded:', {
           orders: res.data.orders?.length || 0,
@@ -774,6 +776,76 @@ const Profile = () => {
                               </div>
                             </motion.div>
                           ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Saved Artworks Section */}
+                  <Card className="bg-card/90 backdrop-blur-md border-white/10 shadow-xl">
+                    <CardHeader>
+                      <div className="flex items-center gap-2">
+                        <Bookmark className="w-5 h-5 text-accent" />
+                        <CardTitle>Saved Artworks</CardTitle>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Pieces you've bookmarked in the Gallery
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      {savedArtworks.length === 0 ? (
+                        <div className="text-center py-12">
+                          <Bookmark className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
+                          <p className="text-muted-foreground">No artworks saved yet!</p>
+                          <Button asChild variant="ghost" className="mt-4 text-accent hover:text-accent/80">
+                            <Link to="/gallery">Explore Gallery</Link>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                          {savedArtworks.map((art, idx) => {
+                            const imageUrl = art.imageUrl
+                              ? (art.imageUrl.startsWith('http') ? art.imageUrl : `${API_URL}/${art.imageUrl.replace(/\\/g, "/")}`)
+                              : '/placeholder-art.png';
+
+                            return (
+                              <motion.div
+                                key={art._id}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: idx * 0.1 }}
+                                className="group"
+                              >
+                                <Link to="/gallery">
+                                  <div className="bg-gradient-to-br from-card/90 to-card/50 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-accent/30 transition-all">
+                                    <div className="relative h-40">
+                                      <img
+                                        src={imageUrl}
+                                        alt={art.title}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                      />
+                                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                                      <div className="absolute bottom-3 left-3">
+                                        <Badge className="bg-accent/80 backdrop-blur-md text-white border-none text-[10px] uppercase tracking-wider">
+                                          {art.category}
+                                        </Badge>
+                                      </div>
+                                    </div>
+                                    <div className="p-4">
+                                      <h3 className="font-bold text-lg mb-1 group-hover:text-accent transition-colors">{art.title}</h3>
+                                      <p className="text-sm text-white/60 mb-3">by {art.artist}</p>
+                                      <div className="flex items-center justify-between">
+                                        <span className="font-display text-lg text-accent font-bold">₹{art.price?.toLocaleString('en-IN')}</span>
+                                        <div className="p-2 rounded-full bg-accent/10 text-accent">
+                                          <Bookmark className="w-4 h-4 fill-current" />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </Link>
+                              </motion.div>
+                            );
+                          })}
                         </div>
                       )}
                     </CardContent>

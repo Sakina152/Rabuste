@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Eye, Heart, User, X, ShoppingBag } from "lucide-react";
+import { ArrowRight, Eye, Heart, User, X, ShoppingBag, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useRazorpay } from "@/hooks/useRazorpay";
 import ArtistSubmissionForm from "@/components/ArtistSubmissionForm"; // <--- Import New Component
+import { getToken } from "@/utils/getToken";
 
 interface Artwork {
   _id: string;
@@ -17,7 +18,7 @@ interface Artwork {
   imageUrl?: string;
   dimensions?: string;
   description?: string;
-  category?: "abstract" | "landscape" | "portrait";
+  category: string;
 }
 
 const Gallery = () => {
@@ -25,6 +26,8 @@ const Gallery = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState("All");
+  const [savedArtIds, setSavedArtIds] = useState<string[]>([]);
 
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [showSubmissionForm, setShowSubmissionForm] = useState(false); // <--- State for new form
@@ -43,6 +46,70 @@ const Gallery = () => {
   const { handlePayment, isProcessing } = useRazorpay(); // <--- 2. Use Hook
 
   const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
+  // Fetch saved artworks if logged in
+  useEffect(() => {
+    const fetchSavedArtIds = async () => {
+      const userToken = await getToken();
+      if (!userToken) return;
+
+      try {
+        const response = await fetch(`${API_URL}/api/profile/data`, {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        });
+        const data = await response.json();
+        setSavedArtIds(data.savedArtworks?.map((art: any) => art._id) || []);
+      } catch (err) {
+        console.error("Error fetching saved art IDs:", err);
+      }
+    };
+
+    fetchSavedArtIds();
+  }, []);
+
+  const toggleSave = async (e: React.MouseEvent, artId: string) => {
+    e.stopPropagation();
+    const userToken = await getToken();
+    if (!userToken) return;
+
+    // Optimistic UI update
+    const isSaved = savedArtIds.includes(artId);
+    if (isSaved) {
+      setSavedArtIds(prev => prev.filter(id => id !== artId));
+    } else {
+      setSavedArtIds(prev => [...prev, artId]);
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/api/profile/toggle-favourite-art`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({ artId }),
+      });
+
+      if (!response.ok) {
+        // Revert on error
+        if (isSaved) {
+          setSavedArtIds(prev => [...prev, artId]);
+        } else {
+          setSavedArtIds(prev => prev.filter(id => id !== artId));
+        }
+      }
+    } catch (err) {
+      console.error("Error toggling save:", err);
+      // Revert on error
+      if (isSaved) {
+        setSavedArtIds(prev => [...prev, artId]);
+      } else {
+        setSavedArtIds(prev => prev.filter(id => id !== artId));
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchArtworks = async () => {
@@ -72,7 +139,7 @@ const Gallery = () => {
           imageUrl: art.imageUrl,
           dimensions: art.dimensions,
           description: art.description,
-          category: art.category || 'abstract'
+          category: art.category || 'Abstract'
         }));
 
         setArtworks(formattedArtworks);
@@ -127,21 +194,27 @@ const Gallery = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden min-h-[400px]">
+      <section className="relative pt-32 pb-20 md:pb-[155px] overflow-hidden min-h-[400px] md:min-h-[475px]">
         {/* Background Image with smooth fade */}
         <div className="absolute inset-0 z-0">
+          {/* Desktop Image */}
           <img
             src="/images/gallery-hero.jpg"
-            alt="Gallery Hero"
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              console.error("Hero image failed to load");
-              e.currentTarget.src = ""; // Fallback or handle accordingly
-            }}
+            alt="Gallery Hero Desktop"
+            className="hidden md:block w-full h-full object-cover"
+          />
+          {/* Mobile Image */}
+          <img
+            src="/images/gallery-hero-mobile.jpg"
+            alt="Gallery Hero Mobile"
+            className="block md:hidden w-full h-full object-cover"
           />
           {/* Top overlay for navbar contrast and bottom overlay for smooth page transition */}
           <div className="absolute inset-0 bg-black/40" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-background" />
+          {/* Top gradient for navbar readability */}
+          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/60 to-transparent" />
+          {/* Bottom gradient for smooth transition - pushed lower */}
+          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background to-transparent" />
         </div>
 
         <div className="container-custom relative z-10 px-6">
@@ -163,14 +236,14 @@ const Gallery = () => {
             transition={{ duration: 0.6 }}
             className="max-w-3xl"
           >
-            <span className="text-accent text-sm tracking-[0.3em] uppercase font-body">
+            <span className="text-accent text-sm tracking-[0.3em] uppercase font-body font-extrabold">
               Micro Art Gallery
             </span>
             <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground mt-4 mb-6">
               Where Coffee Meets{" "}
               <span className="text-gradient">Fine Art</span>
             </h1>
-            <p className="text-muted-foreground text-xl leading-relaxed">
+            <p className="text-foreground/90 text-xl leading-relaxed">
               Our café doubles as a curated gallery showcasing emerging and
               established artists. Each piece is available for purchase, bringing
               bold creativity into your home.
@@ -180,107 +253,160 @@ const Gallery = () => {
       </section>
 
       {/* Gallery Grid */}
-      <section className="section-padding bg-background overflow-hidden">
+      <section className="pt-5 md:pt-[68px] pb-[30px] md:pb-[78px] px-6 md:px-12 bg-background overflow-hidden relative min-h-screen">
         <div className="container-custom">
+
+          {/* Category Filter - Two-Row Horizontal Scroll on Mobile */}
+          <div className="relative mb-10 -mx-6 px-6 md:mx-0 md:px-0">
+            <div
+              className="overflow-x-auto scrollbar-hide pb-2"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
+            >
+              <div
+                className="grid auto-cols-max gap-3 md:flex md:flex-wrap md:justify-center"
+                style={{
+                  gridAutoFlow: 'column',
+                  gridTemplateRows: 'repeat(2, minmax(0, 1fr))',
+                  gridTemplateColumns: 'none',
+                }}
+              >
+                {["All", "Abstract", "Acrylic", "Oil", "Watercolour", "Charcoal", "Mixed Media", "Digital"].map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setFilter(cat)}
+                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 border whitespace-nowrap ${filter === cat
+                      ? "bg-accent text-white border-accent shadow-[0_0_20px_rgba(188,101,59,0.3)] scale-105"
+                      : "bg-transparent text-muted-foreground border-border hover:border-accent/50 hover:text-foreground"
+                      }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Scroll Indicator - Only visible on mobile */}
+            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-background to-transparent pointer-events-none md:hidden" />
+          </div>
+
           <motion.div
             layout
             className="grid md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-16 max-w-[1800px] mx-auto"
           >
             <AnimatePresence mode="popLayout">
-              {artworks.map((artwork, index) => (
-                <motion.div
-                  key={artwork._id}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.5, delay: (index % 3) * 0.1 }}
-                  className="group relative"
-                >
-                  {/* Heavy Ornate Frame Container */}
-                  {/* Heavy Ornate Frame Container */}
+              {artworks
+                .filter(art => filter === "All" || art.category === filter)
+                .map((artwork, index) => (
                   <motion.div
-                    whileHover="hover"
-                    initial="initial"
-                    className="relative p-[14px] bg-gradient-to-br from-[#1A0F0A] via-[#8D6E63] to-[#F5F5DC] rounded-sm transform transition-all duration-500 group-hover:shadow-[0_60px_120px_-30px_rgba(0,0,0,0.9)] cursor-pointer shadow-[20px_20px_60px_rgba(0,0,0,0.6),_inset_0_2px_15px_rgba(255,255,255,0.1)] overflow-visible group"
-                    onClick={() => setSelectedArt(artwork)}
+                    key={artwork._id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.4 }}
+                    className="group relative"
                   >
-                    {/* Frame Interior Edge (Bevel) */}
-                    <div className="absolute inset-[10px] border border-black/30 pointer-events-none" />
+                    {/* Heavy Ornate Frame Container */}
+                    {/* Heavy Ornate Frame Container */}
+                    <motion.div
+                      whileHover="hover"
+                      initial="initial"
+                      className="relative p-[14px] bg-gradient-to-br from-[#1A0F0A] via-[#8D6E63] to-[#F5F5DC] rounded-sm transform transition-all duration-500 group-hover:shadow-[0_60px_120px_-30px_rgba(0,0,0,0.9)] cursor-pointer shadow-[20px_20px_60px_rgba(0,0,0,0.6),_inset_0_2px_15px_rgba(255,255,255,0.1)] overflow-visible group"
+                      onClick={() => setSelectedArt(artwork)}
+                    >
+                      {/* Frame Interior Edge (Bevel) */}
+                      <div className="absolute inset-[10px] border border-black/30 pointer-events-none" />
 
-                    {/* Artwork Container (No matting) */}
-                    <div className="relative aspect-[4/5] overflow-hidden shadow-[inset_0_4px_20px_rgba(0,0,0,0.6)] bg-espresso">
-                      {artwork.imageUrl ? (
-                        <motion.img
+                      {/* Artwork Container (No matting) */}
+                      <div className="relative aspect-[4/5] overflow-hidden shadow-[inset_0_4px_20px_rgba(0,0,0,0.6)] bg-espresso">
+                        {/* Bookmark / Save Feature */}
+                        {token && (
+                          <button
+                            onClick={(e) => toggleSave(e, artwork._id)}
+                            className="absolute top-4 right-4 z-[40] p-2 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-black/60 transition-all duration-300 group/bookmark"
+                          >
+                            <Bookmark
+                              className={`w-5 h-5 transition-all duration-500 ${savedArtIds.includes(artwork._id)
+                                ? "fill-accent text-accent scale-110"
+                                : "fill-transparent text-white group-hover/bookmark:scale-110"
+                                }`}
+                            />
+                          </button>
+                        )}
+
+                        {artwork.imageUrl ? (
+                          <motion.img
+                            variants={{
+                              initial: { scale: 1 },
+                              hover: { scale: 1.1 }
+                            }}
+                            transition={{ duration: 1, ease: "easeOut" }}
+                            src={artwork.imageUrl.startsWith('http') ? artwork.imageUrl : `${API_URL}/${artwork.imageUrl.replace(/\\/g, "/")}`}
+                            alt={artwork.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-espresso/40">
+                            No Image
+                          </div>
+                        )}
+
+                        {/* Interactive Espresso Overlay (Refined with Gradient & Poppy Text) */}
+                        <motion.div
                           variants={{
-                            initial: { scale: 1 },
-                            hover: { scale: 1.1 }
+                            initial: { y: "100%", opacity: 0 },
+                            hover: { y: 0, opacity: 1 }
                           }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                          src={artwork.imageUrl.startsWith('http') ? artwork.imageUrl : `${API_URL}/${artwork.imageUrl.replace(/\\/g, "/")}`}
-                          alt={artwork.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-espresso/40">
-                          No Image
+                          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                          className="absolute inset-0 bg-gradient-to-t from-[#1a0f0a] via-[#1a0f0a]/90 to-transparent p-8 flex flex-col justify-end pointer-events-none z-10"
+                        >
+                          <div className="space-y-4 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-100">
+                            <div className="flex justify-between items-start gap-4">
+                              <h3 className="font-display text-3xl md:text-4xl font-black text-white leading-[1.1] tracking-tighter drop-shadow-2xl flex-1">
+                                {artwork.title}
+                              </h3>
+                              <span className="font-display text-2xl md:text-3xl font-bold text-accent drop-shadow-lg whitespace-nowrap mt-2">
+                                ₹{artwork.price.toLocaleString('en-IN')}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="h-[2px] w-12 bg-accent" />
+                              <span className="text-accent font-display text-sm md:text-base font-bold tracking-[0.25em] uppercase drop-shadow-md">
+                                {artwork.artist}
+                              </span>
+                            </div>
+                            {artwork.description && (
+                              <p className="text-white/95 text-base md:text-lg leading-relaxed line-clamp-3 mt-6 font-body font-medium drop-shadow-md max-w-[85%] italic">
+                                {artwork.description}
+                              </p>
+                            )}
+                          </div>
+                        </motion.div>
+
+                        {/* Hover glaze effect */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-20" />
+                      </div>
+
+                      {/* SOLD Gold Plaque (Bottom Center) */}
+                      {artwork.status === "Sold" && (
+                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-[30]">
+                          <div className="bg-gradient-to-b from-[#91672C] via-[#B8860B] to-[#705206] px-6 py-1.5 rounded-sm border border-[#F5F5DC]/20 shadow-2xl scale-110">
+                            <p className="text-[#FDFCF0] text-[12px] font-display font-black uppercase tracking-[0.4em] drop-shadow-md">
+                              SOLD
+                            </p>
+                          </div>
+                          <div className="absolute -bottom-1 left-[10%] right-[10%] h-2 bg-black/40 blur-md -z-10" />
                         </div>
                       )}
 
-                      {/* Interactive Espresso Overlay (Refined with Gradient & Poppy Text) */}
-                      <motion.div
-                        variants={{
-                          initial: { y: "100%", opacity: 0 },
-                          hover: { y: 0, opacity: 1 }
-                        }}
-                        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                        className="absolute inset-0 bg-gradient-to-t from-[#1a0f0a] via-[#1a0f0a]/90 to-transparent p-8 flex flex-col justify-end pointer-events-none z-10"
-                      >
-                        <div className="space-y-4 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-100">
-                          <div className="flex justify-between items-start gap-4">
-                            <h3 className="font-display text-3xl md:text-4xl font-black text-white leading-[1.1] tracking-tighter drop-shadow-2xl flex-1">
-                              {artwork.title}
-                            </h3>
-                            <span className="font-display text-2xl md:text-3xl font-bold text-accent drop-shadow-lg whitespace-nowrap mt-2">
-                              ₹{artwork.price.toLocaleString('en-IN')}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="h-[2px] w-12 bg-accent" />
-                            <span className="text-accent font-display text-sm md:text-base font-bold tracking-[0.25em] uppercase drop-shadow-md">
-                              {artwork.artist}
-                            </span>
-                          </div>
-                          {artwork.description && (
-                            <p className="text-white/95 text-base md:text-lg leading-relaxed line-clamp-3 mt-6 font-body font-medium drop-shadow-md max-w-[85%] italic">
-                              {artwork.description}
-                            </p>
-                          )}
-                        </div>
-                      </motion.div>
-
-                      {/* Hover glaze effect */}
-                      <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-20" />
-                    </div>
-
-                    {/* SOLD Gold Plaque (Bottom Center) */}
-                    {artwork.status === "Sold" && (
-                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-[30]">
-                        <div className="bg-gradient-to-b from-[#91672C] via-[#B8860B] to-[#705206] px-6 py-1.5 rounded-sm border border-[#F5F5DC]/20 shadow-2xl scale-110">
-                          <p className="text-[#FDFCF0] text-[12px] font-display font-black uppercase tracking-[0.4em] drop-shadow-md">
-                            SOLD
-                          </p>
-                        </div>
-                        <div className="absolute -bottom-1 left-[10%] right-[10%] h-2 bg-black/40 blur-md -z-10" />
-                      </div>
-                    )}
-
-                    {/* Frame Highlights */}
-                    <div className="absolute inset-0 border-t border-white/10 pointer-events-none" />
-                    <div className="absolute inset-x-0 bottom-0 h-[3px] bg-black/20 pointer-events-none" />
+                      {/* Frame Highlights */}
+                      <div className="absolute inset-0 border-t border-white/10 pointer-events-none" />
+                      <div className="absolute inset-x-0 bottom-0 h-[3px] bg-black/20 pointer-events-none" />
+                    </motion.div>
                   </motion.div>
-                </motion.div>
-              ))}
+                ))}
             </AnimatePresence>
           </motion.div>
         </div>

@@ -29,6 +29,7 @@ interface Art {
   imageUrl?: string;
   description?: string;
   dimensions?: string;
+  category?: string;
 }
 
 /* ================= COMPONENT ================= */
@@ -364,6 +365,7 @@ function ArtModal({
   const [imageUrl, setImageUrl] = useState(art?.imageUrl || "");
   const [description, setDescription] = useState(art?.description || "");
   const [dimensions, setDimensions] = useState(art?.dimensions || "");
+  const [category, setCategory] = useState(art?.category || "Abstract");
 
   const getInitialPreview = (path?: string) => {
     if (!path) return null;
@@ -403,7 +405,8 @@ function ArtModal({
         status,
         imageUrl,
         description,
-        dimensions
+        dimensions,
+        category
       }),
     });
 
@@ -469,6 +472,25 @@ function ArtModal({
               className="w-full rounded-xl bg-muted/40 border border-border px-4 py-2"
               required
             />
+          </div>
+
+          {/* Category */}
+          <div className="space-y-1">
+            <label className="text-sm text-muted-foreground">Category</label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full rounded-xl bg-muted/40 border border-border px-4 py-2"
+            >
+              <option value="Abstract">Abstract</option>
+              <option value="Acrylic">Acrylic</option>
+              <option value="Oil">Oil</option>
+              <option value="Watercolour">Watercolour</option>
+              <option value="Charcoal">Charcoal</option>
+              <option value="Mixed Media">Mixed Media</option>
+              <option value="Digital">Digital</option>
+              <option value="Other">Other</option>
+            </select>
           </div>
 
           {/* Status */}

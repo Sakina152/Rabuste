@@ -28,6 +28,11 @@ const artSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please provide an image']
   },
+  category: {
+    type: String,
+    enum: ['Abstract', 'Acrylic', 'Oil', 'Watercolour', 'Charcoal', 'Mixed Media', 'Digital', 'Other'],
+    default: 'Abstract'
+  },
   status: {
     type: String,
     required: true,

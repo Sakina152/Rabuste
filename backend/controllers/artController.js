@@ -16,7 +16,7 @@ export const getAllArt = async (req, res) => {
 // 2. Add New Art (Admin only)
 export const addArt = async (req, res) => {
   try {
-    const { title, artist, price, status, imageUrl, description, dimensions } = req.body;
+    const { title, artist, price, status, imageUrl, description, dimensions, category } = req.body;
 
     if (!imageUrl) {
       return res.status(400).json({ message: "Please provide an imageUrl (Cloudinary link)" });
@@ -29,7 +29,8 @@ export const addArt = async (req, res) => {
       status,
       imageUrl,
       description,
-      dimensions
+      dimensions,
+      category: category || 'Abstract'
     });
 
     await newArt.save();
@@ -213,6 +214,7 @@ export const updateArt = async (req, res) => {
     art.status = req.body.status ?? art.status;
     art.description = req.body.description ?? art.description;
     art.dimensions = req.body.dimensions ?? art.dimensions;
+    art.category = req.body.category ?? art.category;
 
     if (req.body.imageUrl !== undefined) {
       art.imageUrl = req.body.imageUrl;
