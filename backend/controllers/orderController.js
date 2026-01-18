@@ -1,6 +1,8 @@
 import asyncHandler from 'express-async-handler';
 import Order from '../models/Order.js';
 import Art from '../models/Art.js';
+import ArtPurchase from '../models/ArtPurchase.js';
+import Booking from '../models/Booking.js';
 import Notification from '../models/Notification.js';
 import { emitNotification } from '../socket.js';
 

@@ -1,6 +1,7 @@
 import Art from '../models/Art.js';
 import ArtInquiry from '../models/ArtInquiry.js';
 import Order from '../models/Order.js';
+import ArtPurchase from '../models/ArtPurchase.js';
 import Booking from '../models/Booking.js';
 import Franchise from '../models/Franchise.js';
 import sendEmail from '../utils/emailSender.js';
@@ -82,117 +83,144 @@ export const getDashboardStats = async (req, res) => {
     const startOfThisWeek = new Date(now);
     startOfThisWeek.setDate(now.getDate() - 7);
     const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
-    // Menu Orders Statistics
-    const totalMenuOrders = await Order.countDocuments({ orderType: 'MENU' });
-    const paidMenuOrders = await Order.countDocuments({
-      orderType: 'MENU',
-      isPaid: true
-    });
-    const menuRevenue = await Order.aggregate([
+    // --- 1. REVENUE CALCULATIONS ---
+
+    // Menu Revenue (from Order)
+    const menuRevenueResult = await Order.aggregate([
       { $match: { orderType: 'MENU', isPaid: true } },
       { $group: { _id: null, total: { $sum: '$totalPrice' } } }
     ]);
-    const totalMenuRevenue = menuRevenue[0]?.total || 0;
+    const totalMenuRevenue = menuRevenueResult[0]?.total || 0;
 
-    // Art Sales Statistics
-    const totalArtSold = await Art.countDocuments({ status: 'Sold' });
-    const artRevenue = await Order.aggregate([
-      { $match: { orderType: 'ART', isPaid: true } },
-      { $group: { _id: null, total: { $sum: '$totalPrice' } } }
+    // Art Revenue (from ArtPurchase)
+    const artRevenueResult = await ArtPurchase.aggregate([
+      { $match: { paymentStatus: 'completed' } },
+      { $group: { _id: null, total: { $sum: '$purchasePrice' } } }
     ]);
-    const totalArtRevenue = artRevenue[0]?.total || 0;
+    const totalArtRevenue = artRevenueResult[0]?.total || 0;
 
-    // Weekly sales (this week vs last week)
-    const thisWeekOrders = await Order.countDocuments({
-      isPaid: true,
-      createdAt: { $gte: startOfThisWeek }
-    });
-    const lastWeekStart = new Date(startOfThisWeek);
-    lastWeekStart.setDate(lastWeekStart.getDate() - 7);
-    const lastWeekOrders = await Order.countDocuments({
-      isPaid: true,
-      createdAt: {
-        $gte: lastWeekStart,
-        $lt: startOfThisWeek
-      }
-    });
-
-    // This week revenue
-    const thisWeekRevenue = await Order.aggregate([
-      {
-        $match: {
-          isPaid: true,
-          createdAt: { $gte: startOfThisWeek }
-        }
-      },
-      { $group: { _id: null, total: { $sum: '$totalPrice' } } }
+    // Workshop Revenue (from Booking)
+    const workshopRevenueResult = await Booking.aggregate([
+      { $match: { paymentStatus: 'completed' } },
+      { $group: { _id: null, total: { $sum: '$totalAmount' } } }
     ]);
-    const thisWeekRevenueTotal = thisWeekRevenue[0]?.total || 0;
+    const totalWorkshopRevenue = workshopRevenueResult[0]?.total || 0;
 
-    // Last week revenue
-    const lastWeekRevenue = await Order.aggregate([
-      {
-        $match: {
-          isPaid: true,
-          createdAt: {
-            $gte: lastWeekStart,
-            $lt: startOfThisWeek
-          }
-        }
-      },
-      { $group: { _id: null, total: { $sum: '$totalPrice' } } }
-    ]);
-    const lastWeekRevenueTotal = lastWeekRevenue[0]?.total || 0;
+    const totalRevenue = totalMenuRevenue + totalArtRevenue + totalWorkshopRevenue;
 
-    // Workshop bookings
+    // --- 2. ORDER/ACTIVITY COUNTS ---
+
+    const totalMenuOrders = await Order.countDocuments({ orderType: 'MENU' });
+    const paidMenuOrders = await Order.countDocuments({ orderType: 'MENU', isPaid: true });
+
+    const totalArtSold = await ArtPurchase.countDocuments({ paymentStatus: 'completed' });
     const totalWorkshops = await Booking.countDocuments();
     const confirmedWorkshops = await Booking.countDocuments({ status: 'confirmed' });
+
+    // --- 3. WEEKLY REVENUE TRENDS (This Week vs Last Week) ---
+
+    const lastWeekStart = new Date(startOfThisWeek);
+    lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+
+    // Helpers to get revenue in range
+    const getRevenueInRange = async (Model, dateField, priceField, matchCriteria = {}) => {
+      const result = await Model.aggregate([
+        {
+          $match: {
+            ...matchCriteria,
+            [dateField]: { $gte: startOfThisWeek }
+          }
+        },
+        { $group: { _id: null, total: { $sum: `$${priceField}` } } }
+      ]);
+      return result[0]?.total || 0;
+    };
+
+    const getRevenueInLastWeekRange = async (Model, dateField, priceField, matchCriteria = {}) => {
+      const result = await Model.aggregate([
+        {
+          $match: {
+            ...matchCriteria,
+            [dateField]: { $gte: lastWeekStart, $lt: startOfThisWeek }
+          }
+        },
+        { $group: { _id: null, total: { $sum: `$${priceField}` } } }
+      ]);
+      return result[0]?.total || 0;
+    };
+
+    const thisWeekMenuRev = await getRevenueInRange(Order, 'createdAt', 'totalPrice', { orderType: 'MENU', isPaid: true });
+    const thisWeekArtRev = await getRevenueInRange(ArtPurchase, 'createdAt', 'purchasePrice', { paymentStatus: 'completed' });
+    const thisWeekWorkshopRev = await getRevenueInRange(Booking, 'createdAt', 'totalAmount', { paymentStatus: 'completed' });
+    const thisWeekRevenueTotal = thisWeekMenuRev + thisWeekArtRev + thisWeekWorkshopRev;
+
+    const lastWeekMenuRev = await getRevenueInLastWeekRange(Order, 'createdAt', 'totalPrice', { orderType: 'MENU', isPaid: true });
+    const lastWeekArtRev = await getRevenueInLastWeekRange(ArtPurchase, 'createdAt', 'purchasePrice', { paymentStatus: 'completed' });
+    const lastWeekWorkshopRev = await getRevenueInLastWeekRange(Booking, 'createdAt', 'totalAmount', { paymentStatus: 'completed' });
+    const lastWeekRevenueTotal = lastWeekMenuRev + lastWeekArtRev + lastWeekWorkshopRev;
+
+    const revenueTrend = lastWeekRevenueTotal > 0
+      ? ((thisWeekRevenueTotal - lastWeekRevenueTotal) / lastWeekRevenueTotal * 100).toFixed(1)
+      : 0;
+
+    // --- 4. WEEKLY ORDER TRENDS ---
+
+    const getCountInRange = async (Model, dateField, matchCriteria = {}) => {
+      return await Model.countDocuments({
+        ...matchCriteria,
+        [dateField]: { $gte: startOfThisWeek }
+      });
+    }
+
+    const getCountInLastWeekRange = async (Model, dateField, matchCriteria = {}) => {
+      return await Model.countDocuments({
+        ...matchCriteria,
+        [dateField]: { $gte: lastWeekStart, $lt: startOfThisWeek }
+      });
+    }
+
+    const thisWeekMenuCount = await getCountInRange(Order, 'createdAt', { isPaid: true });
+    const thisWeekArtCount = await getCountInRange(ArtPurchase, 'createdAt', { paymentStatus: 'completed' });
+    const thisWeekWorkshopCount = await getCountInRange(Booking, 'createdAt', { status: 'confirmed' });
+    const thisWeekOrders = thisWeekMenuCount + thisWeekArtCount + thisWeekWorkshopCount;
+
+    const lastWeekMenuCount = await getCountInLastWeekRange(Order, 'createdAt', { isPaid: true });
+    const lastWeekArtCount = await getCountInLastWeekRange(ArtPurchase, 'createdAt', { paymentStatus: 'completed' });
+    const lastWeekWorkshopCount = await getCountInLastWeekRange(Booking, 'createdAt', { status: 'confirmed' });
+    const lastWeekOrders = lastWeekMenuCount + lastWeekArtCount + lastWeekWorkshopCount;
+
+    const ordersTrend = lastWeekOrders > 0
+      ? ((thisWeekOrders - lastWeekOrders) / lastWeekOrders * 100).toFixed(1)
+      : 0;
 
     // Pending franchises
     const pendingFranchises = await Franchise.countDocuments({
       status: 'pending'
     }).catch(() => 0);
 
-    // Calculate trends
-    const revenueTrend = lastWeekRevenueTotal > 0
-      ? ((thisWeekRevenueTotal - lastWeekRevenueTotal) / lastWeekRevenueTotal * 100).toFixed(1)
-      : 0;
-    const ordersTrend = lastWeekOrders > 0
-      ? ((thisWeekOrders - lastWeekOrders) / lastWeekOrders * 100).toFixed(1)
-      : 0;
-
     res.json({
       // Revenue Stats
-      totalRevenue: totalMenuRevenue + totalArtRevenue,
+      totalRevenue: totalRevenue,
       menuRevenue: totalMenuRevenue,
       artRevenue: totalArtRevenue,
+      workshopRevenue: totalWorkshopRevenue,
       thisWeekRevenue: thisWeekRevenueTotal,
       lastWeekRevenue: lastWeekRevenueTotal,
-      revenueTrend: parseFloat(revenueTrend),
+      revenueTrend: parseFloat(revenueTrend.toString()),
 
-      // Order Stats
-      totalOrders: totalMenuOrders,
-      paidOrders: paidMenuOrders,
+      // Order/Activity Stats
+      totalOrders: totalMenuOrders + totalArtSold + confirmedWorkshops,
+      paidOrders: paidMenuOrders + totalArtSold + confirmedWorkshops, // Used for "Active Orders"
       thisWeekOrders,
       lastWeekOrders,
-      ordersTrend: parseFloat(ordersTrend),
+      ordersTrend: parseFloat(ordersTrend.toString()),
 
-      // Art Stats
+      // Sub-stats
       totalArtSold,
-
-      // Workshop Stats
       totalWorkshops,
       confirmedWorkshops,
-
-      // Franchise Stats
       pendingFranchises,
-
-      // Recent activity indicators
-      recentOrders: await Order.countDocuments({
-        createdAt: { $gte: startOfToday }
-      })
     });
   } catch (err) {
     console.error('Error fetching dashboard stats:', err);

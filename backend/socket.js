@@ -5,13 +5,10 @@ let io;
 export const initSocket = (server) => {
     io = new Server(server, {
         cors: {
-            origin: [
-                "http://localhost:5173",
-                "http://localhost:8080",
-                "http://127.0.0.1:5173",
-                "http://127.0.0.1:8080",
-                "https://rabuste-omegon.vercel.app"
-            ],
+            origin: (origin, callback) => {
+                // Allow any origin for development/testing
+                callback(null, true);
+            },
             methods: ["GET", "POST"],
             credentials: true
         }
