@@ -110,6 +110,32 @@ a cafe storefront + an event system + an art gallery + a payments layer + admin 
 
 ---
 
+## 🛤️ Website Flow (User Journey)
+
+### 1. **Discovery & Exploration**
+- **Landing Page**: Users enter the immersive 3D/VR-enabled homepage to experience the cafe's vibe.
+- **Virtual Tour**: Explore the physical café space virtually using A-Frame technology.
+- **AI Barista Chat**:Interact with the Gemini-powered AI to get mood-based drink recommendations.
+
+### 2. **Ordering & Dining**
+- **Menu Browsing**: View categories and items with rich visuals.
+- **Cart & Checkout**: Add items to the cart and proceed to secure checkout via Razorpay.
+- **Payment**: Complete transaction (supports UPI, Cards, Netbanking).
+
+### 3. **Art & Culture**
+- **Art Gallery**: Browse the curated collection of artworks with real-time status (Available/Reserved/Sold).
+- **Inquiry/Purchase**: Send an inquiry for a piece or purchase it directly online.
+
+### 4. **Events & Community**
+- **Workshops**: View upcoming coffee brewing or art workshops.
+- **Registration**: Book seats for workshops (dynamic seat management) and receive confirmation.
+
+### 5. **User Profile**
+- **Authentication**: Sign up/Login via Email or Google (Firebase Auth).
+- **Dashboard**: View order history, art purchases, and workshop bookings.
+
+---
+
 ## 🧠 Tech Stack (Detected from `package.json`)
 
 ### Frontend (`/frontend`)
