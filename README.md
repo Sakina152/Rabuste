@@ -421,7 +421,7 @@ Pull requests are welcome. If you’d like to add a new feature (new workshop ty
 ---
 
 ## 📜 License
-This project is currently unlicensed (default). Add a license if you plan to open-source publicly.
+This project is currently unlicensed (default). 
 
 ---
 
