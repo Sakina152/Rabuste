@@ -123,7 +123,7 @@ const Gallery = () => {
 
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
 
       {/* Hero Section */}
@@ -166,7 +166,7 @@ const Gallery = () => {
             <span className="text-accent text-sm tracking-[0.3em] uppercase font-body">
               Micro Art Gallery
             </span>
-            <h1 className="font-display text-5xl md:text-6xl font-bold text-foreground mt-4 mb-6">
+            <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground mt-4 mb-6">
               Where Coffee Meets{" "}
               <span className="text-gradient">Fine Art</span>
             </h1>
@@ -180,7 +180,7 @@ const Gallery = () => {
       </section>
 
       {/* Gallery Grid */}
-      <section className="section-padding bg-background">
+      <section className="section-padding bg-background overflow-hidden">
         <div className="container-custom">
           <motion.div
             layout
@@ -491,7 +491,7 @@ const Gallery = () => {
 
 
       {/* Artist Feature */}
-      <section className="section-padding bg-gradient-to-b from-background to-coffee-medium">
+      <section className="section-padding bg-gradient-to-b from-background to-coffee-medium overflow-hidden">
         <div className="container-custom text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
