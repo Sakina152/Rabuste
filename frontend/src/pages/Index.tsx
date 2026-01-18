@@ -171,6 +171,9 @@ const Index = () => {
               </div>
             </div>
           </div>
+
+          {/* Full-width Transition Shroud: Blends House Specials (zinc-950) into Testimonials (background) */}
+          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-b from-transparent to-background pointer-events-none z-10" />
         </section>
 
         {/* 5. Testimonials Section */}
