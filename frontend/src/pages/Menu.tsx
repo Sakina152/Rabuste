@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Coffee, Snowflake, UtensilsCrossed, Clock, Sparkles, ShoppingBag, Search, X, Mic, MicOff } from "lucide-react";
+import { Coffee, Snowflake, UtensilsCrossed, Clock, Sparkles, ShoppingBag, Search, X, Mic, MicOff, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button"; // Import Button
@@ -26,6 +26,7 @@ import frappeImg from "@/assets/menu/robusta-frappe.jpg";
 import espressoTonicImg from "@/assets/menu/espresso-tonic.jpg";
 import bagelImg from "@/assets/menu/bagel.jpg";
 import rabusteCup from "@/assets/rabuste-cup.png";
+import blackCoffeeSpecialImg from "@/assets/menu/black-coffee-special.jpg";
 
 console.log('ENV:', import.meta.env);
 console.log('BASE URL:', import.meta.env.VITE_API_BASE_URL);
@@ -213,8 +214,44 @@ const Menu = () => {
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [isListening, setIsListening] = useState(false); // State for voice search
+  const [isListening, setIsListening] = useState(false);
   const { addToCart } = useCart();
+  const [isOfferActive, setIsOfferActive] = useState(false);
+  const [currentBlackCoffeePrice, setCurrentBlackCoffeePrice] = useState(135);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const checkOfferStatus = () => {
+      const now = new Date();
+
+      const startTime = new Date(now);
+      startTime.setHours(9, 30, 0, 0);
+
+      const endTime = new Date(now);
+      endTime.setHours(12, 0, 0, 0);
+
+      const active = now >= startTime && now < endTime;
+
+      setIsOfferActive(active);
+      setCurrentBlackCoffeePrice(active ? 99 : 135);
+
+      console.log(`[Offer Check] Time: ${now.toLocaleTimeString()}, Active: ${active}, Price: ${active ? 99 : 135}`);
+    };
+
+    checkOfferStatus();
+    const interval = setInterval(checkOfferStatus, 10000); // Check every 10s for more responsiveness
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleOrderBlackCoffee = () => {
+    addToCart({
+      id: "black-coffee-special-item",
+      name: "Black Coffee",
+      price: currentBlackCoffeePrice,
+      image: blackCoffeeSpecialImg,
+    });
+  };
 
   // Voice Search Handler
   const toggleVoiceSearch = () => {
@@ -410,24 +447,58 @@ const Menu = () => {
             className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-accent/20 via-accent/10 to-accent/20 border border-accent/30 p-8 md:p-10"
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(212,196,168,0.1),transparent_50%)]" />
-            <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-full bg-accent/20">
-                  <Clock className="w-8 h-8 text-accent" />
+
+            <div className={cn(
+              "relative flex flex-col md:flex-row items-center gap-8",
+              (mounted && isOfferActive) ? "justify-between" : "justify-center"
+            )}>
+              <div className="flex items-center gap-6">
+                {/* Visual Thumbnail */}
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden border border-accent/20 flex-shrink-0 shadow-lg relative">
+                  <img
+                    src={blackCoffeeSpecialImg}
+                    alt="Black Coffee Special"
+                    className="w-full h-full object-cover object-center"
+                  />
                 </div>
+
                 <div>
-                  <h3 className="font-display text-2xl md:text-3xl text-foreground">
-                    Black Coffee at <span className="text-accent">₹99</span>
+                  <h3 className="font-display text-3xl md:text-5xl text-foreground">
+                    Black Coffee at <span className="text-accent">
+                      {mounted && isOfferActive ? (
+                        <>
+                          <span className="line-through text-muted-foreground/40 text-2xl md:text-3xl mr-2">₹135</span>
+                          ₹99
+                        </>
+                      ) : "₹135"}
+                    </span>
                   </h3>
-                  <p className="font-body text-muted-foreground mt-1">
-                    Special Offer • Available daily from 9:30 AM to 12:00 PM
-                  </p>
+                  {mounted && isOfferActive && (
+                    <p className="font-body text-muted-foreground mt-2 text-sm md:text-base italic">
+                      Special Offer • Available daily from 9:30 AM to 12:00 PM
+                    </p>
+                  )}
                 </div>
               </div>
-              <div className="flex-shrink-0">
-                <span className="inline-block px-6 py-3 rounded-full bg-accent text-background font-body font-medium">
-                  Limited Time Offer
-                </span>
+
+              <div className={cn(
+                "flex flex-col items-center gap-4",
+                (!mounted || !isOfferActive) && "md:ml-20"
+              )}>
+                {mounted && isOfferActive && (
+                  <div className="px-5 py-2 border border-accent/40 bg-accent/5 rounded-lg">
+                    <span className="text-accent text-[11px] font-bold tracking-[0.2em] uppercase">
+                      Limited Time Offer
+                    </span>
+                  </div>
+                )}
+
+                <Button
+                  onClick={handleOrderBlackCoffee}
+                  className="rounded-full bg-accent hover:bg-accent/90 text-white px-8 h-12 text-base font-medium shadow-md hover:shadow-xl transition-all scale-100 hover:scale-105"
+                >
+                  Order Now <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
               </div>
             </div>
           </motion.div>
