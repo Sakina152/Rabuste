@@ -9,6 +9,7 @@ import FloatingFeatures from "@/components/FloatingFeatures";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, MapPin, Phone, Mail } from "lucide-react";
+import MobileStackedCards from "@/components/MobileStackedCards";
 
 // Menu images
 import frappeImg from "@/assets/menu/robusta-frappe.jpg";
@@ -112,16 +113,24 @@ const Index = () => {
         <section className="py-32 bg-zinc-950 text-white relative">
           <div className="container-custom px-6 relative z-10">
             <div className="flex flex-col md:flex-row justify-between items-end mb-20">
-              <div>
+              <div className="-ml-16 md:ml-0">
                 <span className="text-accent uppercase tracking-widest text-sm font-semibold mb-2 block">Our Menu</span>
-                <h2 className="text-5xl md:text-7xl font-bold font-display">House Specials</h2>
+                <h2 className="text-5xl md:text-7xl font-bold font-display tracking-tight leading-none text-white">
+                  House <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-amber-600">Specials</span>
+                </h2>
               </div>
-              <Button variant="hero" size="lg" asChild className="mt-8 md:mt-0">
-                <Link to="/menu">View Full Menu <ArrowRight className="ml-2" /></Link>
+              <Button
+                variant="outline"
+                size="lg"
+                asChild
+                className="mt-8 md:mt-0 hidden md:inline-flex rounded-full border-accent/50 text-accent hover:bg-accent hover:text-white px-12 h-14 text-lg tracking-widest backdrop-blur-sm bg-black/30 shadow-[0_0_20px_rgba(212,175,55,0.15)] transition-all duration-300 transform hover:scale-105 uppercase"
+              >
+                <Link to="/menu">View Full Menu <ArrowRight className="ml-2 w-5 h-5" /></Link>
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Desktop Grid */}
+            <div className="hidden md:grid md:grid-cols-3 gap-8">
               {rabusteSpecials.map((item, index) => (
                 <motion.div
                   key={index}
@@ -129,20 +138,36 @@ const Index = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.2 }}
-                  className="group relative h-[500px] rounded-3xl overflow-hidden cursor-pointer"
+                  className="group relative h-[500px] rounded-3xl overflow-hidden cursor-pointer border border-white/5"
                 >
                   <img src={item.image} alt={item.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
 
                   <div className="absolute bottom-0 left-0 p-8 w-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                     <div className="flex justify-between items-center mb-2">
-                      <h3 className="text-3xl font-bold">{item.name}</h3>
-                      <span className="bg-accent px-3 py-1 rounded-full text-sm font-bold">{item.price}</span>
+                      <h3 className="text-3xl font-display font-bold">{item.name}</h3>
+                      <span className="bg-accent px-3 py-1 rounded-full text-sm font-bold font-sans">{item.price}</span>
                     </div>
-                    <p className="text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">{item.desc}</p>
+                    <p className="text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 font-light">{item.desc}</p>
                   </div>
                 </motion.div>
               ))}
+            </div>
+
+            {/* Mobile Stacked Cards - Moved Upwards */}
+            <div className="md:hidden mt-0 mb-8">
+              <MobileStackedCards items={rabusteSpecials} />
+
+              <div className="flex justify-center mt-[-20px] relative z-40">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  asChild
+                  className="rounded-full border-accent/50 text-accent hover:bg-accent hover:text-white px-12 h-14 text-lg tracking-widest backdrop-blur-sm bg-black/30 shadow-[0_0_20px_rgba(212,175,55,0.15)] transition-all duration-300 transform hover:scale-105 uppercase"
+                >
+                  <Link to="/menu">View Full Menu <ArrowRight className="ml-2 w-5 h-5" /></Link>
+                </Button>
+              </div>
             </div>
           </div>
         </section>
