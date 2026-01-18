@@ -145,25 +145,25 @@ export default function OrderManagement() {
     <div className="min-h-screen bg-background pt-28 pb-16">
       <div className="container-custom px-6 max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" asChild>
+            <Button variant="ghost" asChild className="p-0 md:p-4">
               <Link to="/admin/dashboard">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Dashboard
+                <ArrowLeft className="w-4 h-4 mr-0 md:mr-2" />
+                <span className="hidden md:inline">Back to Dashboard</span>
               </Link>
             </Button>
             <div>
-              <h1 className="text-3xl font-display font-bold flex items-center gap-3">
-                <ShoppingBag className="w-8 h-8 text-accent" />
+              <h1 className="text-2xl md:text-3xl font-display font-bold flex items-center gap-3">
+                <ShoppingBag className="w-6 h-6 md:w-8 md:h-8 text-accent" />
                 Order Management
               </h1>
-              <p className="text-muted-foreground mt-1">
+              <p className="text-muted-foreground mt-1 text-sm md:text-base">
                 Manage and update order statuses
               </p>
             </div>
           </div>
-          <Button onClick={fetchOrders} variant="outline" disabled={loading}>
+          <Button onClick={fetchOrders} variant="outline" disabled={loading} className="w-full md:w-auto">
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
@@ -172,10 +172,10 @@ export default function OrderManagement() {
         {/* Filters */}
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
               <label className="text-sm font-medium">Filter by Status:</label>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-[200px]">
+                <SelectTrigger className="w-full md:w-[200px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -186,7 +186,7 @@ export default function OrderManagement() {
                   <SelectItem value="cancelled">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
-              <div className="ml-auto text-sm text-muted-foreground">
+              <div className="md:ml-auto text-sm text-muted-foreground">
                 Showing {filteredOrders.length} order(s)
               </div>
             </div>
@@ -220,8 +220,8 @@ export default function OrderManagement() {
                 transition={{ duration: 0.3 }}
               >
                 <Card className="hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between gap-6">
+                  <CardContent className="p-4 md:p-6">
+                    <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
                       {/* Order Info */}
                       <div className="flex-1 space-y-4">
                         <div className="flex items-start gap-4">
@@ -316,7 +316,7 @@ export default function OrderManagement() {
                       </div>
 
                       {/* Status Update Section */}
-                      <div className="w-64 space-y-4">
+                      <div className="w-full lg:w-64 space-y-4">
                         <div>
                           <label className="text-sm font-medium mb-2 block">
                             Update Status:

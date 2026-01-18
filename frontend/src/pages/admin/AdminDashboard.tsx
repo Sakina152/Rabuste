@@ -15,7 +15,9 @@ import {
   Calendar,
   Clock,
   ChevronRight,
-  MessageSquare
+  MessageSquare,
+  Menu,
+  X
 } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -33,7 +35,6 @@ const navItems = [
   { title: "Orders", icon: ShoppingBag, href: "/admin/dashboard/orders" },
   { title: "Analytics", icon: TrendingUp, href: "/admin/dashboard/analytics" },
   { title: "Event Inquiries", icon: MessageSquare, href: "/admin/dashboard/inquiries" },
-  { title: "Applications", icon: FileText, href: "/admin/applications" },
 ];
 
 // Stats will be loaded from API
@@ -132,6 +133,7 @@ const getQuickActions = (dashboardStats: any) => {
 export default function AdminDashboard() {
   const location = useLocation();
   const [activeNav, setActiveNav] = useState("Dashboard");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [dashboardStats, setDashboardStats] = useState<any>(null);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -210,16 +212,22 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex relative">
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <motion.aside
-        initial={{ x: -100, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="w-64 border-r border-border bg-card/50 backdrop-blur-sm flex flex-col"
+      <aside
+        className={`w-64 border-r border-border bg-card/95 backdrop-blur-md flex flex-col fixed md:relative z-50 h-full transition-transform duration-300 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          }`}
       >
         {/* Logo */}
-        <div className="p-6 border-b border-border">
+        <div className="p-6 border-b border-border flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center group-hover:bg-accent/30 transition-colors">
               <img src={logo} alt="Rabuste" className="w-6 h-6" />
@@ -228,6 +236,14 @@ export default function AdminDashboard() {
               Rabuste Admin
             </span>
           </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            <X className="w-5 h-5 text-muted-foreground" />
+          </Button>
         </div>
 
         {/* Navigation */}
@@ -262,7 +278,7 @@ export default function AdminDashboard() {
             Sign Out
           </Button>
         </div>
-      </motion.aside>
+      </aside>
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
@@ -275,14 +291,24 @@ export default function AdminDashboard() {
         >
           <div className="px-8 py-6">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="font-display text-3xl font-semibold text-foreground">
-                  Welcome back, <span className="text-accent">{user?.name || 'Admin'}</span>
-                </h1>
-                <p className="text-muted-foreground mt-1 flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  Here's what's happening at Rabuste Coffee today.
-                </p>
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden -ml-2"
+                  onClick={() => setIsSidebarOpen(true)}
+                >
+                  <Menu className="w-6 h-6 text-foreground" />
+                </Button>
+                <div>
+                  <h1 className="font-display text-3xl font-semibold text-foreground">
+                    Welcome back, <span className="text-accent">{user?.name || 'Admin'}</span>
+                  </h1>
+                  <p className="text-muted-foreground mt-1 flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    Here's what's happening at Rabuste Coffee today.
+                  </p>
+                </div>
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-right">

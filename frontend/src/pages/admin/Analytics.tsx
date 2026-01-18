@@ -99,25 +99,25 @@ export default function Analytics() {
             <div className="container-custom px-6 max-w-7xl mx-auto space-y-8">
 
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
-                        <Button variant="ghost" asChild>
+                        <Button variant="ghost" asChild className="p-0 md:p-4">
                             <Link to="/admin/dashboard">
-                                <ArrowLeft className="w-4 h-4 mr-2" />
-                                Back to Dashboard
+                                <ArrowLeft className="w-4 h-4 mr-0 md:mr-2" />
+                                <span className="hidden md:inline">Back to Dashboard</span>
                             </Link>
                         </Button>
                         <div>
-                            <h1 className="text-3xl font-display font-bold flex items-center gap-3 text-foreground">
-                                <TrendingUp className="w-8 h-8 text-accent" />
+                            <h1 className="text-2xl md:text-3xl font-display font-bold flex items-center gap-3 text-foreground">
+                                <TrendingUp className="w-6 h-6 md:w-8 md:h-8 text-accent" />
                                 Analytics & Insights
                             </h1>
-                            <p className="text-muted-foreground mt-1 text-sm">
+                            <p className="text-muted-foreground mt-1 text-xs md:text-sm">
                                 A birds-eye view of Rabuste's performance across all departments.
                             </p>
                         </div>
                     </div>
-                    <Button onClick={fetchAnalytics} variant="outline" disabled={loading}>
+                    <Button onClick={fetchAnalytics} variant="outline" disabled={loading} className="w-full md:w-auto">
                         <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                         Refresh Data
                     </Button>
@@ -170,7 +170,7 @@ export default function Analytics() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="h-[350px] w-full">
+                            <div className="h-[300px] md:h-[350px] w-full min-w-0">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <LineChart data={data?.charts?.dailyRevenue}>
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
