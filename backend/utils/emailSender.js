@@ -1,41 +1,39 @@
-import nodemailer from 'nodemailer';
+import SibApiV3Sdk from 'sib-api-v3-sdk';
 import dotenv from 'dotenv';
 
 // Load env vars
 dotenv.config();
 
 const sendEmail = async (options) => {
-  // 1. Create the Transporter
-  const transporter = nodemailer.createTransport({
-    service: 'gmail', 
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS, 
-    },
-  });
+  const defaultClient = SibApiV3Sdk.ApiClient.instance;
+  const apiKey = defaultClient.authentications['api-key'];
+  apiKey.apiKey = process.env.BREVO_API_KEY;
 
-  // 2. Define the Email Options
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: options.email,
-    subject: options.subject,
-    text: options.message,
-    html:options.html
+  const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+  const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+
+  sendSmtpEmail.subject = options.subject;
+  sendSmtpEmail.htmlContent = options.html || options.message; // Use html if available, fall back to message
+  sendSmtpEmail.sender = {
+    name: "Rabuste Team",
+    email: process.env.EMAIL_USER // Make sure this is a verified sender in Brevo
   };
+  sendSmtpEmail.to = [{ email: options.email }];
 
-  // 3. Send the Email
+  if (options.message && !options.html) {
+    sendSmtpEmail.textContent = options.message;
+  }
+
   try {
-    await transporter.sendMail(mailOptions);
-    console.log('✅ Email Sent Successfully to: ' + options.email);
+    const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
+    console.log('✅ Email sent successfully via Brevo. Message ID: ' + data.messageId);
   } catch (error) {
-    if (error.code === 'EAUTH') {
-      console.warn('⚠️  Email Auth Failed: Please check your EMAIL_USER and EMAIL_PASS in .env');
-      console.warn('   (Use an App Password if using Gmail: https://myaccount.google.com/apppasswords)');
-    } else {
-      console.error('❌ Email could not be sent:', error.message);
+    console.error('❌ Brevo Email Error:', error);
+    // Log more specific error details if available from Brevo SDK
+    if (error.response && error.response.body) {
+      console.error('   Error Body:', JSON.stringify(error.response.body, null, 2));
     }
-    // We throw so the controller knows it failed, but the log is now cleaner
-    throw new Error('Email sending failed'); 
+    throw new Error('Email sending failed');
   }
 };
 
